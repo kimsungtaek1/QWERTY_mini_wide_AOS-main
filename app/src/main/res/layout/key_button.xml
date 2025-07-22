@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 작은 대체문자 (예: ㅃ, ㅉ, ㄸ...) -->
+
+    <!-- 아이콘 (delete, shift, enter 등) -->
+    <TextView
+        android:id="@+id/tv_lt"
+        android:layout_width="20dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|top"
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="4dp"
+        android:foregroundGravity="top|left"
+        android:gravity="left|top"
+        android:paddingTop="0dp"
+        android:paddingLeft="0dp"
+        android:textAlignment="viewStart"
+        android:textColor="@color/key_text_secondary"
+        android:textSize="10sp"
+        android:visibility="visible"
+        tools:ignore="RtlCompat" />
+
+    <TextView
+        android:id="@+id/tv_rt"
+        android:layout_width="20dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|top"
+        android:layout_marginTop="0dp"
+        android:layout_marginRight="4dp"
+        android:foregroundGravity="top|right"
+        android:gravity="right|top"
+        android:paddingTop="0dp"
+        android:paddingRight="0dp"
+        android:textAlignment="viewEnd"
+        android:textColor="@color/key_text_secondary"
+        android:textSize="10sp"
+        android:visibility="visible"
+        tools:ignore="RtlCompat" />
+
+    <TextView
+        android:id="@+id/tv_rb"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="2dp"
+        android:gravity="bottom|end"
+        android:textColor="@color/key_text_secondary"
+        android:textSize="10sp"
+        android:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/ivIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        android:scaleType="fitCenter"
+        android:visibility="gone" />
+
+    <!-- 메인 문자 -->
+    <TextView
+        android:id="@+id/tvMain"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textColor="@color/key_text_primary"
+        android:textSize="18sp"
+        app:autoSizeTextType="none" />
+    <!-- 눌렸을 때 보일 반투명 오버레이 -->
+    <View
+        android:id="@+id/pressed_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#20000000"
+        android:visibility="gone" />
+</FrameLayout>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomKeyButton">
+        <attr name="lt_Text"   format="string"/>
+        <attr name="rt_Text"   format="string"/>
+        <attr name="rb_Text"   format="string"/>
+        <attr name="mainText"  format="string"/>
+        <attr name="icon"      format="reference"/>
+        <attr name="keyStyle"  format="enum">
+            <enum name="white" value="0"/>
+            <enum name="grey"  value="1"/>
+        </attr>
+    </declare-styleable>
+
+</resources>

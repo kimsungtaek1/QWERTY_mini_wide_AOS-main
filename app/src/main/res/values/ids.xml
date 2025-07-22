@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="btnBack" type="id" />
+    <item name="btnHowTo" type="id" />
+    <item name="btnPreview" type="id" />
+    <item name="itemTerms" type="id" />
+    <item name="itemShare" type="id" />
+    <item name="itemSystem" type="id" />
+    <item name="acrivity_home" type="id" />
+</resources>

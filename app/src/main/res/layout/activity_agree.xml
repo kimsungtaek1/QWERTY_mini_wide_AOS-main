@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="서비스 이용약관"
+        android:textColor="@color/textPrimary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/btnBack"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btnBack" />
+
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/back"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:background="#F7F7F7"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView4">
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp"
+            android:text="제1조(목적)\n\n    이 약관은 ○○학원(이하 ‘학원’이라 합니다)과 학원이 제공하는 교습과정을 수강하는 자(이하 ‘수강자’라 합니다)간의 교습 및 수강에 관한 제반사항을 규정하는 것을 목적으로 합니다.\n\n제2조(관계법령)\n\n    이 약관에 규정되지 아니한 사항 또는 이 약관의 해석에 관하여 다툼이 있는 사항에 대하여서는 학원과 수강자가 합의하여 결정하되, 합의가 이루어지지 아니한 경우에는 학원의 설립·운영 및 과외교습에 관한 법률, 약관의 규제에 관한 법률, 할부거래에 관한 법률, 민법, 상법 등 관계법령 및 공정·타당한 일반관례에 따릅니다.\n\n제3조(게시의무)\n\n  ① 학원은 수강자가 보기 쉬운 곳에 다음 각 호의 사항을 게시합니다.\n\n      1. 강사의 인적사항\n      2. 교습과정(과목)의 현황과 개요\n      3. 교습과정(과목)별 수강료 및 일체의 부대비용(교재대금, 실습재료비 등)\n      4. 교습과정(과목)별 강의시간\n      5. 이 약관\n      6. 기타 수강자에게 필요한 사항\n\n  ② 학원은 제1항 제3호의 규정에 의한 수강료 및 부대비용(이하 ‘수강료등’이라 합니다)을 허위로 게시하거나 이를 초과하여 징수하지 아니합니다. "
+            android:textColor="@color/textPrimary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

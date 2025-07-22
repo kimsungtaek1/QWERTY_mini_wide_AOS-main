@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.QWERTY_mini_wide" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- 1) StatusBar 배경색 -->
+        <item name="android:statusBarColor">@color/black</item>
+        <!-- 2) 아이콘을 어두운 색(검정)으로 바꿀지 여부 (M 이상) -->
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Theme.QWERTY_mini_wide" parent="Base.Theme.QWERTY_mini_wide" />
+</resources>
