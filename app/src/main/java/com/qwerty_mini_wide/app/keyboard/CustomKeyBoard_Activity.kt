@@ -2,6 +2,8 @@ package com.qwerty_mini_wide.app.keyboard
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.qwerty_mini_wide.app.R
@@ -14,14 +16,15 @@ var currentLanguage:CurrentLanguage = CurrentLanguage.KOR
 
 class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboardActionListener {
     private lateinit var binding: ViewCustomkeyboardBinding
-
     private lateinit var inputField: EditText
+    private var vibrator: Vibrator? = null
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ViewCustomkeyboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
 
         if(KeyLetter.isLightMode){
             binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg) )
@@ -44,6 +47,17 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
     }
 
     override fun onKey(code: KeyType, text: String?) {
+        // 강한 진동 햅틱 200ms
+        vibrator?.let { v ->
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                // 최대 강도(255)로 200ms 진동
+                v.vibrate(VibrationEffect.createOneShot(200, 255))
+            } else {
+                @Suppress("DEPRECATION")
+                v.vibrate(200)
+            }
+        }
+        
         when (code) {
 
             KeyType.NONE -> { /* Do nothing */ }
@@ -60,6 +74,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
             }
             KeyType.KOR -> { 
                 currentLanguage = CurrentLanguage.KOR
+                text?.let { inputField.append(it) }
             }
             KeyType.ENG -> { 
                 currentLanguage = CurrentLanguage.ENG

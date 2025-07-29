@@ -36,7 +36,7 @@ class Hanja_Adapter(
     // 3) 데이터 바인딩
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.txt_hanja.text = items[position].def + " " + items[position].hanja
+        holder.txt_hanja.text = items[position].meaning + " " + items[position].hanja
         holder.txt_hanja.setTextColor(if(KeyLetter.isLightMode)  Color.BLACK else Color.WHITE)
         // 클릭 이벤트 설정
         holder.itemView.setOnClickListener {

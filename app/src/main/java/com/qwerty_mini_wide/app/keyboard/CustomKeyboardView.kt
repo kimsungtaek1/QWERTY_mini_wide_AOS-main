@@ -42,17 +42,23 @@ class CustomKeyboardView @JvmOverloads constructor(
 
     private val binding: CustomKeyboardViewBinding
     var composingLength = 0
-    var currentState:KeyType = KeyType.KOR
-    var currentLanguage: CurrentLanguage = CurrentLanguage.KOR
+    var currentState:KeyType = KeyType.ENG
+    var currentLanguage: CurrentLanguage = CurrentLanguage.ENG
     var automata = HangulAutomata()
     //var proxy: InputConnection? = null
     var touchSize:Int = 0
+    private var keyPopupWindow: KeyPopupWindow? = null
 
     // 더블탭 간격 기준(ms)
     private val DOUBLE_TAP_THRESHOLD = 300L
 
     // 마지막 Shift 클릭 시각
     private var lastShiftClickTime = 0L
+    
+    // Shift 키 터치 상태 추적
+    private var isShiftPressed = false
+    private var shiftUsedWithOtherKey = false
+    private var isShiftModeOn = false  // Shift가 ON 상태인지 추적
 
     // ↓ 이 부분을 클래스 바로 안쪽(다른 멤버 변수들 옆)에 추가
     private val deleteHandler = Handler(Looper.getMainLooper())
@@ -97,55 +103,21 @@ class CustomKeyboardView @JvmOverloads constructor(
 
         HanjaManager.init(context)
         
-        // 마이크 버튼 이벤트 처리
-        findViewById<ImageButton>(R.id.microphone_button)?.setOnClickListener {
-            Log.d("CustomKeyboardView", "Microphone button clicked")
-            val service = context as? CustomKeyBoard_Service
-            if (service != null) {
-                Log.d("CustomKeyboardView", "Starting speech recognition via service")
-                service.startSpeechRecognition()
-            } else {
-                Log.e("CustomKeyboardView", "Service is null, cannot start speech recognition")
-            }
-        }
+        // Initialize popup window
+        keyPopupWindow = KeyPopupWindow(context)
         
-        // 언어 전환 버튼 이벤트 처리
-        findViewById<TextView>(R.id.lang_switch_button)?.setOnClickListener {
-            when (currentLanguage) {
-                CurrentLanguage.KOR -> {
-                    commitText()
-                    currentState = KeyType.ENG
-                    currentLanguage = CurrentLanguage.ENG
-                    setLetter(KeyLetter.getEngLetter())
-                    setFuntion(KeyLetter.getEngFunction())
-                    listener?.onKey(KeyType.ENG, "")
-                }
-                CurrentLanguage.ENG -> {
-                    commitText()
-                    currentState = KeyType.KOR
-                    currentLanguage = CurrentLanguage.KOR
-                    setLetter(KeyLetter.getKorLetters())
-                    setFuntion(KeyLetter.getKorFunction())
-                    listener?.onKey(KeyType.KOR, "")
-                }
-                CurrentLanguage.CHN -> {
-                    // 중국어 모드에서는 한글로 전환
-                    commitText()
-                    currentState = KeyType.KOR
-                    currentLanguage = CurrentLanguage.KOR
-                    setLetter(KeyLetter.getKorLetters())
-                    setFuntion(KeyLetter.getKorFunction())
-                    listener?.onKey(KeyType.KOR, "")
-                }
-            }
-        }
 
     }
 
     fun initViews(){
         setupKeys()
-        setLetter(KeyLetter.getKorLetters())
-        setFuntion(KeyLetter.getKorFunction())
+        if(currentState == KeyType.ENG) {
+            setLetter(KeyLetter.getEngLetter())
+            setFuntion(KeyLetter.getEngFunction())
+        } else {
+            setLetter(KeyLetter.getKorLetters())
+            setFuntion(KeyLetter.getKorFunction())
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
@@ -259,6 +231,9 @@ class CustomKeyboardView @JvmOverloads constructor(
 
     @SuppressLint("ResourceType")
     fun resetShift(){
+        // Reset the flag
+        isShiftModeOn = false
+        
         for(i in 0 until binding.funtionLinear.childCount){
             if(binding.funtionLinear.getChildAt(i) is CustomKeyButton){
                 val keyButon = binding.funtionLinear.getChildAt(i) as CustomKeyButton
@@ -349,26 +324,50 @@ class CustomKeyboardView @JvmOverloads constructor(
             }
 
             key.setOnTouchListener { _, event ->
-                // DELETE 키만 long-press 반복 처리
-                if (key.keyModel?.keyType == KeyType.DELETE) {
-                    when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        // Track shift press state
+                        if (key.keyModel?.keyType == KeyType.SHIFT) {
+                            isShiftPressed = true
+                            shiftUsedWithOtherKey = false
+                        }
+                        
+                        // If shift is pressed and another key is pressed, mark it as used with other key
+                        if (isShiftPressed && key.keyModel?.keyType == KeyType.LETTER) {
+                            shiftUsedWithOtherKey = true
+                        }
+                        
+                        // Show popup for letter keys
+                        if (key.keyModel?.keyType == KeyType.LETTER && shouldShowPopup(key)) {
+                            showKeyPopup(key)
+                        }
+                        
+                        // DELETE key long-press handling
+                        if (key.keyModel?.keyType == KeyType.DELETE) {
                             baseDelete()
-                            // 누르는 순간 한 번 삭제
-                            //listener?.onKey(KeyType.DELETE, "")
-                            // 500ms 후부터 반복 삭제 시작
                             deleteHandler.postDelayed(deleteRunnable, 500)
                         }
-                        MotionEvent.ACTION_UP,
-                        MotionEvent.ACTION_CANCEL -> {
-                            // 손 떼면 반복 삭제 멈춤
+                    }
+                    MotionEvent.ACTION_UP,
+                    MotionEvent.ACTION_CANCEL -> {
+                        // Track shift release
+                        if (key.keyModel?.keyType == KeyType.SHIFT) {
+                            isShiftPressed = false
+                        }
+                        
+                        // Hide popup
+                        if (key.keyModel?.keyType == KeyType.LETTER) {
+                            keyPopupWindow?.hide()
+                        }
+                        
+                        // Stop delete repetition
+                        if (key.keyModel?.keyType == KeyType.DELETE) {
                             deleteHandler.removeCallbacks(deleteRunnable)
                         }
                     }
-                    true  // touch event consume
-                } else {
-                    false
                 }
+                // Don't consume touch event for letter keys
+                key.keyModel?.keyType == KeyType.DELETE
             }
 
 
@@ -403,7 +402,18 @@ class CustomKeyboardView @JvmOverloads constructor(
                         if(touchSize == 0){
                             tapLetter(key)
                         }
-                        if(!InputManager.shared.isMultiTapInProgress()) {
+                        // Reset shift only if it's in single-tap mode (not simultaneous or multi-tap)
+                        // Check if any shift key is in ONSHIFT state
+                        var hasOnShift = false
+                        for(i in 0 until binding.funtionLinear.childCount){
+                            val keyButton = binding.funtionLinear.getChildAt(i) as? CustomKeyButton
+                            if(keyButton?.keyModel?.keyType == KeyType.ONSHIFT){
+                                hasOnShift = true
+                                break
+                            }
+                        }
+                        
+                        if(hasOnShift && !isShiftPressed && !InputManager.shared.isMultiTapInProgress()) {
                             resetShift()
                         }
                     }
@@ -480,14 +490,14 @@ class CustomKeyboardView @JvmOverloads constructor(
                     }
 
                     keyModel.keyType == KeyType.SHIFT ->{
-
-
-
-                        if(touchSize == 0) {
+                        // Check if shift was used alone or with another key
+                        if(!shiftUsedWithOtherKey && touchSize == 0) {
+                            // Shift pressed alone - toggle shift mode
                             key.setBackgroundDrawable(resources.getDrawable(keyModel.selectBackgroundColor))
                             key.getIcImageView()
                                 .setImageDrawable(resources.getDrawable(keyModel.selectImage))
                             keyModel.keyType = KeyType.ONSHIFT
+                            isShiftModeOn = true  // Mark shift mode as ON
                             if (currentLanguage == CurrentLanguage.KOR) {
                                 setLetter(KeyLetter.getShiftLetter())
                             } else {
@@ -495,8 +505,7 @@ class CustomKeyboardView @JvmOverloads constructor(
                             }
                             lastShiftClickTime = SystemClock.elapsedRealtime()
                         }
-
-
+                        // If shift was used with another key, don't change its state
                     }
 
                     keyModel.keyType == KeyType.RETURN -> {
@@ -604,15 +613,35 @@ class CustomKeyboardView @JvmOverloads constructor(
     // 첫/두 번째 터치된 키 버튼을 저장할 변수
     private var firstTouchedKey: CustomKeyButton? = null
     private var secondTouchedKey: CustomKeyButton? = null
+    private var firstTouchTime: Long = 0
+    private val SIMULTANEOUS_THRESHOLD = 100L // 100ms
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         when (ev.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                firstTouchedKey = findEnclosingKeyButton(
+                val currentTime = System.currentTimeMillis()
+                val newKey = findEnclosingKeyButton(
                     findChildUnder(this, ev.x.toInt(), ev.y.toInt())
                 )
-                touchSize = 0
-                return super.dispatchTouchEvent(ev)
+                
+                // 이전 키가 있고 시간차가 100ms 이내라면 동시 입력으로 처리
+                if (firstTouchedKey != null && newKey != null && 
+                    currentTime - firstTouchTime <= SIMULTANEOUS_THRESHOLD) {
+                    
+                    // 동시 입력 처리
+                    handleSimultaneousInput(firstTouchedKey!!, newKey)
+                    
+                    // 처리 후 초기화
+                    firstTouchedKey = null
+                    firstTouchTime = 0
+                    return true
+                } else {
+                    // 새로운 첫 번째 키로 설정
+                    firstTouchedKey = newKey
+                    firstTouchTime = currentTime
+                    touchSize = 0
+                    return super.dispatchTouchEvent(ev)
+                }
             }
             MotionEvent.ACTION_POINTER_DOWN -> {
                 touchSize = ev.pointerCount
@@ -626,47 +655,10 @@ class CustomKeyboardView @JvmOverloads constructor(
                         findChildUnder(this, x, y)
                     )
 
-                    // 첫 번째, 두 번째 키가 모두 잡혔으면 순서대로 로깅/처리
+                    // 첫 번째, 두 번째 키가 모두 잡혔으면 처리
                     firstTouchedKey?.let { first ->
                         secondTouchedKey?.let { second ->
-                            Log.i(
-                                "Keyboard",
-                                "첫번째: ${first.keyModel?.ltText}, 두번째: ${second.keyModel?.ltText}"
-                            )
-                            //  proxy?.finishComposingText()
-                            // 예: InputManager로 동시 입력 처리 후 커밋
-                            val touchedButtons = mutableListOf<CustomKeyButton>()
-                            touchedButtons.add(firstTouchedKey!!)
-                            touchedButtons.add(secondTouchedKey!!)
-
-
-                            val ch = InputManager.shared
-                                .handleSimultaneous(touchedButtons.take(2), currentLanguage) ?: ""
-                            val split =  ch.split(",")
-                            Log.i("더블터치",ch)
-
-                            if(ch == "")
-                                return true
-
-                            if (currentState == KeyType.KOR) {
-
-                                for(i in 0..split.count() - 1){
-                                    // 2) 새로운 키 처리
-                                    automata.hangulAutomata(split[i])
-                                    val composed = automata.buffer.joinToString("")
-                                    Log.d("Keyboard", "composed : $composed")
-                                    // 3) 새로 조합된 문자열 삽입
-                                    listener?.onKey(KeyType.KOR, composed)
-                                    // proxy?.commitText(composed,0)
-
-                                    // 4) 삭제할 길이 갱신
-                                    composingLength = composed.length
-                                }
-
-                            } else {
-                                listener?.onKey(KeyType.LETTER, ch)
-                                // proxy?.commitText(ch,1)
-                            }
+                            handleSimultaneousInput(first, second)
                         }
                     }
                     return true
@@ -709,17 +701,73 @@ class CustomKeyboardView @JvmOverloads constructor(
         return v as? CustomKeyButton
     }
     
-    fun updateMicrophoneState(isListening: Boolean) {
-        Log.d("CustomKeyboardView", "Updating microphone state: isListening = $isListening")
-        findViewById<ImageButton>(R.id.microphone_button)?.let { micButton ->
-            if (isListening) {
-                micButton.setImageResource(R.drawable.ic_microphone_on)
-                Log.d("CustomKeyboardView", "Microphone icon set to ON state")
-            } else {
-                micButton.setImageResource(R.drawable.ic_microphone)
-                Log.d("CustomKeyboardView", "Microphone icon set to OFF state")
+    private fun handleSimultaneousInput(first: CustomKeyButton, second: CustomKeyButton) {
+        Log.i(
+            "Keyboard",
+            "동시입력 - 첫번째: lt=${first.keyModel?.ltText}, rt=${first.keyModel?.rtText}, rb=${first.keyModel?.rbText} | " +
+            "두번째: lt=${second.keyModel?.ltText}, rt=${second.keyModel?.rtText}, rb=${second.keyModel?.rbText}"
+        )
+        
+        val touchedButtons = mutableListOf<CustomKeyButton>()
+        touchedButtons.add(first)
+        touchedButtons.add(second)
+        
+        val ch = InputManager.shared
+            .handleSimultaneous(touchedButtons.take(2), currentLanguage) ?: ""
+        val split = ch.split(",")
+        Log.i("더블터치","result: $ch, currentLanguage: $currentLanguage, currentState: $currentState")
+        
+        if(ch.isEmpty()) {
+            Log.w("더블터치", "Empty result from simultaneous input")
+            return
+        }
+        
+        if (currentState == KeyType.KOR) {
+            for(i in 0..split.count() - 1){
+                // 2) 새로운 키 처리
+                automata.hangulAutomata(split[i])
+                val composed = automata.buffer.joinToString("")
+                Log.d("Keyboard", "composed : $composed")
+                // 3) 새로 조합된 문자열 삽입
+                listener?.onKey(KeyType.KOR, composed)
+                // 4) 삭제할 길이 갱신
+                composingLength = composed.length
             }
-        } ?: Log.e("CustomKeyboardView", "Microphone button not found")
+        } else if (currentState == KeyType.ENG) {
+            // 영어 모드에서 동시 입력 처리
+            Log.d("Keyboard", "ENG mode simultaneous: $ch")
+            listener?.onKey(KeyType.LETTER, ch)
+        } else {
+            listener?.onKey(KeyType.LETTER, ch)
+        }
+    }
+    
+    fun updateMicrophoneState(isListening: Boolean) {
+        // Microphone feature removed for now
+    }
+    
+    private fun shouldShowPopup(key: CustomKeyButton): Boolean {
+        // Don't show popup for keys with special types
+        val keyType = key.keyModel?.keyType
+        return keyType == KeyType.LETTER
+    }
+    
+    private fun showKeyPopup(key: CustomKeyButton) {
+        val keyModel = key.keyModel ?: return
+        
+        // Get the text to display in popup
+        val popupText = when {
+            keyModel.mainText.isNotEmpty() -> keyModel.mainText
+            keyModel.ltText.isNotEmpty() -> keyModel.ltText
+            else -> return
+        }
+        
+        keyPopupWindow?.show(key, popupText)
+    }
+    
+    fun release() {
+        keyPopupWindow?.release()
+        keyPopupWindow = null
     }
 
 

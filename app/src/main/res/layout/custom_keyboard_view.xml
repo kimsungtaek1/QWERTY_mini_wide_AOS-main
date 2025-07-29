@@ -26,6 +26,7 @@
             android:visibility="visible" />
     </LinearLayout>
 
+
     <Space
         android:layout_width="match_parent"
         android:layout_height="6dp" />
@@ -260,7 +261,7 @@
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="9"
+            android:layout_weight="8.5"
             app:icon="@drawable/ic_shift"
             app:keyStyle="grey" />
 
@@ -272,7 +273,7 @@
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="9"
+            android:layout_weight="8.5"
             app:keyStyle="grey"
             app:mainText="123" />
 
@@ -283,9 +284,9 @@
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="5"
+            android:layout_weight="5.5"
             app:keyStyle="white"
-            app:mainText="스페이스" />
+            app:mainText="Space" />
 
         <Space
             android:layout_width="6dp"
@@ -294,7 +295,7 @@
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="8"
+            android:layout_weight="7"
             app:icon="@drawable/ic_enter"
             app:keyStyle="grey" />
 
@@ -305,79 +306,15 @@
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="9"
+            android:layout_weight="8.5"
             app:icon="@drawable/ic_backspace"
             app:keyStyle="grey" />
 
         <Space
             android:layout_width="2dp"
             android:layout_height="match_parent" />
-
-        <Space
-            android:id="@+id/space_enter"
-            android:layout_width="6dp"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-
-        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="9.1"
-            android:visibility="visible"
-            app:keyStyle="grey"
-            app:mainText="Chn" />
-
-        <Space
-            android:layout_width="2dp"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
     </LinearLayout>
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="20dp" />
-    
-    <!-- 언어 전환 키 영역 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:background="#D3D3D3">
-        
-        <TextView
-            android:id="@+id/lang_switch_button"
-            android:layout_width="60dp"
-            android:layout_height="40dp"
-            android:background="#D3D3D3"
-            android:textColor="#888888"
-            android:text="🌐"
-            android:textSize="18sp"
-            android:gravity="center"
-            android:layout_gravity="left" />
-            
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-            
-        <ImageButton
-            android:id="@+id/microphone_button"
-            android:layout_width="60dp"
-            android:layout_height="40dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_microphone"
-            android:scaleType="centerInside"
-            android:layout_gravity="right"
-            android:padding="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:contentDescription="음성 입력" />
-            
-    </LinearLayout>
-    
     <Space
         android:layout_width="match_parent"
         android:layout_height="20dp" />

@@ -44,6 +44,7 @@ class InputManager private constructor() {
         }
     }
 
+
     private fun handleKorTap(keyButton: CustomKeyButton): String {
         if(getThirdTapKey(keyButton) != null){
             return when (tapCount % 3) {
@@ -158,6 +159,7 @@ class InputManager private constructor() {
         }
     }
 
+
     /**
      * 현재 연속 탭이 진행 중인지 확인
      */
@@ -173,6 +175,37 @@ class InputManager private constructor() {
         if (isFunctionalKey(keyViews[0].keyModel?.keyType) || isFunctionalKey(keyViews[1].keyModel?.keyType)) {
             return null
         }
+        
+        // 영어 모드에서 특수 조합 체크
+        if (currLanguage == CurrentLanguage.ENG) {
+            // 점이 있는 키와의 조합
+            if (isDotKey(keyViews)) {
+                val dotKey = keyViews.find { it.keyModel?.rtText == "˙" }
+                android.util.Log.d("InputManager", "ENG Dot key combo - dotKey: ${dotKey?.keyModel?.ltText}, rbText: ${dotKey?.keyModel?.rbText}")
+                
+                // 점이 있는 키의 rbText 반환
+                dotKey?.keyModel?.rbText?.let { 
+                    if (it.isNotEmpty()) return it 
+                }
+            }
+            
+            // 두 키 모두 rbText를 가지고 있는 경우 처리
+            val key0 = keyViews[0]
+            val key1 = keyViews[1]
+            
+            // 첫 번째 키가 rbText를 가지고 있는 경우
+            if (!key0.keyModel?.rbText.isNullOrEmpty()) {
+                android.util.Log.d("InputManager", "Key0 has rbText: ${key0.keyModel?.ltText} -> ${key0.keyModel?.rbText}")
+                return key0.keyModel?.rbText
+            }
+            
+            // 두 번째 키가 rbText를 가지고 있는 경우
+            if (!key1.keyModel?.rbText.isNullOrEmpty()) {
+                android.util.Log.d("InputManager", "Key1 has rbText: ${key1.keyModel?.ltText} -> ${key1.keyModel?.rbText}")
+                return key1.keyModel?.rbText
+            }
+        }
+        
         val text0 = keyViews[0].keyModel?.mainText.orEmpty()
         val text1 = keyViews[1].keyModel?.mainText.orEmpty()
         if (isNumberOrSymbol(text0) && isNumberOrSymbol(text1)) {
@@ -224,25 +257,8 @@ class InputManager private constructor() {
             }
 
             CurrentLanguage.ENG -> {
-                when {
-                    // W/O 로 시작하는 조합
-                    listOf("W","O","w","o").any { isEngKeyView(keyViews, it) } -> {
-                        if (keyViews[1].keyModel?.ltText != "·"){
-                            keyViews[1].keyModel?.ltText
-                        }else{
-                            keyViews[1].keyModel?.ltText
-                        }
-                    }
-                    // A/L 로 시작하는 조합
-                    listOf("A","L","a","l").any { isEngKeyView(keyViews, it) } -> {
-                        if (keyViews[1].keyModel?.rbText != "·"){
-                            keyViews[1].keyModel?.rbText
-                        }else{
-                            keyViews[1].keyModel?.ltText
-                        }
-                    }
-                    else -> keyViews[1].keyModel?.ltText.orEmpty()
-                }
+                // 점이 있는 키 조합은 위에서 이미 처리되므로 여기서는 기본값만 반환
+                keyViews[0].keyModel?.ltText.orEmpty()
             }
             
             CurrentLanguage.CHN -> {
@@ -261,6 +277,9 @@ class InputManager private constructor() {
 
     private fun isEngKeyView(keyViews: List<CustomKeyButton>, target: String): Boolean =
          keyViews[0].keyModel?.ltText == target
+    
+    private fun isDotKey(keyViews: List<CustomKeyButton>): Boolean =
+        keyViews.any { it.keyModel?.rtText == "˙" }
 
     private fun isKorShiftCombo(keyButtons: List<CustomKeyButton>, first: String, second: String): Boolean {
         val hasFirst = keyButtons.any { it.keyModel?.mainText == first }

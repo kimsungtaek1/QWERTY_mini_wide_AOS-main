@@ -12,6 +12,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.provider.Settings
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
@@ -46,11 +48,13 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
     
     private var speechRecognizer: SpeechRecognizer? = null
     private var isListening = false
+    private var vibrator: Vibrator? = null
 
     override fun onCreate() {
         super.onCreate()
         val view = layoutInflater.inflate(R.layout.service_keyboardview, null)
         binding = ServiceKeyboardviewBinding.bind(view)
+        vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
     }
 
 
@@ -63,10 +67,6 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
 
         setBackgroundBg()
         binding.customKeyboard.findViewById<LinearLayout>(R.id.suggestion_bar).visibility = GONE
-        
-        // 마이크 버튼 초기 상태 설정
-        binding.customKeyboard.updateMicrophoneState(false)
-        Log.d("CustomKeyBoard_Service", "Microphone button initialized")
 
         val extracted = currentInputConnection.getExtractedText(ExtractedTextRequest(), 0)
         previousSelStart = extracted?.selectionStart ?: -1
@@ -92,14 +92,24 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         // 키보드 상태 및 뷰 완전 초기화
         binding.customKeyboard.composingLength = 0
         binding.customKeyboard.automata = HangulAutomata()
-        binding.customKeyboard.currentState = KeyType.KOR // 기본값(필요시 변경)
-        currentLanguage = com.qwerty_mini_wide.app.keyboard.model.CurrentLanguage.KOR // 기본값(필요시 변경)
+        binding.customKeyboard.currentState = KeyType.ENG // 기본값(필요시 변경)
+        currentLanguage = com.qwerty_mini_wide.app.keyboard.model.CurrentLanguage.ENG // 기본값(필요시 변경)
         binding.customKeyboard.initViews() // 뷰도 항상 초기화
         actionId = (editorInfo?.imeOptions ?: 0) and EditorInfo.IME_MASK_ACTION
         typedBuffer.clear()
     }
 
     override fun onKey(code: KeyType, text: String?) {
+        // 강한 진동 햅틱 200ms
+        vibrator?.let { v ->
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                // 최대 강도(255)로 200ms 진동
+                v.vibrate(VibrationEffect.createOneShot(200, 255))
+            } else {
+                @Suppress("DEPRECATION")
+                v.vibrate(200)
+            }
+        }
 
         lastKeyTypedTime = System.currentTimeMillis()
         val ic = currentInputConnection
@@ -317,15 +327,13 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
             Log.d("SpeechRecognizer", "Starting speech recognition...")
             speechRecognizer?.startListening(intent)
             isListening = true
-            binding.customKeyboard.updateMicrophoneState(true)
             Toast.makeText(this, "음성 인식 시작", Toast.LENGTH_SHORT).show()
             
         } catch (e: Exception) {
             Log.e("SpeechRecognizer", "Error starting speech recognition", e)
             Toast.makeText(this, "음성 인식 시작 실패: ${e.message}", Toast.LENGTH_SHORT).show()
             isListening = false
-            binding.customKeyboard.updateMicrophoneState(false)
-        }
+            }
     }
     
     private fun stopSpeechRecognition() {
@@ -336,12 +344,17 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
             Log.e("SpeechRecognizer", "Error stopping speech recognition", e)
         }
         isListening = false
-        binding.customKeyboard.updateMicrophoneState(false)
+    }
+    
+    override fun onFinishInputView(finishingInput: Boolean) {
+        super.onFinishInputView(finishingInput)
+        binding.customKeyboard.release()
     }
     
     override fun onDestroy() {
         super.onDestroy()
         speechRecognizer?.destroy()
+        binding.customKeyboard.release()
     }
 
     // RecognitionListener methods
@@ -360,7 +373,6 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
     override fun onEndOfSpeech() {
         Log.d("SpeechRecognizer", "End of speech")
         isListening = false
-        binding.customKeyboard.updateMicrophoneState(false)
     }
 
     override fun onError(error: Int) {
@@ -383,7 +395,6 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         }
         
         isListening = false
-        binding.customKeyboard.updateMicrophoneState(false)
     }
 
     override fun onResults(results: Bundle?) {
@@ -399,7 +410,6 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
             typedBuffer.append(recognizedText)
         }
         isListening = false
-        binding.customKeyboard.updateMicrophoneState(false)
     }
 
     override fun onPartialResults(partialResults: Bundle?) {
