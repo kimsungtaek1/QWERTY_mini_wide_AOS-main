@@ -56,9 +56,6 @@ class CustomKeyboardView @JvmOverloads constructor(
     private var lastShiftClickTime = 0L
     
     // Shift 키 터치 상태 추적
-    private var isShiftPressed = false
-    private var shiftUsedWithOtherKey = false
-    private var isShiftModeOn = false  // Shift가 ON 상태인지 추적
 
     // ↓ 이 부분을 클래스 바로 안쪽(다른 멤버 변수들 옆)에 추가
     private val deleteHandler = Handler(Looper.getMainLooper())
@@ -231,17 +228,16 @@ class CustomKeyboardView @JvmOverloads constructor(
 
     @SuppressLint("ResourceType")
     fun resetShift(){
-        // Reset the flag
-        isShiftModeOn = false
-        
         for(i in 0 until binding.funtionLinear.childCount){
             if(binding.funtionLinear.getChildAt(i) is CustomKeyButton){
                 val keyButon = binding.funtionLinear.getChildAt(i) as CustomKeyButton
-                if(keyButon.keyModel!!.keyType == KeyType.ONSHIFT){
+                // Only reset ONSHIFT, not LOCKSHIFT
+                if(keyButon.keyModel?.keyType == KeyType.ONSHIFT){
                     keyButon.setBackgroundDrawable(resources.getDrawable(keyButon.keyModel!!.backgroundColor))
-                    // key.setBackgroundColor(keyModel.backgroundColor)
                     keyButon.getIcImageView().setImageDrawable(resources.getDrawable(keyButon.keyModel!!.image))
                     keyButon.keyModel!!.keyType = KeyType.SHIFT
+                    
+                    // Reset keyboard layout only if it was ONSHIFT
                     if(currentLanguage == CurrentLanguage.KOR){
                         setLetter(KeyLetter.getKorLetters())
                     }else{
@@ -326,17 +322,6 @@ class CustomKeyboardView @JvmOverloads constructor(
             key.setOnTouchListener { _, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        // Track shift press state
-                        if (key.keyModel?.keyType == KeyType.SHIFT) {
-                            isShiftPressed = true
-                            shiftUsedWithOtherKey = false
-                        }
-                        
-                        // If shift is pressed and another key is pressed, mark it as used with other key
-                        if (isShiftPressed && key.keyModel?.keyType == KeyType.LETTER) {
-                            shiftUsedWithOtherKey = true
-                        }
-                        
                         // Show popup for letter keys
                         if (key.keyModel?.keyType == KeyType.LETTER && shouldShowPopup(key)) {
                             showKeyPopup(key)
@@ -350,11 +335,6 @@ class CustomKeyboardView @JvmOverloads constructor(
                     }
                     MotionEvent.ACTION_UP,
                     MotionEvent.ACTION_CANCEL -> {
-                        // Track shift release
-                        if (key.keyModel?.keyType == KeyType.SHIFT) {
-                            isShiftPressed = false
-                        }
-                        
                         // Hide popup
                         if (key.keyModel?.keyType == KeyType.LETTER) {
                             keyPopupWindow?.hide()
@@ -402,20 +382,8 @@ class CustomKeyboardView @JvmOverloads constructor(
                         if(touchSize == 0){
                             tapLetter(key)
                         }
-                        // Reset shift only if it's in single-tap mode (not simultaneous or multi-tap)
-                        // Check if any shift key is in ONSHIFT state
-                        var hasOnShift = false
-                        for(i in 0 until binding.funtionLinear.childCount){
-                            val keyButton = binding.funtionLinear.getChildAt(i) as? CustomKeyButton
-                            if(keyButton?.keyModel?.keyType == KeyType.ONSHIFT){
-                                hasOnShift = true
-                                break
-                            }
-                        }
-                        
-                        if(hasOnShift && !isShiftPressed && !InputManager.shared.isMultiTapInProgress()) {
-                            resetShift()
-                        }
+                        // Always reset shift after letter input (except for LOCKSHIFT)
+                        resetShift()
                     }
 
                     keyModel.keyType == KeyType.DELETE ->{
@@ -490,22 +458,16 @@ class CustomKeyboardView @JvmOverloads constructor(
                     }
 
                     keyModel.keyType == KeyType.SHIFT ->{
-                        // Check if shift was used alone or with another key
-                        if(!shiftUsedWithOtherKey && touchSize == 0) {
-                            // Shift pressed alone - toggle shift mode
-                            key.setBackgroundDrawable(resources.getDrawable(keyModel.selectBackgroundColor))
-                            key.getIcImageView()
-                                .setImageDrawable(resources.getDrawable(keyModel.selectImage))
-                            keyModel.keyType = KeyType.ONSHIFT
-                            isShiftModeOn = true  // Mark shift mode as ON
-                            if (currentLanguage == CurrentLanguage.KOR) {
-                                setLetter(KeyLetter.getShiftLetter())
-                            } else {
-                                setLetter(KeyLetter.getEngShiftLetter())
-                            }
-                            lastShiftClickTime = SystemClock.elapsedRealtime()
+                        key.setBackgroundDrawable(resources.getDrawable(keyModel.selectBackgroundColor))
+                        key.getIcImageView()
+                            .setImageDrawable(resources.getDrawable(keyModel.selectImage))
+                        keyModel.keyType = KeyType.ONSHIFT
+                        if (currentLanguage == CurrentLanguage.KOR) {
+                            setLetter(KeyLetter.getShiftLetter())
+                        } else {
+                            setLetter(KeyLetter.getEngShiftLetter())
                         }
-                        // If shift was used with another key, don't change its state
+                        lastShiftClickTime = SystemClock.elapsedRealtime()
                     }
 
                     keyModel.keyType == KeyType.RETURN -> {
