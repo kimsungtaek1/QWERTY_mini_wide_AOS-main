@@ -1,27 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 아래쪽 그림자 효과 -->
-    <item>
+    <!-- 본체 하단 그림자 -->
+    <item android:top="32dp">
         <shape android:shape="rectangle">
             <gradient
-                android:startColor="#00000000"
-                android:centerColor="#00000000"
-                android:endColor="#40000000"
-                android:angle="270"
-                android:centerY="0.7" />
-            <corners android:radius="8dp" />
-            <padding android:bottom="3dp" />
+                android:startColor="#25000000"
+                android:centerColor="#15000000"
+                android:endColor="#00000000"
+                android:angle="270" />
+            <size android:height="8dp" />
+            <corners
+                android:bottomLeftRadius="8dp"
+                android:bottomRightRadius="8dp" />
         </shape>
     </item>
     
-    <!-- 말풍선 본체 -->
+    <!-- 꼬리 왼쪽 그림자 -->
+    <item
+        android:gravity="bottom|center_horizontal"
+        android:bottom="-3dp"
+        android:left="-1dp">
+        <rotate
+            android:fromDegrees="45"
+            android:pivotX="50%"
+            android:pivotY="50%">
+            <shape android:shape="rectangle">
+                <size
+                    android:width="6dp"
+                    android:height="6dp" />
+                <gradient
+                    android:startColor="#40000000"
+                    android:centerColor="#20000000"
+                    android:endColor="#00000000"
+                    android:angle="225" />
+            </shape>
+        </rotate>
+    </item>
+    
+    <!-- 꼬리 오른쪽 그림자 -->
+    <item
+        android:gravity="bottom|center_horizontal"
+        android:bottom="-3dp"
+        android:right="-1dp">
+        <rotate
+            android:fromDegrees="45"
+            android:pivotX="50%"
+            android:pivotY="50%">
+            <shape android:shape="rectangle">
+                <size
+                    android:width="6dp"
+                    android:height="6dp" />
+                <gradient
+                    android:startColor="#40000000"
+                    android:centerColor="#20000000"
+                    android:endColor="#00000000"
+                    android:angle="315" />
+            </shape>
+        </rotate>
+    </item>
+    
+    <!-- 말풍선 본체 외곽선 (하단이 더 두꺼운 효과) -->
     <item android:bottom="1dp">
         <shape android:shape="rectangle">
-            <solid android:color="#FFFFFF" />
+            <gradient
+                android:startColor="#E8E8E8"
+                android:endColor="#D0D0D0"
+                android:angle="270" />
             <corners android:radius="8dp" />
-            <stroke
-                android:width="0.3dp"
-                android:color="#F0F0F0" />
+        </shape>
+    </item>
+    
+    <!-- 말풍선 본체 내부 (그라데이션 효과) -->
+    <item android:bottom="1.3dp" android:left="0.3dp" android:right="0.3dp" android:top="0.3dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#FFFFFF"
+                android:endColor="#F8F8F8"
+                android:angle="270" />
+            <corners android:radius="7.7dp" />
             <padding
                 android:left="12dp"
                 android:top="4dp"
@@ -30,19 +86,19 @@
         </shape>
     </item>
     
-    <!-- 말풍선 꼬리 (순수한 흰색) -->
+    <!-- 꼬리 본체 (더 뛰족한 삼각형) -->
     <item
         android:gravity="bottom|center_horizontal"
-        android:bottom="-8dp">
+        android:bottom="-5dp">
         <rotate
             android:fromDegrees="45"
             android:pivotX="50%"
             android:pivotY="50%">
             <shape android:shape="rectangle">
                 <size
-                    android:width="12dp"
-                    android:height="12dp" />
-                <solid android:color="#FFFFFF" />
+                    android:width="7dp"
+                    android:height="7dp" />
+                <solid android:color="#FAFAFA" />
             </shape>
         </rotate>
     </item>
@@ -50,16 +106,16 @@
     <!-- 꼬리 양쪽에 그림자 효과 -->
     <item
         android:gravity="bottom|center_horizontal"
-        android:bottom="-8dp"
-        android:left="1dp">
+        android:bottom="-5dp"
+        android:left="0.5dp">
         <rotate
             android:fromDegrees="45"
             android:pivotX="50%"
             android:pivotY="50%">
             <shape android:shape="rectangle">
                 <size
-                    android:width="11dp"
-                    android:height="11dp" />
+                    android:width="7.5dp"
+                    android:height="7.5dp" />
                 <solid android:color="#00000000" />
                 <stroke
                     android:width="0.3dp"
@@ -68,15 +124,18 @@
         </rotate>
     </item>
     
-    <!-- 꼬리의 윗부분을 가리는 흰색 사각형 -->
+    <!-- 꼬리의 윗부분을 가리는 사각형 (그라데이션) -->
     <item
         android:gravity="bottom|center_horizontal"
         android:bottom="0dp">
         <shape android:shape="rectangle">
             <size
-                android:width="14dp"
-                android:height="5dp" />
-            <solid android:color="#FFFFFF" />
+                android:width="10dp"
+                android:height="4dp" />
+            <gradient
+                android:startColor="#FFFFFF"
+                android:endColor="#F8F8F8"
+                android:angle="270" />
         </shape>
     </item>
 </layer-list>

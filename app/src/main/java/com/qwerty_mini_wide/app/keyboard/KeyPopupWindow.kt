@@ -55,7 +55,7 @@ class KeyPopupWindow(private val context: Context) {
         
         // Calculate popup position (centered above the key)
         val xOffset = (anchorWidth - popupWidth) / 2
-        val yOffset = -(popupHeight + anchorHeight - 25) // Position much closer to the key
+        val yOffset = -(popupHeight + anchorHeight - 40) // Position even lower (closer to the key)
         
         try {
             popupWindow?.showAsDropDown(anchor, xOffset, yOffset, Gravity.NO_GRAVITY)
