@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 그림자 효과를 위한 배경 -->
+    <!-- 아래쪽 그림자 효과 -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#10000000" />
+            <gradient
+                android:startColor="#00000000"
+                android:centerColor="#00000000"
+                android:endColor="#40000000"
+                android:angle="270"
+                android:centerY="0.7" />
             <corners android:radius="8dp" />
+            <padding android:bottom="3dp" />
         </shape>
     </item>
     
@@ -24,7 +30,7 @@
         </shape>
     </item>
     
-    <!-- 말풍선 꼬리 -->
+    <!-- 말풍선 꼬리 (순수한 흰색) -->
     <item
         android:gravity="bottom|center_horizontal"
         android:bottom="-8dp">
@@ -34,12 +40,30 @@
             android:pivotY="50%">
             <shape android:shape="rectangle">
                 <size
-                    android:width="10dp"
-                    android:height="10dp" />
-                <gradient
-                    android:startColor="#FFFFFF"
-                    android:endColor="#F8F8F8"
-                    android:angle="270" />
+                    android:width="12dp"
+                    android:height="12dp" />
+                <solid android:color="#FFFFFF" />
+            </shape>
+        </rotate>
+    </item>
+    
+    <!-- 꼬리 양쪽에 그림자 효과 -->
+    <item
+        android:gravity="bottom|center_horizontal"
+        android:bottom="-8dp"
+        android:left="1dp">
+        <rotate
+            android:fromDegrees="45"
+            android:pivotX="50%"
+            android:pivotY="50%">
+            <shape android:shape="rectangle">
+                <size
+                    android:width="11dp"
+                    android:height="11dp" />
+                <solid android:color="#00000000" />
+                <stroke
+                    android:width="0.3dp"
+                    android:color="#F0F0F0" />
             </shape>
         </rotate>
     </item>
@@ -50,8 +74,8 @@
         android:bottom="0dp">
         <shape android:shape="rectangle">
             <size
-                android:width="12dp"
-                android:height="4dp" />
+                android:width="14dp"
+                android:height="5dp" />
             <solid android:color="#FFFFFF" />
         </shape>
     </item>
