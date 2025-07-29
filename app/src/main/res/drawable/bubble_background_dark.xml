@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 그림자 효과를 위한 배경 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#10000000" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    
+    <!-- 말풍선 본체 -->
+    <item android:bottom="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF" />
+            <corners android:radius="8dp" />
+            <stroke
+                android:width="0.3dp"
+                android:color="#F0F0F0" />
+            <padding
+                android:left="12dp"
+                android:top="4dp"
+                android:right="12dp"
+                android:bottom="4dp" />
+        </shape>
+    </item>
+    
+    <!-- 말풍선 꼬리 -->
+    <item
+        android:gravity="bottom|center_horizontal"
+        android:bottom="-8dp">
+        <rotate
+            android:fromDegrees="45"
+            android:pivotX="50%"
+            android:pivotY="50%">
+            <shape android:shape="rectangle">
+                <size
+                    android:width="10dp"
+                    android:height="10dp" />
+                <gradient
+                    android:startColor="#FFFFFF"
+                    android:endColor="#F8F8F8"
+                    android:angle="270" />
+            </shape>
+        </rotate>
+    </item>
+    
+    <!-- 꼬리의 윗부분을 가리는 흰색 사각형 -->
+    <item
+        android:gravity="bottom|center_horizontal"
+        android:bottom="0dp">
+        <shape android:shape="rectangle">
+            <size
+                android:width="12dp"
+                android:height="4dp" />
+            <solid android:color="#FFFFFF" />
+        </shape>
+    </item>
+</layer-list>

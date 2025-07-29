@@ -1,0 +1,581 @@
+package com.qwerty_mini_wide.app.keyboard
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.Rect
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.util.AttributeSet
+import android.util.Log
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.TextView
+import android.widget.LinearLayout
+import androidx.annotation.RequiresApi
+import com.qwerty_mini_wide.app.R
+import com.qwerty_mini_wide.app.databinding.CustomKeyboardViewBinding
+import com.qwerty_mini_wide.app.keyboard.model.CurrentLanguage
+import com.qwerty_mini_wide.app.keyboard.model.KeyLetter
+import com.qwerty_mini_wide.app.keyboard.model.KeyModel
+import com.qwerty_mini_wide.app.keyboard.model.KeyType
+import com.qwerty_mini_wide.app.keyboard.manager.InputManager
+import com.qwerty_mini_wide.app.keyboard.service.CustomKeyBoard_Service
+
+class CustomKeyboardView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null
+) : LinearLayout(context, attrs) {
+
+    private val binding: CustomKeyboardViewBinding
+    var currentState:KeyType = KeyType.ENG
+    var currentLanguage: CurrentLanguage = CurrentLanguage.ENG
+    var touchSize:Int = 0
+    
+    // 햅틱 피드백을 위한 Vibrator
+    private val vibrator: Vibrator by lazy {
+        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    }
+
+    // 더블탭 간격 기준(ms)
+    private val DOUBLE_TAP_THRESHOLD = 300L
+
+    // 마지막 Shift 클릭 시각
+    private var lastShiftClickTime = 0L
+
+    // Shift 자동 해제 타이머
+    private val shiftAutoReleaseHandler = Handler(Looper.getMainLooper())
+    private var shiftAutoReleaseRunnable: Runnable? = null
+    
+    // 연타 기능이 있는 키 (shift + 연타 → rb_txt 출력)
+    private val doubleTapKeys = setOf("w", "r", "t", "y", "s", "d", "c", "h", "n", "m", 
+                                      "W", "R", "T", "Y", "S", "D", "C", "H", "N", "M")
+    
+    // 자동 해제만 적용되는 키 (연타 기능 없음)
+    private val shiftAutoReleaseKeys = setOf("e", "u", "i", "o", "a", "l",
+                                             "E", "U", "I", "O", "A", "L")
+    
+    // 마지막 탭한 키와 시간 추적 (연타 감지용)
+    private var lastTappedKey: String? = null
+    private var lastTapTime = 0L
+    
+    // ↓ 이 부분을 클래스 바로 안쪽(다른 멤버 변수들 옆)에 추가
+    private val deleteHandler = Handler(Looper.getMainLooper())
+    private val deleteRunnable = object : Runnable {
+        override fun run() {
+            baseDelete()
+           // listener?.onKey(KeyType.DELETE, "")
+            // 50ms 간격으로 반복
+            deleteHandler.postDelayed(this, 50)
+        }
+    }
+
+    fun baseDelete(){
+        listener?.onKey(KeyType.DELETE, "")
+    }
+
+    interface OnKeyboardActionListener {
+        /** code: Unicode int or special KEYCODE_* */
+        fun onKey(code: KeyType, text: String?)
+    }
+
+    private var listener: OnKeyboardActionListener? = null
+
+    init {
+        orientation = VERTICAL
+        val view = inflate(context, R.layout.custom_keyboard_view, this)
+        binding = CustomKeyboardViewBinding.bind(view)
+        setupSuggestionBar()
+        initViews()
+    }
+
+    fun initViews(){
+        setupKeys()
+        setLetter(KeyLetter.getEngLetter())
+        setFuntion(KeyLetter.getEngFunction())
+        
+        // 엔터 버튼 강제 업데이트
+        updateEnterButton()
+    }
+    
+    // 엔터 버튼만 업데이트하는 메서드
+    fun updateEnterButton() {
+        val service = context as? CustomKeyBoard_Service
+        val actionId = service?.actionId ?: 0
+        
+        for(i in 0 until binding.funtionLinear.childCount){
+            if(binding.funtionLinear.getChildAt(i) is CustomKeyButton){
+                val keyButton = binding.funtionLinear.getChildAt(i) as CustomKeyButton
+                if(keyButton.keyModel?.keyType == KeyType.RETURN || 
+                   keyButton.keyModel?.mainText == "return" || 
+                   keyButton.keyModel?.image == R.drawable.ic_enter){
+                    keyButton.setData(keyButton.keyModel!!, actionId)
+                    break
+                }
+            }
+        }
+    }
+
+    fun setOnKeyboardActionListener(l: OnKeyboardActionListener) {
+        listener = l
+    }
+
+    private fun setupSuggestionBar() {
+        findViewById<ImageButton>(R.id.btnArrowDown).setOnClickListener {
+            listener?.onKey(KeyType.LETTER, "ㅏ")
+        }
+        findViewById<ImageButton>(R.id.btnArrowUp).setOnClickListener {
+           // listener?.onKey(CODE_NEXT, null)
+        }
+        findViewById<TextView>(R.id.tvDone).setOnClickListener {
+           // listener?.onKey(CODE_DONE, null)
+        }
+    }
+
+    fun setFuntion(fountions:List<KeyModel>){
+        var count = 0
+        for(i in 0 until binding.funtionLinear.childCount){
+            if(binding.funtionLinear.getChildAt(i) is CustomKeyButton){
+                val keyButon = binding.funtionLinear.getChildAt(i) as CustomKeyButton
+                val service = context as? CustomKeyBoard_Service
+
+                keyButon.setData(fountions[count],service?.actionId ?: 0)
+                count++
+            }
+        }
+    }
+
+    @SuppressLint("ResourceType")
+    fun resetShift(){
+        for(i in 0 until binding.funtionLinear.childCount){
+            if(binding.funtionLinear.getChildAt(i) is CustomKeyButton){
+                val keyButon = binding.funtionLinear.getChildAt(i) as CustomKeyButton
+                if(keyButon.keyModel!!.keyType == KeyType.ONSHIFT){
+                    keyButon.setBackgroundDrawable(resources.getDrawable(keyButon.keyModel!!.backgroundColor))
+                    // key.setBackgroundColor(keyModel.backgroundColor)
+                    keyButon.getIcImageView().setImageDrawable(resources.getDrawable(keyButon.keyModel!!.image))
+                    keyButon.keyModel!!.keyType = KeyType.SHIFT
+                    setLetter(KeyLetter.getEngLetter())
+                }
+            }
+        }
+    }
+    
+    // Shift 자동 해제 타이머 시작
+    private fun startShiftAutoReleaseTimer() {
+        // 기존 타이머 취소
+        cancelShiftAutoReleaseTimer()
+        
+        // Shift Lock 모드에서는 자동 해제하지 않음
+        if (isShiftLocked()) return
+        
+        // 0.3초 후 자동 해제
+        shiftAutoReleaseRunnable = Runnable {
+            resetShift()
+        }
+        shiftAutoReleaseHandler.postDelayed(shiftAutoReleaseRunnable!!, 300)
+    }
+    
+    // Shift 자동 해제 타이머 취소
+    private fun cancelShiftAutoReleaseTimer() {
+        shiftAutoReleaseRunnable?.let {
+            shiftAutoReleaseHandler.removeCallbacks(it)
+        }
+        shiftAutoReleaseRunnable = null
+    }
+    
+    // Shift Lock 상태 확인
+    private fun isShiftLocked(): Boolean {
+        for(i in 0 until binding.funtionLinear.childCount){
+            if(binding.funtionLinear.getChildAt(i) is CustomKeyButton){
+                val keyButton = binding.funtionLinear.getChildAt(i) as CustomKeyButton
+                if(keyButton.keyModel?.keyType == KeyType.LOCKSHIFT){
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
+    // 햅틱 피드백 실행 메서드
+    private fun performHapticFeedback() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // 진동 시간을 20ms로 늘리고, 진폭을 최대값(255)으로 설정
+            vibrator.vibrate(VibrationEffect.createOneShot(20, 255))
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(20)
+        }
+    }
+
+    fun setLetter(letters:List<List<KeyModel>>){
+
+        var count = 0
+        for(i in 0 until binding.firstLinear.childCount){
+            if(binding.firstLinear.getChildAt(i) is CustomKeyButton){
+                val keyButon = binding.firstLinear.getChildAt(i) as CustomKeyButton
+                keyButon.setData(letters[0][count])
+                count++
+
+            }
+        }
+
+        count = 0
+        for(i in 0 until binding.secondLinear.childCount){
+            if(binding.secondLinear.getChildAt(i) is CustomKeyButton){
+                val keyButon = binding.secondLinear.getChildAt(i) as CustomKeyButton
+                keyButon.setData(letters[1][count])
+                count++
+            }
+        }
+    }
+
+    @SuppressLint("ResourceType", "ClickableViewAccessibility")
+    private fun setupKeys() {
+
+        // 뷰 트리 순회해서 CustomKeyButton 모두 찾기
+        val keys = mutableListOf<CustomKeyButton>()
+        fun traverse(v: View) {
+            if (v is CustomKeyButton) keys += v
+            else if (v is ViewGroup) {
+                for (i in 0 until v.childCount) traverse(v.getChildAt(i))
+            }
+        }
+        traverse(this)
+
+        // 클릭 리스너 설정
+        keys.forEach { key ->
+
+            key.setOnTouchListener { _, event ->
+                // DELETE 키만 long-press 반복 처리
+                if (key.keyModel?.keyType == KeyType.DELETE) {
+                    when (event.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            baseDelete()
+                            // 누르는 순간 한 번 삭제
+                            //listener?.onKey(KeyType.DELETE, "")
+                            // 500ms 후부터 반복 삭제 시작
+                            deleteHandler.postDelayed(deleteRunnable, 500)
+                        }
+                        MotionEvent.ACTION_UP,
+                        MotionEvent.ACTION_CANCEL -> {
+                            // 손 떼면 반복 삭제 멈춤
+                            deleteHandler.removeCallbacks(deleteRunnable)
+                        }
+                    }
+                    true  // touch event consume
+                } else {
+                    false
+                }
+            }
+
+            key.setOnClickListener {
+                performHapticFeedback() // 햅틱 피드백 추가
+                val icon = key.getIconRes()
+                val main = key.getMainText()
+                val keyModel = key.keyModel
+
+                when{
+                    keyModel!!.keyType == KeyType.LETTER ->{
+                        if(touchSize == 0){
+                            tapLetter(key)
+                        }
+                        // Shift 리셋은 tapLetter 내부에서 처리됨
+                    }
+
+                    keyModel.keyType == KeyType.DELETE ->{
+                        baseDelete()
+                    }
+
+                    keyModel.keyType == KeyType.NUMBER ->{
+                        currentState = KeyType.NUMBER
+                        setLetter(KeyLetter.getNumberLetter(currentLanguage))
+                        setFuntion(KeyLetter.getNumberFuntion(currentLanguage))
+                        listener?.onKey(KeyType.NUMBER,"")
+                    }
+
+                    keyModel.keyType == KeyType.SPECIAL ->{
+                        currentState = KeyType.SPECIAL
+                        setLetter(KeyLetter.getSpecialLetter(currentLanguage))
+                        setFuntion(KeyLetter.getSpectialFuntion(currentLanguage))
+                    }
+
+                    keyModel.keyType == KeyType.SPACE ->{
+                        commitText()
+                        listener?.onKey(KeyType.SPACE, " ")
+                    }
+
+                    keyModel.keyType == KeyType.ONSHIFT ->{
+                        val now = SystemClock.elapsedRealtime()
+                        if (now - lastShiftClickTime < DOUBLE_TAP_THRESHOLD) {
+                            // ─── 더블 클릭: Shift 잠금 토글 ───
+                            keyModel.keyType = KeyType.LOCKSHIFT
+                        } else {
+                            key.setBackgroundDrawable(resources.getDrawable(keyModel.backgroundColor))
+                            key.getIcImageView().setImageDrawable(resources.getDrawable(keyModel.image))
+                            keyModel.keyType = KeyType.SHIFT
+                            setLetter(KeyLetter.getEngLetter())
+                        }
+                    }
+
+                    keyModel.keyType == KeyType.LOCKSHIFT ->{
+                        key.setBackgroundDrawable(resources.getDrawable(keyModel.backgroundColor))
+                        key.getIcImageView().setImageDrawable(resources.getDrawable(keyModel.image))
+                        keyModel.keyType = KeyType.SHIFT
+                        setLetter(KeyLetter.getEngLetter())
+                    }
+
+                    keyModel.keyType == KeyType.SHIFT ->{
+                        if(touchSize == 0) {
+                            key.setBackgroundDrawable(resources.getDrawable(keyModel.selectBackgroundColor))
+                            key.getIcImageView()
+                                .setImageDrawable(resources.getDrawable(keyModel.selectImage))
+                            keyModel.keyType = KeyType.ONSHIFT
+                            setLetter(KeyLetter.getEngShiftLetter())
+                            lastShiftClickTime = SystemClock.elapsedRealtime()
+                        }
+                    }
+
+                    keyModel.keyType == KeyType.RETURN -> {
+                        commitText() // 기존 조합 중인 글자 정리
+                        listener?.onKey(KeyType.RETURN, "\n")
+                    }
+                }
+            }
+        }
+    }
+
+    fun commitText(){
+        val service = context as? com.qwerty_mini_wide.app.keyboard.service.CustomKeyBoard_Service
+        service?.currentInputConnection?.finishComposingText()
+    }
+
+    private fun isShiftOn(): Boolean {
+        for(i in 0 until binding.funtionLinear.childCount){
+            if(binding.funtionLinear.getChildAt(i) is CustomKeyButton){
+                val keyButton = binding.funtionLinear.getChildAt(i) as CustomKeyButton
+                if(keyButton.keyModel?.keyType == KeyType.ONSHIFT || keyButton.keyModel?.keyType == KeyType.LOCKSHIFT){
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    fun tapLetter(keyButton: CustomKeyButton) {
+        // 영어 모드에서 Shift가 켜져있는 경우
+        if (currentState == KeyType.ENG && isShiftOn()) {
+            val keyText = keyButton.keyModel?.ltText ?: ""
+            val now = SystemClock.elapsedRealtime()
+            
+            // 연타 기능이 있는 키 처리
+            if (doubleTapKeys.contains(keyText)) {
+                // 같은 키를 0.3초 이내에 다시 눌렀는지 확인
+                if (lastTappedKey == keyText && now - lastTapTime < DOUBLE_TAP_THRESHOLD) {
+                    // 연타 감지 - rb_txt 출력
+                    val rbText = keyButton.keyModel?.rbText ?: ""
+                    if (rbText.isNotEmpty()) {
+                        // 이전에 입력한 대문자 삭제
+                        listener?.onKey(KeyType.DELETE, "")
+                        // rb_txt 문자 출력 (대문자로)
+                        listener?.onKey(KeyType.LETTER, rbText.uppercase())
+                        // Shift 즉시 해제
+                        resetShift()
+                        cancelShiftAutoReleaseTimer()
+                        lastTappedKey = null
+                        lastTapTime = 0L
+                        return
+                    }
+                } else {
+                    // 첫 번째 탭 - 대문자 출력하고 타이머 시작
+                    lastTappedKey = keyText
+                    lastTapTime = now
+                    startShiftAutoReleaseTimer()
+                }
+            }
+            // 자동 해제만 적용되는 키 처리
+            else if (shiftAutoReleaseKeys.contains(keyText)) {
+                // 타이머 시작
+                startShiftAutoReleaseTimer()
+                lastTappedKey = null
+                lastTapTime = 0L
+            }
+            // 다른 키는 타이머 취소하고 Shift 해제
+            else {
+                cancelShiftAutoReleaseTimer()
+                lastTappedKey = null
+                lastTapTime = 0L
+            }
+        } else {
+            // Shift가 꺼져있거나 다른 언어 모드인 경우 타이머 관련 변수 초기화
+            lastTappedKey = null
+            lastTapTime = 0L
+        }
+        
+        // 기존 로직 계속 실행
+        val ch = InputManager.shared.handleTap(keyButton, currentState, isShiftOn())
+
+        Log.d("Keyboard", "ch : $ch")
+
+        if (InputManager.shared.tapCount == 1) {
+            listener?.onKey(KeyType.LETTER, ch)
+        } else {
+            if (InputManager.shared.tapCount > 1){
+                InputManager.shared.tapCount = 0
+            }
+            listener?.onKey(KeyType.DELETE, "")
+            listener?.onKey(KeyType.LETTER, ch)
+        }
+        
+        // InputManager의 다중 탭이 진행 중이 아니고, Shift가 켜져 있지 않은 경우에만 Shift 리셋
+        if(!InputManager.shared.isMultiTapInProgress() && !isShiftOn()) {
+            resetShift()
+        }
+    }
+
+    // 첫/두 번째 터치된 키 버튼을 저장할 변수
+    private var firstTouchedKey: CustomKeyButton? = null
+    private var secondTouchedKey: CustomKeyButton? = null
+    private var firstTouchTime: Long = 0L
+    private val SIMULTANEOUS_THRESHOLD = 100L // 100ms 시간 차이 허용
+    
+    // . 키 확인 함수
+    private fun isDotKey(keyButton: CustomKeyButton?): Boolean {
+        if (keyButton == null) return false
+        val rtText = keyButton.keyModel?.rtText ?: ""
+        return rtText == "˙"
+    }
+    
+    // 특정 키에 rbText가 있는지 확인
+    private fun hasRbText(keyButton: CustomKeyButton?): Boolean {
+        if (keyButton == null) return false
+        val rbText = keyButton.keyModel?.rbText ?: ""
+        return rbText.isNotEmpty()
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                firstTouchedKey = findEnclosingKeyButton(
+                    findChildUnder(this, ev.x.toInt(), ev.y.toInt())
+                )
+                firstTouchTime = System.currentTimeMillis()
+                touchSize = 0
+                
+                // 첫 번째 키만 눌렸을 때 일정 시간 후 처리
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (touchSize == 0 && firstTouchedKey != null && secondTouchedKey == null) {
+                        // 단일 키 입력으로 처리
+                        super.dispatchTouchEvent(ev)
+                    }
+                }, SIMULTANEOUS_THRESHOLD)
+                
+                return true // 이벤트 처리 보류
+            }
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                touchSize = ev.pointerCount
+                if (ev.pointerCount >= 2) {
+                    val currentTime = System.currentTimeMillis()
+                    
+                    // 시간 차이 확인
+                    if (currentTime - firstTouchTime <= SIMULTANEOUS_THRESHOLD) {
+                        // 이 이벤트를 발생시킨 포인터의 인덱스
+                        val idx = ev.actionIndex
+                        val x = ev.getX(idx).toInt()
+                        val y = ev.getY(idx).toInt()
+
+                        secondTouchedKey = findEnclosingKeyButton(
+                            findChildUnder(this, x, y)
+                        )
+
+                        // 첫 번째, 두 번째 키가 모두 잡혔으면 처리
+                        firstTouchedKey?.let { first ->
+                            secondTouchedKey?.let { second ->
+                                Log.i(
+                                    "Keyboard",
+                                    "첫번째: ${first.keyModel?.ltText}, 두번째: ${second.keyModel?.ltText}"
+                                )
+                                
+                                // . 키와 다른 키의 조합 처리
+                                if (isDotKey(first) && hasRbText(second)) {
+                                    // 첫 번째가 . 키이고 두 번째 키에 rbText가 있으면
+                                    val rbText = second.keyModel?.rbText ?: ""
+                                    listener?.onKey(KeyType.LETTER, rbText)
+                                    return true
+                                } else if (isDotKey(second) && hasRbText(first)) {
+                                    // 두 번째가 . 키이고 첫 번째 키에 rbText가 있으면
+                                    val rbText = first.keyModel?.rbText ?: ""
+                                    listener?.onKey(KeyType.LETTER, rbText)
+                                    return true
+                                }
+                                
+                                // 기존 동시 입력 처리
+                                val touchedButtons = mutableListOf<CustomKeyButton>()
+                                touchedButtons.add(firstTouchedKey!!)
+                                touchedButtons.add(secondTouchedKey!!)
+
+                                val ch = InputManager.shared
+                                    .handleSimultaneous(touchedButtons.take(2), currentLanguage) ?: ""
+                                
+                                Log.i("더블터치",ch)
+
+                                if(ch == "")
+                                    return true
+
+                                listener?.onKey(KeyType.LETTER, ch)
+                            }
+                        }
+                        return true
+                    }
+                }
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                // 터치 종료 시 초기화
+                if (ev.pointerCount == 1) {
+                    firstTouchedKey = null
+                    secondTouchedKey = null
+                    touchSize = 0
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    /** 원래의 findChildUnder() 그대로 사용합니다 */
+    private fun findChildUnder(parent: ViewGroup, x: Int, y: Int): View? {
+        for (i in parent.childCount - 1 downTo 0) {
+            val child = parent.getChildAt(i)
+            // (1) 내부 뷰그룹부터 재귀
+            if (child is ViewGroup) {
+                val cx = x - child.left
+                val cy = y - child.top
+                findChildUnder(child, cx, cy)?.let { return it }
+            }
+            // (2) 자기 자신의 히트 박스 검사
+            val rect = Rect().apply { child.getHitRect(this) }
+            if (rect.contains(x, y)) {
+                return child
+            }
+        }
+        return null
+    }
+
+    /**
+     * findChildUnder()로 찾은 뷰가 TextView든 ImageView든,
+     * 그 조상 중 CustomKeyButton이 있으면 리턴. 없으면 null.
+     */
+    private fun findEnclosingKeyButton(view: View?): CustomKeyButton? {
+        var v = view
+        while (v != null && v !is CustomKeyButton) {
+            val parent = v.parent
+            v = if (parent is View) parent else null
+        }
+        return v as? CustomKeyButton
+    }
+
+}
