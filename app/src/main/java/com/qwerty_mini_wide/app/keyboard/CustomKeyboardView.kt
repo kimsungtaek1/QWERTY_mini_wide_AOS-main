@@ -48,6 +48,10 @@ class CustomKeyboardView @JvmOverloads constructor(
     //var proxy: InputConnection? = null
     var touchSize:Int = 0
     private var keyPopupWindow: KeyPopupWindow? = null
+    
+    // Variables for tracking repeated key presses
+    private var lastPressedKey: CustomKeyButton? = null
+    private var lastPressTime = 0L
 
     // 더블탭 간격 기준(ms)
     private val DOUBLE_TAP_THRESHOLD = 300L
@@ -65,6 +69,14 @@ class CustomKeyboardView @JvmOverloads constructor(
            // listener?.onKey(KeyType.DELETE, "")
             // 50ms 간격으로 반복
             deleteHandler.postDelayed(this, 50)
+        }
+    }
+    
+    // Shift reset handler for multi-tap
+    private val shiftResetHandler = Handler(Looper.getMainLooper())
+    private val shiftResetRunnable = Runnable {
+        if (currentState == KeyType.ENG) {
+            resetShift()
         }
     }
 
@@ -382,8 +394,7 @@ class CustomKeyboardView @JvmOverloads constructor(
                         if(touchSize == 0){
                             tapLetter(key)
                         }
-                        // Always reset shift after letter input (except for LOCKSHIFT)
-                        resetShift()
+                        // Don't reset shift here - let tapLetter handle it
                     }
 
                     keyModel.keyType == KeyType.DELETE ->{
@@ -510,7 +521,7 @@ class CustomKeyboardView @JvmOverloads constructor(
         // base.currentState: KeyType, base.proxy: ProxyInterface?, base.automata: Automata, base.composingLength: Int
         val ch = InputManager.shared.handleTap(keyButton, currentState, isShiftOn())
 
-        Log.d("Keyboard", "ch : $ch")
+        Log.d("Keyboard", "ch : $ch, isShiftOn: ${isShiftOn()}, tapCount: ${InputManager.shared.tapCount}")
 
         if (InputManager.shared.tapCount == 1) {
 
@@ -569,6 +580,14 @@ class CustomKeyboardView @JvmOverloads constructor(
              //   proxy?.deleteSurroundingText(1,0)
                // proxy?.commitText(ch,1)
             }
+        }
+        
+        // Schedule shift reset after multi-tap timeout
+        if (currentState == KeyType.ENG) {
+            // Cancel any pending shift reset
+            shiftResetHandler.removeCallbacks(shiftResetRunnable)
+            // Schedule new shift reset after 300ms (multi-tap timeout)
+            shiftResetHandler.postDelayed(shiftResetRunnable, 350)
         }
     }
 
@@ -717,14 +736,69 @@ class CustomKeyboardView @JvmOverloads constructor(
     private fun showKeyPopup(key: CustomKeyButton) {
         val keyModel = key.keyModel ?: return
         
-        // Get the text to display in popup
-        val popupText = when {
-            keyModel.mainText.isNotEmpty() -> keyModel.mainText
-            keyModel.ltText.isNotEmpty() -> keyModel.ltText
-            else -> return
-        }
+        // Check if this is a repeated press of the same key
+        val currentTime = System.currentTimeMillis()
+        val isRepeatPress = lastPressedKey == key && (currentTime - lastPressTime) < DOUBLE_TAP_THRESHOLD
         
-        keyPopupWindow?.show(key, popupText)
+        // Update tracking variables
+        lastPressedKey = key
+        lastPressTime = currentTime
+        
+        // Calculate the actual character that will be input based on current state and rules
+        val popupText = calculateActualInputChar(key, isRepeatPress)
+        
+        if (popupText.isNotEmpty()) {
+            keyPopupWindow?.show(key, popupText)
+        }
+    }
+    
+    private fun calculateActualInputChar(key: CustomKeyButton, isRepeatPress: Boolean): String {
+        val keyModel = key.keyModel ?: return ""
+        
+        // Simulate what InputManager.handleTap would return
+        return when (currentState) {
+            KeyType.KOR -> {
+                when {
+                    // Multi-tap handling for Korean
+                    isRepeatPress -> {
+                        when (keyModel.mainText) {
+                            "ㅂ" -> if (InputManager.shared.tapCount % 3 == 1) "ㅃ" else "ㅂ"
+                            "ㅈ" -> if (InputManager.shared.tapCount % 3 == 1) "ㅉ" else "ㅈ"
+                            "ㄷ" -> if (InputManager.shared.tapCount % 3 == 1) "ㄸ" else "ㄷ"
+                            "ㄱ" -> if (InputManager.shared.tapCount % 3 == 1) "ㄲ" else "ㄱ"
+                            "ㅅ" -> "ㅆ"
+                            "ㅗ", "ㅏ", "ㅜ", "ㅓ" -> keyModel.ltText.ifEmpty { keyModel.mainText }
+                            else -> keyModel.mainText
+                        }
+                    }
+                    else -> keyModel.mainText
+                }
+            }
+            KeyType.ENG -> {
+                val baseChar = when {
+                    isRepeatPress && keyModel.rbText.isNotEmpty() -> keyModel.rbText
+                    keyModel.ltText.isNotEmpty() -> keyModel.ltText
+                    else -> keyModel.mainText
+                }
+                // Apply shift if active
+                if (isShiftOn()) baseChar.uppercase() else baseChar
+            }
+            KeyType.NUMBER -> {
+                when {
+                    isRepeatPress && keyModel.rbText.isNotEmpty() -> keyModel.rbText
+                    keyModel.mainText.isNotEmpty() -> keyModel.mainText
+                    else -> keyModel.ltText
+                }
+            }
+            KeyType.SPECIAL -> {
+                when {
+                    isRepeatPress && keyModel.rbText.isNotEmpty() -> keyModel.rbText
+                    keyModel.ltText.isNotEmpty() -> keyModel.ltText
+                    else -> keyModel.mainText
+                }
+            }
+            else -> keyModel.mainText.ifEmpty { keyModel.ltText }
+        }
     }
     
     fun release() {
