@@ -193,6 +193,18 @@ class InputManager private constructor() {
             // l 키 찾기
             val lKey = keyViews.find { it.keyModel?.ltText == "l" }
             
+            // wq + o = w
+            if (wqKey != null && oKey != null) {
+                android.util.Log.d("InputManager", "WQ + O combo: returning w")
+                return "w"
+            }
+            
+            // wq + a = w
+            if (wqKey != null && aKey != null) {
+                android.util.Log.d("InputManager", "WQ + A combo: returning w")
+                return "w"
+            }
+            
             // 다른 통합키 찾기 (wq가 아닌 다른 통합키)
             val otherDualKey = keyViews.find { 
                 !it.keyModel?.rbText.isNullOrEmpty() && 
