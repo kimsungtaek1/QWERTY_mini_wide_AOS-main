@@ -184,6 +184,33 @@ class InputManager private constructor() {
         
         // 영어 모드에서 특수 조합 체크
         if (currLanguage == CurrentLanguage.ENG) {
+            // wq 키 찾기
+            val wqKey = keyViews.find { it.keyModel?.ltText == "w" && it.keyModel?.rbText == "q" }
+            // o 키 찾기
+            val oKey = keyViews.find { it.keyModel?.ltText == "o" }
+            // a 키 찾기
+            val aKey = keyViews.find { it.keyModel?.ltText == "a" }
+            // l 키 찾기
+            val lKey = keyViews.find { it.keyModel?.ltText == "l" }
+            
+            // 다른 통합키 찾기 (wq가 아닌 다른 통합키)
+            val otherDualKey = keyViews.find { 
+                !it.keyModel?.rbText.isNullOrEmpty() && 
+                !(it.keyModel?.ltText == "w" && it.keyModel?.rbText == "q")
+            }
+            
+            // wq 또는 o와 다른 통합키의 조합
+            if ((wqKey != null || oKey != null) && otherDualKey != null) {
+                android.util.Log.d("InputManager", "WQ/O combo with dual key: ${otherDualKey.keyModel?.ltText}")
+                return otherDualKey.keyModel?.ltText
+            }
+            
+            // a 또는 l과 다른 통합키의 조합
+            if ((aKey != null || lKey != null) && otherDualKey != null) {
+                android.util.Log.d("InputManager", "A/L combo with dual key: ${otherDualKey.keyModel?.rbText}")
+                return otherDualKey.keyModel?.rbText
+            }
+            
             // 점이 있는 키와의 조합
             if (isDotKey(keyViews)) {
                 val dotKey = keyViews.find { it.keyModel?.rtText == "˙" }
