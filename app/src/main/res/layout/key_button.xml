@@ -46,8 +46,6 @@
         android:id="@+id/tv_rb"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="2dp"
         android:gravity="bottom|end"
         android:textColor="@color/key_text_secondary"
         android:textSize="10sp"
