@@ -152,6 +152,18 @@ class CustomKeyButton @JvmOverloads constructor(
         if (_keyModel.rtTextSize != 0f) {
             tv_rt.setTextSize(TypedValue.COMPLEX_UNIT_PX,_keyModel.rtTextSize.toFloat() * density)
         }
+        
+        // Apply individual margins and gravity to rt text
+        tv_rt.gravity = _keyModel.rtTextGravity
+        val rtParams = tv_rt.layoutParams as FrameLayout.LayoutParams
+        rtParams.gravity = _keyModel.rtTextGravity
+        rtParams.setMargins(
+            _keyModel.rtTextMarginLeft,
+            _keyModel.rtTextMarginTop,
+            _keyModel.rtTextMarginRight,
+            _keyModel.rtTextMarginBottom
+        )
+        tv_rt.layoutParams = rtParams
 
         tv_rb.text = _keyModel.rbText
         tv_rb.setTextColor(_keyModel.rbColor)

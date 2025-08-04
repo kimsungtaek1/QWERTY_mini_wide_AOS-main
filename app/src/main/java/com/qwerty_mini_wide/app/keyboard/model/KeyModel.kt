@@ -68,6 +68,11 @@ class KeyModel(
     var ltTextMarginTop: Int = 0,
     var ltTextMarginRight: Int = 0,
     var ltTextMarginBottom: Int = 0,
+    var rtTextMarginLeft: Int = 0,
+    var rtTextMarginTop: Int = 0,
+    var rtTextMarginRight: Int = 0,
+    var rtTextMarginBottom: Int = 0,
     var ltTextGravity: Int = 3, // Gravity.LEFT = 3
+    var rtTextGravity: Int = 5, // Gravity.RIGHT = 5
     var rbTextGravity: Int = 85 // Gravity.BOTTOM | Gravity.RIGHT = 80 | 5 = 85
 )
