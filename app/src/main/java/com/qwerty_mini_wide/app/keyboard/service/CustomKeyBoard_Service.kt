@@ -100,14 +100,14 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
     }
 
     override fun onKey(code: KeyType, text: String?) {
-        // 강한 진동 햅틱 200ms
+        // 적당한 햅틱 피드백 (100ms, 약한 강도)
         vibrator?.let { v ->
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                // 최대 강도(255)로 200ms 진동
-                v.vibrate(VibrationEffect.createOneShot(200, 255))
+                // 20ms 시간, 매우 약한 강도(30)로 진동
+                v.vibrate(VibrationEffect.createOneShot(20, 30))
             } else {
                 @Suppress("DEPRECATION")
-                v.vibrate(200)
+                v.vibrate(20)
             }
         }
 

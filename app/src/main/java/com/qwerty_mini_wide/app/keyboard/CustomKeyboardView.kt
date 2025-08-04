@@ -120,13 +120,9 @@ class CustomKeyboardView @JvmOverloads constructor(
 
     fun initViews(){
         setupKeys()
-        if(currentState == KeyType.ENG) {
-            setLetter(KeyLetter.getEngLetter())
-            setFuntion(KeyLetter.getEngFunction())
-        } else {
-            setLetter(KeyLetter.getKorLetters())
-            setFuntion(KeyLetter.getKorFunction())
-        }
+        // Always use English keyboard
+        setLetter(KeyLetter.getEngLetter())
+        setFuntion(KeyLetter.getEngFunction())
     }
 
     @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
@@ -250,11 +246,8 @@ class CustomKeyboardView @JvmOverloads constructor(
                     keyButon.keyModel!!.keyType = KeyType.SHIFT
                     
                     // Reset keyboard layout only if it was ONSHIFT
-                    if(currentLanguage == CurrentLanguage.KOR){
-                        setLetter(KeyLetter.getKorLetters())
-                    }else{
-                        setLetter(KeyLetter.getEngLetter())
-                    }
+                    // Always use English keyboard
+                    setLetter(KeyLetter.getEngLetter())
                 }
             }
         }
@@ -381,13 +374,13 @@ class CustomKeyboardView @JvmOverloads constructor(
                     }
 
                     keyModel.keyType == KeyType.KOR ->{
+                        // Korean keyboard removed - switch to English
                         commitText()
-                        currentState = KeyType.KOR
-                       // binding.spaceEnter.visibility = VISIBLE
-                        currentLanguage = CurrentLanguage.KOR
-                        setLetter(KeyLetter.getKorLetters())
-                        setFuntion(KeyLetter.getKorFunction())
-                        listener?.onKey(KeyType.KOR,"")
+                        currentState = KeyType.ENG
+                        currentLanguage = CurrentLanguage.ENG
+                        setLetter(KeyLetter.getEngLetter())
+                        setFuntion(KeyLetter.getEngFunction())
+                        listener?.onKey(KeyType.ENG,"")
                     }
 
                     keyModel.keyType == KeyType.LETTER ->{
@@ -445,11 +438,8 @@ class CustomKeyboardView @JvmOverloads constructor(
                             // key.setBackgroundColor(keyModel.backgroundColor)
                             key.getIcImageView().setImageDrawable(resources.getDrawable(keyModel.image))
                             keyModel.keyType = KeyType.SHIFT
-                            if(currentLanguage == CurrentLanguage.KOR){
-                                setLetter(KeyLetter.getKorLetters())
-                            }else{
-                                setLetter(KeyLetter.getEngLetter())
-                            }
+                            // Always use English keyboard
+                            setLetter(KeyLetter.getEngLetter())
                         }
 
 
@@ -461,11 +451,8 @@ class CustomKeyboardView @JvmOverloads constructor(
                         // key.setBackgroundColor(keyModel.backgroundColor)
                         key.getIcImageView().setImageDrawable(resources.getDrawable(keyModel.image))
                         keyModel.keyType = KeyType.SHIFT
-                        if(currentLanguage == CurrentLanguage.KOR){
-                            setLetter(KeyLetter.getKorLetters())
-                        }else{
-                            setLetter(KeyLetter.getEngLetter())
-                        }
+                        // Always use English keyboard
+                        setLetter(KeyLetter.getEngLetter())
                     }
 
                     keyModel.keyType == KeyType.SHIFT ->{
@@ -473,11 +460,8 @@ class CustomKeyboardView @JvmOverloads constructor(
                         key.getIcImageView()
                             .setImageDrawable(resources.getDrawable(keyModel.selectImage))
                         keyModel.keyType = KeyType.ONSHIFT
-                        if (currentLanguage == CurrentLanguage.KOR) {
-                            setLetter(KeyLetter.getShiftLetter())
-                        } else {
-                            setLetter(KeyLetter.getEngShiftLetter())
-                        }
+                        // Always use English keyboard
+                        setLetter(KeyLetter.getEngShiftLetter())
                         lastShiftClickTime = SystemClock.elapsedRealtime()
                     }
 

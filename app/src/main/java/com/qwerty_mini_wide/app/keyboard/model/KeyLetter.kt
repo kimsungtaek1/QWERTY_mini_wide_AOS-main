@@ -7,7 +7,6 @@ import com.qwerty_mini_wide.app.R
 object KeyLetter {
     // Determine light/dark mode
     var isLightMode: Boolean = false
-       // get() = (Resources.getSystem().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO
         set(value) {
             field = value}
 
@@ -37,68 +36,8 @@ object KeyLetter {
         get() = if (screenWidthDp < screenHeightDp) 37.67f * screenWidthDp / 393f else 75f * screenWidthDp / 852f
     val keyHeight: Int
         get() = if (screenWidthDp < screenHeightDp) 60 else 46
-
-    val subKorSize = 16
     val largeEngSize = 20
     val smallEngSize = 25
-
-    // Korean letters
-    fun getKorLetters(): List<List<KeyModel>> = listOf(
-        listOf(
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅂ", ltText = "ㅍ", mainColor = textColor, ltColor = subletterColor, ltTextSize = subKorSize, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 0),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅈ", ltText = "ㅊ", mainColor = textColor, ltColor = subletterColor, ltTextSize = subKorSize, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 1),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㄷ", ltText = "ㅌ", mainColor = textColor, ltColor = subletterColor, ltTextSize = subKorSize, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 2),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㄱ", ltText = "ㅋ", mainColor = textColor, ltColor = subletterColor, ltTextSize = subKorSize, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 3),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅅ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 4),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅗ", ltText = "ㅛ", mainColor = textColor, ltColor = subletterColor, ltTextSize = subKorSize, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 5),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅏ", ltText = "ㅑ", mainColor = textColor, ltColor = subletterColor, ltTextSize = subKorSize, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 6),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅣ", mainColor = textColor, rtColor = subletterColor, backgroundColor = backgroundColor, rtTextSize = subKorSize.toFloat(), height = keyHeight, width = keyWidth, tag = 7)
-        ),
-        listOf(
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅁ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 9),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㄴ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 10),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅇ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 11),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㄹ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 12),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅎ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 13),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅜ", ltText = "ㅠ", mainColor = textColor, ltColor = subletterColor, ltTextSize = subKorSize, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 14),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅓ", ltText = "ㅕ", mainColor = textColor, ltColor = subletterColor, ltTextSize = subKorSize, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 15),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅡ", rtText = "˙", mainColor = textColor, rtColor = textColor, rtTextSize = 30f, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 16, rtTextMarginTop = -25)
-        )
-    )
-
-    // Korean function row
-    fun getKorFunction(): List<KeyModel> = listOf(
-        KeyModel(keyType = KeyType.SHIFT, image = R.drawable.ic_shift, selectImage = R.drawable.ic_shift_on, backgroundColor = functionBg, selectBackgroundColor = shiftSelectBg, height = keyHeight, width = functionWidth, layout_weight = 9f),
-        KeyModel(keyType = KeyType.NUMBER, mainText = "123",mainTextSize = 15f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth, layout_weight = 9f),
-        KeyModel(keyType = KeyType.SPACE, mainText = "스페이스", mainTextSize = 18f,mainColor = textColor, backgroundColor = backgroundColor),
-        KeyModel(keyType = KeyType.RETURN, image = R.drawable.ic_enter, mainTextSize = 15f, selectImage = R.drawable.ic_enter, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6, layout_weight = 8f),
-        KeyModel(keyType = KeyType.DELETE, mainText = "⌫", mainTextSize = 20f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth, layout_weight = 9f),
-        KeyModel(keyType = KeyType.NONE, mainText = "", mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6, layout_weight = 9f)
-    )
-
-    // Korean shift letters
-    fun getShiftLetter(): List<List<KeyModel>> = listOf(
-        listOf(
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅃ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅉ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㄸ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㄲ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅆ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅙ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅒ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅣ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth)
-        ),
-        listOf(
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅁ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㄴ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅇ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㄹ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅎ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅞ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅖ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "ㅡ", mainColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth)
-        )
-    )
 
     // English function row
     fun getEngFunction(): List<KeyModel> = listOf(
@@ -144,7 +83,7 @@ object KeyLetter {
             KeyModel(KeyType.LETTER, ltText = "R", rbText = "F", ltColor = textColor, ltTextSize = largeEngSize, rbTextSize = largeEngSize,rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 2, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 30, rbTextMarginBottom = 10),
             KeyModel(KeyType.LETTER, ltText = "T", rbText = "G", ltColor = textColor, ltTextSize = largeEngSize,rbTextSize = largeEngSize, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 3, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 30, rbTextMarginBottom = 10),
             KeyModel(KeyType.LETTER, ltText = "Y", rbText = "P", ltColor = textColor, ltTextSize =  largeEngSize, rbTextSize = largeEngSize,rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 4, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 10),
-            KeyModel(KeyType.LETTER, ltText = "U", rbText = "'", ltColor = textColor, rbColor = subletterColor, ltTextSize = largeEngSize, rbTextSize = largeEngSize,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 5, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 5),
+            KeyModel(KeyType.LETTER, ltText = "U", rbText = "\"", ltColor = textColor, rbColor = subletterColor, ltTextSize = largeEngSize, rbTextSize = largeEngSize,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 5, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 5),
             KeyModel(KeyType.LETTER, ltText = "I", ltColor = textColor, ltTextSize = largeEngSize, rbTextSize = largeEngSize,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 6, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10),
             KeyModel(KeyType.LETTER, ltText = "O", rtText = "˙", ltColor = textColor, rtColor = textColor, ltTextSize = largeEngSize, rtTextSize = 60f, rbTextSize = largeEngSize,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 7, ltTextGravity = 3, ltTextMarginLeft = 25, ltTextMarginTop = 10, rtTextMarginRight = 10, rtTextMarginTop = -25)
         ),
@@ -188,8 +127,8 @@ object KeyLetter {
         KeyModel(
             keyType = KeyType.SPECIAL, mainText = "#+=",mainTextSize = 15f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg,
             height = keyHeight, width = keyWidth),
-        KeyModel(keyType =  if (language == CurrentLanguage.KOR) KeyType.KOR else KeyType.ENG, mainText = if (language == CurrentLanguage.KOR) "ㄱㄴㄷ" else "ABC", mainColor = textColor, mainTextSize = 15f, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 9f),
-        KeyModel(keyType = KeyType.SPACE, mainText = if (language == CurrentLanguage.KOR) "스페이스" else "Space",mainTextSize = 18f, mainColor = textColor, backgroundColor = backgroundColor),
+        KeyModel(keyType = KeyType.ENG, mainText = "ABC", mainColor = textColor, mainTextSize = 15f, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 9f),
+        KeyModel(keyType = KeyType.SPACE, mainText = "Space",mainTextSize = 18f, mainColor = textColor, backgroundColor = backgroundColor),
         KeyModel(keyType = KeyType.RETURN, image = R.drawable.ic_enter, mainTextSize = 15f, selectImage = R.drawable.ic_enter, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6, layout_weight = 8f),
         KeyModel(keyType = KeyType.DELETE, mainText = "⌫", mainTextSize = 20f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 9f),
         KeyModel(keyType = KeyType.NONE, mainText = "", mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6)
@@ -223,9 +162,9 @@ object KeyLetter {
             keyType = KeyType.NUMBER, mainText = "123", mainTextSize = 15f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg,
             height = keyHeight, width = keyWidth),
         KeyModel(
-            keyType =  if (language == CurrentLanguage.KOR) KeyType.KOR else KeyType.ENG, mainText = if (language == CurrentLanguage.KOR) "ㄱㄴㄷ" else "ABC", mainColor = textColor,
+            keyType = KeyType.ENG, mainText = "ABC", mainColor = textColor,
             mainTextSize = 15f, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 9f),
-        KeyModel(keyType = KeyType.SPACE, mainText = if (language == CurrentLanguage.KOR) "스페이스" else "Space",mainTextSize = 18f, mainColor = textColor, backgroundColor = backgroundColor),
+        KeyModel(keyType = KeyType.SPACE, mainText = "Space",mainTextSize = 18f, mainColor = textColor, backgroundColor = backgroundColor),
         KeyModel(keyType = KeyType.RETURN, image = R.drawable.ic_enter, mainTextSize = 15f, selectImage = R.drawable.ic_enter, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6, layout_weight = 8f),
         KeyModel(keyType = KeyType.DELETE, mainText = "⌫", mainTextSize = 20f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 9f),
         KeyModel(keyType = KeyType.NONE, mainText = "", mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6)

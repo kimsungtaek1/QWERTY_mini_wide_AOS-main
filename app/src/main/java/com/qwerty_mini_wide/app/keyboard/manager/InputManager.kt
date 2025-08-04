@@ -258,47 +258,8 @@ class InputManager private constructor() {
         }
         return when (currLanguage) {
             CurrentLanguage.KOR -> {
-                // Swift의 if-else 체인을 when + 중첩 when 으로 변환
-                when {
-                    isKorKeyView(keyViews, "ㅡ") -> when {
-                        keyViews[1].keyModel?.mainText == "ㅂ" -> "ㅃ"
-                        keyViews[1].keyModel?.mainText == "ㅈ" -> "ㅉ"
-                        keyViews[1].keyModel?.mainText == "ㄷ" -> "ㄸ"
-                        keyViews[1].keyModel?.mainText == "ㄱ" -> "ㄲ"
-                        keyViews[1].keyModel?.mainText == "ㅅ" -> "ㅆ"
-                        else                        -> keyViews[0].keyModel?.mainText.orEmpty() + "," + keyViews[1].keyModel?.mainText.orEmpty()
-                    }
-                    isKorKeyView(keyViews, "ㅣ") -> when {
-                        keyViews[1].keyModel?.mainText == "ㅂ" -> "ㅂ"
-                        keyViews[1].keyModel?.mainText == "ㅈ" -> "ㅈ"
-                        keyViews[1].keyModel?.mainText == "ㄷ" -> "ㄷ"
-                        keyViews[1].keyModel?.mainText == "ㄱ" -> "ㄱ"
-                        keyViews[1].keyModel?.mainText == "ㅅ" -> "ㅅ"
-                        else                        -> keyViews[0].keyModel?.mainText.orEmpty() + "," + keyViews[1].keyModel?.mainText.orEmpty()
-                    }
-                    isKorKeyView(keyViews, "ㅎ") -> when {
-                        keyViews[1].keyModel?.mainText == "ㅂ" -> "ㅍ"
-                        keyViews[1].keyModel?.mainText == "ㅈ" -> "ㅊ"
-                        keyViews[1].keyModel?.mainText == "ㄷ" -> "ㅌ"
-                        keyViews[1].keyModel?.mainText == "ㄱ" -> "ㅋ"
-                        else                        -> keyViews[0].keyModel?.mainText.orEmpty() + "," + keyViews[1].keyModel?.mainText.orEmpty()
-                    }
-                    isKorKeyView(keyViews, "ㅁ") -> when {
-                        keyViews[1].keyModel?.mainText == "ㅗ" -> "ㅛ"
-                        keyViews[1].keyModel?.mainText == "ㅏ" -> "ㅑ"
-                        keyViews[1].keyModel?.mainText == "ㅜ" -> "ㅠ"
-                        keyViews[1].keyModel?.mainText == "ㅓ" -> "ㅕ"
-                        else                        -> keyViews[0].keyModel?.mainText.orEmpty() + "," + keyViews[1].keyModel?.mainText.orEmpty()
-                    }
-                    isKorShiftView(keyViews, KeyType.SHIFT) -> when {
-                        keyViews[1].keyModel?.mainText == "ㅗ" -> "ㅙ"
-                        keyViews[1].keyModel?.mainText == "ㅏ" -> "ㅒ"
-                        keyViews[1].keyModel?.mainText == "ㅜ" -> "ㅞ"
-                        keyViews[1].keyModel?.mainText == "ㅓ" -> "ㅖ"
-                        else                         -> keyViews[0].keyModel?.mainText.orEmpty() + "," + keyViews[1].keyModel?.mainText.orEmpty()
-                    }
-                    else -> keyViews[0].keyModel?.mainText.orEmpty() + "," + keyViews[1].keyModel?.mainText.orEmpty()
-                }
+                // Korean keyboard removed - return English handling
+                keyViews[0].keyModel?.ltText.orEmpty()
             }
 
             CurrentLanguage.ENG -> {
