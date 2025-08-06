@@ -5,10 +5,70 @@ import android.graphics.Color
 import com.qwerty_mini_wide.app.R
 
 object KeyLetter {
+    // Screen metrics
+    private val displayMetrics = Resources.getSystem().displayMetrics
+    private val screenWidthDp: Float
+        get() = displayMetrics.widthPixels.toFloat() / displayMetrics.density
+    private val screenHeightDp: Float
+        get() = displayMetrics.heightPixels.toFloat() / displayMetrics.density
+    private val scaleFactor: Float
+        get() = minOf(screenWidthDp / 393f, screenHeightDp / 852f) // Base on common phone size
+    
+    // Responsive text sizes (scale with screen size)
+    private val LARGE_ENG_SIZE: Int
+        get() = ((if (screenWidthDp > screenHeightDp) 30 else 20) * scaleFactor).toInt()
+    private val SMALL_ENG_SIZE: Int
+        get() = ((if (screenWidthDp > screenHeightDp) 31.5f else 21f) * scaleFactor).toInt()
+    private val SPECIAL_TEXT_SIZE: Int
+        get() = ((if (screenWidthDp > screenHeightDp) 30 else 20) * scaleFactor).toInt()
+    private val NUMBER_TEXT_SIZE: Float
+        get() = (if (screenWidthDp > screenHeightDp) 36f else 24f) * scaleFactor
+    private val FUNCTION_TEXT_SIZE: Float
+        get() = (if (screenWidthDp > screenHeightDp) 22.5f else 15f) * scaleFactor
+    private val SPACE_TEXT_SIZE: Float
+        get() = (if (screenWidthDp > screenHeightDp) 27f else 18f) * scaleFactor
+    private val DELETE_TEXT_SIZE: Float
+        get() = (if (screenWidthDp > screenHeightDp) 30f else 20f) * scaleFactor
+    private val DOT_SIZE: Float
+        get() = (if (screenWidthDp > screenHeightDp) 90f else 60f) * scaleFactor
+    
+    // 반응형 마진 값 (키 너비의 백분율로 계산)
+    private val MARGIN_XSMALL: Int         // 극소 여백 (키 너비의 8%)
+        get() = (keyWidth * 0.08f).toInt()
+    private val MARGIN_SMALL: Int          // 아주 작은 여백 (키 너비의 13%)
+        get() = (keyWidth * 0.13f).toInt()
+    private val MARGIN_SMALL_RIGHT: Int    // 작은 우측 여백 (키 너비의 20%) - 세로모드 우하단키용
+        get() = (keyWidth * 0.20f).toInt()
+    private val MARGIN_MEDIUM: Int         // 보통 여백 (키 너비의 27%)
+        get() = (keyWidth * 0.27f).toInt()
+    private val MARGIN_LARGE: Int          // 큰 여백 (키 너비의 53%)
+        get() = (keyWidth * 0.53f).toInt()
+    private val MARGIN_XLARGE: Int         // 더 큰 여백 (키 너비의 66%)
+        get() = (keyWidth * 0.66f).toInt()
+    private val MARGIN_XXLARGE: Int        // 아주 큰 여백 (키 너비의 80%)
+        get() = (keyWidth * 0.80f).toInt()
+    private val MARGIN_XXXLARGE: Int       // 최대 여백 (키 너비의 93%)
+        get() = (keyWidth * 0.93f).toInt()
+    
+    // 반응형 점키 상단 마진 (키 높이의 백분율로 계산)
+    private val DOT_MARGIN_TOP: Int
+        get() = -(keyHeight * (if (screenWidthDp > screenHeightDp) 0.45f else 0.40f)).toInt()
+    
+    // Gravity constants
+    private const val GRAVITY_LEFT = 3
+    private const val GRAVITY_RIGHT = 5
+    private const val GRAVITY_CENTER = 17
+    private const val GRAVITY_BOTTOM = 48
+    private const val GRAVITY_BOTTOM_80 = 80
+    private const val GRAVITY_BOTTOM_RIGHT = 85
+    private const val GRAVITY_BOTTOM_LEFT = 83
+    private const val GRAVITY_BOTTOM_CENTER = 50
+    
     // Determine light/dark mode
     var isLightMode: Boolean = false
         set(value) {
-            field = value}
+            field = value
+        }
 
     // Dynamic colors
     val subletterColor: Int
@@ -22,55 +82,112 @@ object KeyLetter {
 
     val shiftSelectBg:Int get() = if (isLightMode) R.drawable.shape_white_key else R.drawable.shape_white_key
 
-    // Screen metrics
-    private val displayMetrics = Resources.getSystem().displayMetrics
-    private val screenWidthDp: Float
-        get() = displayMetrics.widthPixels.toFloat() / displayMetrics.density
-    private val screenHeightDp: Float
-        get() = displayMetrics.heightPixels.toFloat() / displayMetrics.density
-
-    // Key sizes
+    // Key sizes (responsive based on screen width)
     val functionWidth: Float
-        get() = if (screenWidthDp < screenHeightDp) 48.58f * screenWidthDp / 393f else 92.5f * screenWidthDp / 852f
+        get() = screenWidthDp * (if (screenWidthDp < screenHeightDp) 0.124f else 0.109f)
     val keyWidth: Float
-        get() = if (screenWidthDp < screenHeightDp) 37.67f * screenWidthDp / 393f else 75f * screenWidthDp / 852f
+        get() = screenWidthDp * (if (screenWidthDp < screenHeightDp) 0.096f else 0.088f)
     val keyHeight: Int
-        get() = if (screenWidthDp < screenHeightDp) 60 else 46
-    val largeEngSize = 20
-    val smallEngSize = 25
+        get() = (screenHeightDp * (if (screenWidthDp < screenHeightDp) 0.07f else 0.117f)).toInt()
 
+    // Helper function to create a letter key
+    private fun createLetterKey(
+        ltText: String = "",
+        rtText: String = "",
+        rbText: String = "",
+        ltTextSize: Int = SMALL_ENG_SIZE,
+        rtTextSize: Float = DOT_SIZE,
+        rbTextSize: Int = SMALL_ENG_SIZE,
+        ltGravity: Int = GRAVITY_LEFT,
+        ltMarginLeft: Int = MARGIN_XXLARGE,
+        ltMarginTop: Int = -5,
+        rtGravity: Int = GRAVITY_RIGHT,
+        rtMarginRight: Int = MARGIN_MEDIUM,
+        rtMarginTop: Int = -25,
+        rbGravity: Int = GRAVITY_BOTTOM_RIGHT,
+        rbMarginRight: Int = MARGIN_XLARGE,
+        rbMarginBottom: Int = MARGIN_MEDIUM,
+        tag: Int = 0
+    ): KeyModel = KeyModel(
+        keyType = KeyType.LETTER,
+        ltText = ltText,
+        rtText = rtText,
+        rbText = rbText,
+        ltTextSize = ltTextSize,
+        rtTextSize = rtTextSize,
+        rbTextSize = rbTextSize,
+        ltColor = textColor,
+        rtColor = if (rtText.isNotEmpty()) textColor else 0,
+        rbColor = if (rbText.isNotEmpty()) subletterColor else 0,
+        backgroundColor = backgroundColor,
+        height = keyHeight,
+        width = keyWidth,
+        tag = tag,
+        ltTextGravity = ltGravity,
+        ltTextMarginLeft = ltMarginLeft,
+        ltTextMarginTop = ltMarginTop,
+        rtTextGravity = rtGravity,
+        rtTextMarginRight = rtMarginRight,
+        rtTextMarginTop = rtMarginTop,
+        rbTextGravity = rbGravity,
+        rbTextMarginRight = rbMarginRight,
+        rbTextMarginBottom = rbMarginBottom
+    )
+    
+    // Helper function to create a function key
+    private fun createFunctionKey(
+        keyType: KeyType,
+        mainText: String = "",
+        image: Int = 0,
+        selectImage: Int = 0,
+        width: Float = functionWidth,
+        layoutWeight: Float = 9f
+    ): KeyModel = KeyModel(
+        keyType = keyType,
+        mainText = mainText,
+        mainTextSize = if (mainText.isNotEmpty()) FUNCTION_TEXT_SIZE else 0f,
+        mainColor = textColor,
+        image = image,
+        selectImage = selectImage,
+        backgroundColor = if (keyType == KeyType.SPACE) backgroundColor else functionBg,
+        selectBackgroundColor = if (keyType == KeyType.SHIFT) shiftSelectBg else functionBg,
+        height = keyHeight,
+        width = width,
+        layout_weight = layoutWeight
+    )
+    
     // English function row
     fun getEngFunction(): List<KeyModel> = listOf(
-        KeyModel(keyType = KeyType.SHIFT, image = R.drawable.ic_shift, selectImage = R.drawable.ic_shift_on, backgroundColor = functionBg, selectBackgroundColor = shiftSelectBg, height = keyHeight, width = functionWidth, layout_weight = 9f),
-        KeyModel(keyType = KeyType.NUMBER, mainText = "123",mainTextSize = 15f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth, layout_weight = 9f),
-        KeyModel(keyType = KeyType.SPACE, mainText = "Space",mainTextSize = 18f, mainColor = textColor, backgroundColor = backgroundColor),
-        KeyModel(keyType = KeyType.RETURN, image = R.drawable.ic_enter, mainTextSize = 15f, selectImage = R.drawable.ic_enter, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6, layout_weight = 8f),
-        KeyModel(keyType = KeyType.DELETE, mainText = "⌫", mainTextSize = 20f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth, layout_weight = 9f),
-        KeyModel(keyType = KeyType.NONE, mainText = "", mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6, layout_weight = 9f)
+        createFunctionKey(KeyType.SHIFT, image = R.drawable.ic_shift, selectImage = R.drawable.ic_shift_on),
+        createFunctionKey(KeyType.NUMBER, mainText = "123"),
+        KeyModel(keyType = KeyType.SPACE, mainText = "Space", mainTextSize = SPACE_TEXT_SIZE, mainColor = textColor, backgroundColor = backgroundColor),
+        createFunctionKey(KeyType.RETURN, image = R.drawable.ic_enter, selectImage = R.drawable.ic_enter, width = functionWidth + keyWidth + 6, layoutWeight = 8f),
+        KeyModel(keyType = KeyType.DELETE, mainText = "⌫", mainTextSize = DELETE_TEXT_SIZE, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth, layout_weight = 9f),
+        createFunctionKey(KeyType.NONE, width = functionWidth + keyWidth + 6)
     )
 
 
     // 5. English shift letters
     fun getEngLetter(): List<List<KeyModel>> = listOf(
         listOf(
-            KeyModel(keyType = KeyType.LETTER, ltText = "w", rtText = "˙", rbText = "q", ltTextSize = smallEngSize, rtTextSize = 60f, rbTextSize = smallEngSize, ltColor = textColor, rtColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 0, ltTextGravity = 3, ltTextMarginLeft = 10, ltTextMarginTop = -10, rbTextGravity = 85, rbTextMarginRight = 20, rbTextMarginBottom = 10, rtTextGravity = 5, rtTextMarginRight = 10, rtTextMarginTop = -25),
-            KeyModel(keyType = KeyType.LETTER, ltText = "e", ltTextSize = smallEngSize, rbTextSize = smallEngSize,ltColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 1, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = -5),
-        KeyModel(keyType = KeyType.LETTER, ltText = "r", rbText = "f", ltTextSize = smallEngSize, rbTextSize = smallEngSize,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 2, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = -5, rbTextGravity = 85, rbTextMarginRight = 30, rbTextMarginBottom = 10),
-    KeyModel(keyType = KeyType.LETTER, ltText = "t", rbText = "g",ltTextSize = smallEngSize, rbTextSize = smallEngSize, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 3, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 0, rbTextGravity = 85, rbTextMarginRight = 20, rbTextMarginBottom = 15),
-        KeyModel(keyType = KeyType.LETTER, ltText = "y", rbText = "p",ltTextSize = smallEngSize, rbTextSize = smallEngSize, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 4, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = -5, rbTextGravity = 85, rbTextMarginRight = 20, rbTextMarginBottom = 10),
-    KeyModel(keyType = KeyType.LETTER, ltText = "u", rbText = "'", ltTextSize = smallEngSize, rbTextSize = smallEngSize,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 5, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = -5, rbTextGravity = 85, rbTextMarginRight = 30, rbTextMarginBottom = -5),
-    KeyModel(keyType = KeyType.LETTER, ltText = "i", ltTextSize = smallEngSize, rbTextSize = smallEngSize,ltColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 6, ltTextGravity = 3, ltTextMarginLeft = 20, ltTextMarginTop = 0),
-    KeyModel(keyType = KeyType.LETTER, ltText = "o", rtText = "˙",ltTextSize = smallEngSize, rtTextSize = 60f, rbTextSize = smallEngSize, ltColor = textColor, rtColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 7, ltTextGravity = 3, ltTextMarginLeft = 20, ltTextMarginTop = -5, rtTextGravity = 5, rtTextMarginRight = 10, rtTextMarginTop = -25)
+            KeyModel(keyType = KeyType.LETTER, ltText = "w", rtText = "˙", rbText = "q", ltTextSize = SMALL_ENG_SIZE, rtTextSize = DOT_SIZE, rbTextSize = SMALL_ENG_SIZE, ltColor = textColor, rtColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 0, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_XSMALL, ltTextMarginTop = 0, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = MARGIN_SMALL_RIGHT, rbTextMarginBottom = 10, rtTextGravity = GRAVITY_RIGHT, rtTextMarginRight = 10, rtTextMarginTop = DOT_MARGIN_TOP),
+            KeyModel(keyType = KeyType.LETTER, ltText = "e", ltTextSize = SMALL_ENG_SIZE, rbTextSize = SMALL_ENG_SIZE,ltColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 1, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0),
+        KeyModel(keyType = KeyType.LETTER, ltText = "r", rbText = "f", ltTextSize = SMALL_ENG_SIZE, rbTextSize = SMALL_ENG_SIZE,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 2, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = MARGIN_SMALL_RIGHT, rbTextMarginBottom = 10),
+    KeyModel(keyType = KeyType.LETTER, ltText = "t", rbText = "g",ltTextSize = SMALL_ENG_SIZE, rbTextSize = SMALL_ENG_SIZE, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 3, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = MARGIN_SMALL_RIGHT, rbTextMarginBottom = 10),
+        KeyModel(keyType = KeyType.LETTER, ltText = "y", rbText = "p",ltTextSize = SMALL_ENG_SIZE, rbTextSize = SMALL_ENG_SIZE, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 4, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = MARGIN_SMALL_RIGHT, rbTextMarginBottom = 10),
+    KeyModel(keyType = KeyType.LETTER, ltText = "u", rbText = "'", ltTextSize = SMALL_ENG_SIZE, rbTextSize = SMALL_ENG_SIZE,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 5, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = MARGIN_MEDIUM, rbTextMarginBottom = 5),
+    KeyModel(keyType = KeyType.LETTER, ltText = "i", ltTextSize = SMALL_ENG_SIZE, rbTextSize = SMALL_ENG_SIZE,ltColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 6, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_MEDIUM, ltTextMarginTop = 0),
+    KeyModel(keyType = KeyType.LETTER, ltText = "o", rtText = "˙",ltTextSize = SMALL_ENG_SIZE, rtTextSize = DOT_SIZE, rbTextSize = SMALL_ENG_SIZE, ltColor = textColor, rtColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 7, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0, rtTextGravity = GRAVITY_RIGHT, rtTextMarginRight = 10, rtTextMarginTop = DOT_MARGIN_TOP)
     ),
     listOf(
-    KeyModel(keyType = KeyType.LETTER, ltText = "a", rtText = "˙", ltTextSize = smallEngSize, rtTextSize = 60f, ltColor = textColor, rtColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 9, ltTextGravity = 3, ltTextMarginLeft = 35, ltTextMarginTop = -5, rtTextGravity = 5, rtTextMarginRight = 10, rtTextMarginTop = -25),
-    KeyModel(keyType = KeyType.LETTER, ltText = "s", rbText = "z",ltTextSize = smallEngSize, rbTextSize = smallEngSize, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 10, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = -5, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 5),
-    KeyModel(keyType = KeyType.LETTER, ltText = "d", rbText = "x",ltTextSize = smallEngSize, rbTextSize = smallEngSize, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 11, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = -5, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 5),
-        KeyModel(keyType = KeyType.LETTER, ltText = "c", rbText = "v", ltTextSize = smallEngSize, rbTextSize = smallEngSize,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 12, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = -5, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 5),
-    KeyModel(keyType = KeyType.LETTER, ltText = "h", rbText = "b", ltTextSize = smallEngSize, rbTextSize = smallEngSize,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 13, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = -5, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 0),
-    KeyModel(keyType = KeyType.LETTER, ltText = "n", rbText = "j",ltTextSize = smallEngSize, rbTextSize = smallEngSize, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 14, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = -5, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 10),
-    KeyModel(keyType = KeyType.LETTER, ltText = "m", rbText = "k", ltTextSize = smallEngSize, rbTextSize = smallEngSize,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 15, ltTextGravity = 3, ltTextMarginLeft = 20, ltTextMarginTop = -5, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 5),
-        KeyModel(keyType = KeyType.LETTER, ltText = "l", rtText = "˙", ltTextSize = smallEngSize, rtTextSize = 60f, ltColor = textColor, rtColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 16, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = -10, rtTextGravity = 5, rtTextMarginRight = 10, rtTextMarginTop = -25)
+    KeyModel(keyType = KeyType.LETTER, ltText = "a", rtText = "˙", ltTextSize = SMALL_ENG_SIZE, rtTextSize = DOT_SIZE, ltColor = textColor, rtColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 9, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0, rtTextGravity = GRAVITY_RIGHT, rtTextMarginRight = 10, rtTextMarginTop = DOT_MARGIN_TOP),
+    KeyModel(keyType = KeyType.LETTER, ltText = "s", rbText = "z",ltTextSize = SMALL_ENG_SIZE, rbTextSize = SMALL_ENG_SIZE, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 10, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = MARGIN_SMALL_RIGHT, rbTextMarginBottom = 10),
+    KeyModel(keyType = KeyType.LETTER, ltText = "d", rbText = "x",ltTextSize = SMALL_ENG_SIZE, rbTextSize = SMALL_ENG_SIZE, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 11, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = MARGIN_SMALL_RIGHT, rbTextMarginBottom = 10),
+        KeyModel(keyType = KeyType.LETTER, ltText = "c", rbText = "v", ltTextSize = SMALL_ENG_SIZE, rbTextSize = SMALL_ENG_SIZE,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 12, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = MARGIN_SMALL_RIGHT, rbTextMarginBottom = 10),
+    KeyModel(keyType = KeyType.LETTER, ltText = "h", rbText = "b", ltTextSize = SMALL_ENG_SIZE, rbTextSize = SMALL_ENG_SIZE,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 13, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = MARGIN_SMALL_RIGHT, rbTextMarginBottom = 10),
+    KeyModel(keyType = KeyType.LETTER, ltText = "n", rbText = "j",ltTextSize = SMALL_ENG_SIZE, rbTextSize = SMALL_ENG_SIZE, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 14, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = MARGIN_MEDIUM, rbTextMarginBottom = 10),
+    KeyModel(keyType = KeyType.LETTER, ltText = "m", rbText = "k", ltTextSize = SMALL_ENG_SIZE, rbTextSize = SMALL_ENG_SIZE,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 15, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_SMALL, ltTextMarginTop = 0, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = MARGIN_SMALL_RIGHT, rbTextMarginBottom = 10),
+        KeyModel(keyType = KeyType.LETTER, ltText = "l", rtText = "˙", ltTextSize = SMALL_ENG_SIZE, rtTextSize = DOT_SIZE, ltColor = textColor, rtColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 16, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = MARGIN_MEDIUM, ltTextMarginTop = 0, rtTextGravity = GRAVITY_RIGHT, rtTextMarginRight = 10, rtTextMarginTop = DOT_MARGIN_TOP)
     )
     )
 
@@ -78,52 +195,52 @@ object KeyLetter {
     // 6. English main layout
     fun getEngShiftLetter(): List<List<KeyModel>> = listOf(
         listOf(
-            KeyModel(KeyType.LETTER, ltText = "W", rtText = "˙", rbText = "Q", rtColor = textColor, ltColor = textColor, ltTextSize = largeEngSize, rtTextSize = 60f, rbTextSize = largeEngSize, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 0, ltTextGravity = 3, ltTextMarginLeft = 15, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 20, rbTextMarginBottom = 10, rtTextMarginRight = 10, rtTextMarginTop = -25),
-            KeyModel(KeyType.LETTER, ltText = "E", ltColor = textColor, ltTextSize = largeEngSize, rbTextSize = largeEngSize,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 1, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10),
-            KeyModel(KeyType.LETTER, ltText = "R", rbText = "F", ltColor = textColor, ltTextSize = largeEngSize, rbTextSize = largeEngSize,rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 2, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 30, rbTextMarginBottom = 10),
-            KeyModel(KeyType.LETTER, ltText = "T", rbText = "G", ltColor = textColor, ltTextSize = largeEngSize,rbTextSize = largeEngSize, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 3, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 30, rbTextMarginBottom = 10),
-            KeyModel(KeyType.LETTER, ltText = "Y", rbText = "P", ltColor = textColor, ltTextSize =  largeEngSize, rbTextSize = largeEngSize,rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 4, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 10),
-            KeyModel(KeyType.LETTER, ltText = "U", rbText = "\"", ltColor = textColor, rbColor = subletterColor, ltTextSize = largeEngSize, rbTextSize = largeEngSize,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 5, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 5),
-            KeyModel(KeyType.LETTER, ltText = "I", ltColor = textColor, ltTextSize = largeEngSize, rbTextSize = largeEngSize,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 6, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10),
-            KeyModel(KeyType.LETTER, ltText = "O", rtText = "˙", ltColor = textColor, rtColor = textColor, ltTextSize = largeEngSize, rtTextSize = 60f, rbTextSize = largeEngSize,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 7, ltTextGravity = 3, ltTextMarginLeft = 25, ltTextMarginTop = 10, rtTextMarginRight = 10, rtTextMarginTop = -25)
+            KeyModel(KeyType.LETTER, ltText = "W", rtText = "˙", rbText = "Q", rtColor = textColor, ltColor = textColor, ltTextSize = LARGE_ENG_SIZE, rtTextSize = DOT_SIZE, rbTextSize = LARGE_ENG_SIZE, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 0, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 15, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 20, rbTextMarginBottom = 10, rtTextMarginRight = 10, rtTextMarginTop = DOT_MARGIN_TOP),
+            KeyModel(KeyType.LETTER, ltText = "E", ltColor = textColor, ltTextSize = LARGE_ENG_SIZE, rbTextSize = LARGE_ENG_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 1, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5),
+            KeyModel(KeyType.LETTER, ltText = "R", rbText = "F", ltColor = textColor, ltTextSize = LARGE_ENG_SIZE, rbTextSize = LARGE_ENG_SIZE,rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 2, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "T", rbText = "G", ltColor = textColor, ltTextSize = LARGE_ENG_SIZE,rbTextSize = LARGE_ENG_SIZE, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 3, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "Y", rbText = "P", ltColor = textColor, ltTextSize =  LARGE_ENG_SIZE, rbTextSize = LARGE_ENG_SIZE,rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 4, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "U", rbText = "'", ltColor = textColor, rbColor = subletterColor, ltTextSize = LARGE_ENG_SIZE, rbTextSize = LARGE_ENG_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 5, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "I", ltColor = textColor, ltTextSize = LARGE_ENG_SIZE, rbTextSize = LARGE_ENG_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 6, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 30, ltTextMarginTop = 5),
+            KeyModel(KeyType.LETTER, ltText = "O", rtText = "˙", ltColor = textColor, rtColor = textColor, ltTextSize = LARGE_ENG_SIZE, rtTextSize = DOT_SIZE, rbTextSize = LARGE_ENG_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 7, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 20, ltTextMarginTop = 5, rtTextMarginRight = 10, rtTextMarginTop = DOT_MARGIN_TOP)
         ),
         listOf(
-            KeyModel(KeyType.LETTER, ltText = "A", rtText = "˙", ltTextSize = largeEngSize, rtTextSize = 60f, ltColor = textColor, rtColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 9, ltTextGravity = 3, ltTextMarginLeft = 20, ltTextMarginTop = 10, rtTextMarginRight = 10, rtTextMarginTop = -25),
-            KeyModel(KeyType.LETTER, ltText = "S", rbText = "Z", ltTextSize = largeEngSize,rbTextSize = largeEngSize,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 10, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 10),
-            KeyModel(KeyType.LETTER, ltText = "D", rbText = "X", ltTextSize = largeEngSize,rbTextSize = largeEngSize,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 11, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 10),
-            KeyModel(KeyType.LETTER, ltText = "C", rbText = "V", ltTextSize = largeEngSize,rbTextSize = largeEngSize,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 12, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 5, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 10),
-            KeyModel(KeyType.LETTER, ltText = "H", rbText = "B", ltTextSize = largeEngSize,rbTextSize = largeEngSize,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 13, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 10),
-            KeyModel(KeyType.LETTER, ltText = "N", rbText = "J", ltTextSize = largeEngSize,rbTextSize = largeEngSize,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 14, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 25, rbTextMarginBottom = 10),
-            KeyModel(KeyType.LETTER, ltText = "M", rbText = "K", ltTextSize = largeEngSize,rbTextSize = largeEngSize,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 15, ltTextGravity = 3, ltTextMarginLeft = 25, ltTextMarginTop = 10, rbTextGravity = 85, rbTextMarginRight = 30, rbTextMarginBottom = 10),
-            KeyModel(KeyType.LETTER, ltText = "L", rtText = "˙", ltTextSize = largeEngSize, rtTextSize = 60f, ltColor = textColor, rtColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 16, ltTextGravity = 3, ltTextMarginLeft = 30, ltTextMarginTop = 10, rtTextMarginRight = 10, rtTextMarginTop = -25)
+            KeyModel(KeyType.LETTER, ltText = "A", rtText = "˙", ltTextSize = LARGE_ENG_SIZE, rtTextSize = DOT_SIZE, ltColor = textColor, rtColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 9, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 20, ltTextMarginTop = 5, rtTextMarginRight = 10, rtTextMarginTop = DOT_MARGIN_TOP),
+            KeyModel(KeyType.LETTER, ltText = "S", rbText = "Z", ltTextSize = LARGE_ENG_SIZE,rbTextSize = LARGE_ENG_SIZE,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 10, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "D", rbText = "X", ltTextSize = LARGE_ENG_SIZE,rbTextSize = LARGE_ENG_SIZE,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 11, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "C", rbText = "V", ltTextSize = LARGE_ENG_SIZE,rbTextSize = LARGE_ENG_SIZE,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 12, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "H", rbText = "B", ltTextSize = LARGE_ENG_SIZE,rbTextSize = LARGE_ENG_SIZE,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 13, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "N", rbText = "J", ltTextSize = LARGE_ENG_SIZE,rbTextSize = LARGE_ENG_SIZE,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 14, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 30, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "M", rbText = "K", ltTextSize = LARGE_ENG_SIZE,rbTextSize = LARGE_ENG_SIZE,ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 15, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 20, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "L", rtText = "˙", ltTextSize = LARGE_ENG_SIZE, rtTextSize = DOT_SIZE, ltColor = textColor, rtColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, tag = 16, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 30, ltTextMarginTop = 5, rtTextMarginRight = 10, rtTextMarginTop = DOT_MARGIN_TOP)
             )
         )
 
-    fun getNumberLetter(language: CurrentLanguage): List<List<KeyModel>> = listOf(
+    fun getNumberLetter(): List<List<KeyModel>> = listOf(
         listOf(
-            KeyModel(keyType = KeyType.LETTER, mainText = "1", mainColor = textColor, mainTextSize = 24f,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "2", mainColor = textColor, mainTextSize = 24f,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "3", mainColor = textColor, mainTextSize = 24f,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "4", mainColor = textColor, mainTextSize = 24f,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "5", mainColor = textColor, mainTextSize = 24f,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "6", mainColor = textColor, mainTextSize = 24f,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "7", mainColor = textColor, mainTextSize = 24f,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "8", mainColor = textColor, mainTextSize = 24f,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth)
+            KeyModel(keyType = KeyType.LETTER, mainText = "1", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
+            KeyModel(keyType = KeyType.LETTER, mainText = "2", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
+            KeyModel(keyType = KeyType.LETTER, mainText = "3", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
+            KeyModel(keyType = KeyType.LETTER, mainText = "4", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
+            KeyModel(keyType = KeyType.LETTER, mainText = "5", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
+            KeyModel(keyType = KeyType.LETTER, mainText = "6", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
+            KeyModel(keyType = KeyType.LETTER, mainText = "7", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
+            KeyModel(keyType = KeyType.LETTER, mainText = "8", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth)
         ),
         listOf(
-            KeyModel(keyType = KeyType.LETTER, mainText = "0", mainColor = textColor, mainTextSize = 24f, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = ".", mainColor = textColor, mainTextSize = 24f,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = ",", mainColor = textColor, mainTextSize = 24f,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "?", mainColor = textColor, mainTextSize = 24f,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "!", mainColor = textColor, mainTextSize = 24f,ltColor = textColor, rbColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, ltText = "'", rbText = "\"", ltColor = textColor, rbColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, ltText = "-", rbText = "_", ltColor = textColor, rbColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(keyType = KeyType.LETTER, mainText = "9", mainColor = textColor, mainTextSize = 24f,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth)
+            KeyModel(keyType = KeyType.LETTER, mainText = "0", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
+            KeyModel(keyType = KeyType.LETTER, mainText = ".", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
+            KeyModel(keyType = KeyType.LETTER, mainText = ",", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
+            KeyModel(keyType = KeyType.LETTER, mainText = "?", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
+            KeyModel(keyType = KeyType.LETTER, mainText = "!", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,ltColor = textColor, rbColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
+            KeyModel(keyType = KeyType.LETTER, ltText = "'", rbText = "\"", ltTextSize = LARGE_ENG_SIZE, rbTextSize = LARGE_ENG_SIZE, ltColor = textColor, rbColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(keyType = KeyType.LETTER, ltText = "-", rbText = "_", ltTextSize = LARGE_ENG_SIZE, rbTextSize = LARGE_ENG_SIZE, ltColor = textColor, rbColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(keyType = KeyType.LETTER, mainText = "9", mainColor = textColor, mainTextSize = NUMBER_TEXT_SIZE,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth)
         )
 
 
     )
-    fun getNumberFuntion( language: CurrentLanguage): List<KeyModel> = listOf(
+    fun getNumberFuntion(): List<KeyModel> = listOf(
         KeyModel(
             keyType = KeyType.SPECIAL, mainText = "#+=",mainTextSize = 15f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg,
             height = keyHeight, width = keyWidth),
@@ -134,30 +251,30 @@ object KeyLetter {
         KeyModel(keyType = KeyType.NONE, mainText = "", mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6)
     )
 
-    fun getSpecialLetter(language: CurrentLanguage): List<List<KeyModel>> = listOf(
+    fun getSpecialLetter(): List<List<KeyModel>> = listOf(
         listOf(
-            KeyModel(KeyType.LETTER, ltText = "@", ltColor = textColor, ltTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = "#", ltColor = textColor, ltTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = "$", rbText = "￦", ltColor = textColor, ltTextSize = 20, rbTextSize = 20, rbColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = "%", ltColor = textColor, ltTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = "^", ltColor = textColor, ltTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = "&", ltColor = textColor, ltTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = "*", ltColor = textColor, ltTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = "+", rbText = "=", ltColor = textColor, ltTextSize = 20, rbColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth)
+            KeyModel(KeyType.LETTER, ltText = "@", rbText = "#", ltColor = textColor, ltTextSize = SPECIAL_TEXT_SIZE, rbTextSize = SPECIAL_TEXT_SIZE, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 15, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 20, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "$", ltColor = textColor, ltTextSize = SPECIAL_TEXT_SIZE, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5),
+            KeyModel(KeyType.LETTER, ltText = "%", rbText = "¥", ltColor = textColor, ltTextSize = SPECIAL_TEXT_SIZE, rbTextSize = SPECIAL_TEXT_SIZE, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "&", rbText = "•", ltColor = textColor, ltTextSize = SPECIAL_TEXT_SIZE, rbTextSize = SPECIAL_TEXT_SIZE, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "+", rbText = "=", ltColor = textColor, ltTextSize = SPECIAL_TEXT_SIZE, rbTextSize = SPECIAL_TEXT_SIZE, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "~", rbText = "£", ltColor = textColor, rbColor = subletterColor, ltTextSize = SPECIAL_TEXT_SIZE, rbTextSize = SPECIAL_TEXT_SIZE, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "/", ltColor = textColor, ltTextSize = SPECIAL_TEXT_SIZE, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 30, ltTextMarginTop = 5),
+            KeyModel(KeyType.LETTER, ltText = ":", ltColor = textColor, ltTextSize = SPECIAL_TEXT_SIZE, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 20, ltTextMarginTop = 5)
         ),
         listOf(
-            KeyModel(KeyType.LETTER, ltText = "~", ltColor = textColor,ltTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = "/", ltColor = textColor,ltTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = ":", rbText = ";", ltColor = textColor, rbColor = textColor,ltTextSize = 20,rbTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = "(", rbText = "<", ltColor = textColor, rbColor = textColor, ltTextSize = 20,rbTextSize = 20,backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = ")", rbText = ">", ltColor = textColor, rbColor = textColor,ltTextSize = 20,rbTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = "[", rbText = "{", ltColor = textColor, rbColor = textColor,ltTextSize = 20,rbTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = "]", rbText = "}", ltColor = textColor, rbColor = textColor,ltTextSize = 20,rbTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth),
-            KeyModel(KeyType.LETTER, ltText = "|", rbText = "\\", ltColor = textColor, rbColor = textColor,ltTextSize = 20,rbTextSize = 20, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth)
+            KeyModel(KeyType.LETTER, ltText = ";", ltTextSize = SPECIAL_TEXT_SIZE, ltColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 20, ltTextMarginTop = 5),
+            KeyModel(KeyType.LETTER, ltText = "(", rbText = "<", ltTextSize = SPECIAL_TEXT_SIZE, rbTextSize = SPECIAL_TEXT_SIZE, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = ")", rbText = ">", ltTextSize = SPECIAL_TEXT_SIZE, rbTextSize = SPECIAL_TEXT_SIZE, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "[", rbText = "{", ltTextSize = SPECIAL_TEXT_SIZE, rbTextSize = SPECIAL_TEXT_SIZE, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "]", rbText = "}", ltTextSize = SPECIAL_TEXT_SIZE, rbTextSize = SPECIAL_TEXT_SIZE, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, ltText = "|", rbText = "\\", ltTextSize = SPECIAL_TEXT_SIZE, rbTextSize = SPECIAL_TEXT_SIZE, ltColor = textColor, rbColor = subletterColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 25, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 30, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, mainText = "", ltColor = textColor, ltTextSize = SPECIAL_TEXT_SIZE, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 20, ltTextMarginTop = 5, rbTextGravity = GRAVITY_BOTTOM_RIGHT, rbTextMarginRight = 25, rbTextMarginBottom = 10),
+            KeyModel(KeyType.LETTER, mainText = "", ltTextSize = SPECIAL_TEXT_SIZE, ltColor = textColor, backgroundColor = backgroundColor, height = keyHeight, width = keyWidth, ltTextGravity = GRAVITY_LEFT, ltTextMarginLeft = 30, ltTextMarginTop = 5)
         )
     )
 
-    fun getSpectialFuntion( language: CurrentLanguage): List<KeyModel> = listOf(
+    fun getSpectialFuntion(): List<KeyModel> = listOf(
         KeyModel(
             keyType = KeyType.NUMBER, mainText = "123", mainTextSize = 15f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg,
             height = keyHeight, width = keyWidth),

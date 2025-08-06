@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.LinearLayout
+import android.widget.Space
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.qwerty_mini_wide.app.R
@@ -106,6 +107,8 @@ class CustomKeyboardView @JvmOverloads constructor(
         val view = inflate(context, R.layout.custom_keyboard_view, this)
         binding = CustomKeyboardViewBinding.bind(view)
         setupSuggestionBar()
+        setupKeyboardPadding()
+        setupKeySpacing()
         initViews()
         binding.hanjaRecycler.layoutManager = LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false)
         binding.hanjaRecycler.adapter = Hanja_Adapter(this)
@@ -210,15 +213,157 @@ class CustomKeyboardView @JvmOverloads constructor(
     }
 
     private fun setupSuggestionBar() {
-        findViewById<ImageButton>(R.id.btnArrowDown).setOnClickListener {
+        val suggestionBar = findViewById<LinearLayout>(R.id.suggestion_bar)
+        val displayMetrics = resources.displayMetrics
+        val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
+        val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
+        
+        // 화면 방향에 따라 높이 비율 설정 (세로: 5%, 가로: 10%)
+        val heightRatio = if (screenWidthDp < screenHeightDp) 0.05f else 0.10f
+        val suggestionBarHeight = (displayMetrics.heightPixels * heightRatio).toInt()
+        
+        // suggestion bar의 높이 설정
+        val layoutParams = suggestionBar.layoutParams
+        layoutParams.height = suggestionBarHeight
+        suggestionBar.layoutParams = layoutParams
+        
+        // 화살표 버튼 크기 조정
+        val arrowSize = (suggestionBarHeight * 0.5f).toInt()
+        val btnArrowDown = findViewById<ImageButton>(R.id.btnArrowDown)
+        val btnArrowUp = findViewById<ImageButton>(R.id.btnArrowUp)
+        
+        btnArrowDown?.let { btn ->
+            val params = btn.layoutParams
+            params.width = arrowSize
+            params.height = arrowSize
+            btn.layoutParams = params
+        }
+        btnArrowUp?.let { btn ->
+            val params = btn.layoutParams
+            params.width = arrowSize
+            params.height = arrowSize
+            btn.layoutParams = params
+        }
+        
+        // 텍스트 크기 조정
+        val tvDone = findViewById<TextView>(R.id.tvDone)
+        tvDone?.textSize = suggestionBarHeight * 0.35f / displayMetrics.density
+        
+        // 패딩 조정
+        val padding = (suggestionBarHeight * 0.15f).toInt()
+        suggestionBar.setPadding(padding * 2, padding, padding * 2, padding)
+        
+        // 클릭 리스너 설정
+        btnArrowDown.setOnClickListener {
             listener?.onKey(KeyType.LETTER, "ㅏ")
         }
-        findViewById<ImageButton>(R.id.btnArrowUp).setOnClickListener {
+        btnArrowUp.setOnClickListener {
            // listener?.onKey(CODE_NEXT, null)
         }
-        findViewById<TextView>(R.id.tvDone).setOnClickListener {
+        tvDone.setOnClickListener {
            // listener?.onKey(CODE_DONE, null)
         }
+    }
+    
+    private fun setupKeyboardPadding() {
+        // 키보드 영역을 감싸는 LinearLayout 찾기 (suggestion bar 다음의 LinearLayout)
+        val keyboardContainer = (getChildAt(0) as? ViewGroup)?.getChildAt(1) as? LinearLayout
+        if (keyboardContainer != null) {
+            val displayMetrics = resources.displayMetrics
+            val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
+            val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
+            
+            // 가로 모드일 때만 좌우 패딩 10% 적용
+            val horizontalPadding = if (screenWidthDp > screenHeightDp) {
+                (displayMetrics.widthPixels * 0.10f).toInt()
+            } else {
+                0
+            }
+            
+            keyboardContainer.setPadding(horizontalPadding, 0, horizontalPadding, 0)
+        }
+        
+        // 스페이스 키 아래 여백 조정
+        val spaceBelow = findViewById<View>(R.id.space_below_keyboard)
+        if (spaceBelow != null) {
+            val displayMetrics = resources.displayMetrics
+            val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
+            val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
+            
+            val layoutParams = spaceBelow.layoutParams
+            // 가로 모드일 때 10dp로 절반 감소
+            layoutParams.height = if (screenWidthDp > screenHeightDp) {
+                (10 * displayMetrics.density).toInt()
+            } else {
+                (20 * displayMetrics.density).toInt()
+            }
+            spaceBelow.layoutParams = layoutParams
+        }
+    }
+    
+    private fun setupKeySpacing() {
+        // 반응형 키 간격 설정
+        val displayMetrics = resources.displayMetrics
+        val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
+        val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
+        val screenWidthPx = displayMetrics.widthPixels.toFloat()
+        
+        // 세로모드와 가로모드 구분하여 간격 설정
+        val horizontalSpacing: Int
+        val verticalSpacing: Int
+        
+        if (screenWidthDp < screenHeightDp) {
+            // 세로모드
+            horizontalSpacing = (screenWidthPx * 0.005f).toInt() // 화면 너비의 0.5%
+            verticalSpacing = (screenWidthPx * 0.004f).toInt() // 화면 너비의 0.4%
+        } else {
+            // 가로모드
+            horizontalSpacing = (screenWidthPx * 0.003f).toInt() // 화면 너비의 0.3%
+            verticalSpacing = (screenHeightDp * 0.007f * displayMetrics.density).toInt() // 화면 높이의 0.7% 유지
+        }
+        
+        val edgeSpacing = (screenWidthPx * 0.002f).toInt() // 화면 너비의 0.2%
+        
+        // 모든 Space 뷰의 크기 업데이트
+        updateSpaceViewsInLayout(binding.firstLinear, horizontalSpacing, edgeSpacing)
+        updateSpaceViewsInLayout(binding.secondLinear, horizontalSpacing, edgeSpacing)
+        updateSpaceViewsInLayout(binding.funtionLinear, horizontalSpacing, edgeSpacing)
+        
+        // 행 간 간격 업데이트
+        updateVerticalSpaces(verticalSpacing)
+    }
+    
+    private fun updateSpaceViewsInLayout(layout: LinearLayout, spacing: Int, edgeSpacing: Int) {
+        for (i in 0 until layout.childCount) {
+            val child = layout.getChildAt(i)
+            if (child is Space) {
+                val layoutParams = child.layoutParams
+                // 첫 번째나 마지막 Space는 가장자리 간격
+                layoutParams.width = if (i == 0 || i == layout.childCount - 1) edgeSpacing else spacing
+                child.layoutParams = layoutParams
+            }
+        }
+    }
+    
+    private fun updateVerticalSpaces(spacing: Int) {
+        // custom_keyboard_view 레이아웃의 세로 Space 뷰들 찾아서 업데이트
+        val keyboardContainer = (getChildAt(0) as? ViewGroup)?.getChildAt(1) as? LinearLayout
+        if (keyboardContainer != null) {
+            for (i in 0 until keyboardContainer.childCount) {
+                val child = keyboardContainer.getChildAt(i)
+                if (child is Space && child.id != R.id.space_below_keyboard) {
+                    val layoutParams = child.layoutParams
+                    layoutParams.height = spacing
+                    child.layoutParams = layoutParams
+                }
+            }
+        }
+    }
+    
+    fun updateConfiguration() {
+        setupSuggestionBar()
+        setupKeyboardPadding()
+        setupKeySpacing()
     }
 
     fun setFuntion(fountions:List<KeyModel>){
@@ -400,8 +545,8 @@ class CustomKeyboardView @JvmOverloads constructor(
                         automata.deleteBuffer()
                         currentState = KeyType.NUMBER
                         //binding.spaceEnter.visibility = GONE
-                        setLetter(KeyLetter.getNumberLetter(currentLanguage))
-                        setFuntion(KeyLetter.getNumberFuntion(currentLanguage))
+                        setLetter(KeyLetter.getNumberLetter())
+                        setFuntion(KeyLetter.getNumberFuntion())
                         listener?.onKey(KeyType.NUMBER,"")
                     }
 
@@ -409,8 +554,8 @@ class CustomKeyboardView @JvmOverloads constructor(
                         automata.deleteBuffer()
                         currentState = KeyType.SPECIAL
                        // binding.spaceEnter.visibility = GONE
-                        setLetter(KeyLetter.getSpecialLetter(currentLanguage))
-                        setFuntion(KeyLetter.getSpectialFuntion(currentLanguage))
+                        setLetter(KeyLetter.getSpecialLetter())
+                        setFuntion(KeyLetter.getSpectialFuntion())
                     }
 
                     keyModel.keyType == KeyType.SPACE ->{
@@ -571,7 +716,7 @@ class CustomKeyboardView @JvmOverloads constructor(
             // Cancel any pending shift reset
             shiftResetHandler.removeCallbacks(shiftResetRunnable)
             // Schedule new shift reset after 300ms (multi-tap timeout)
-            shiftResetHandler.postDelayed(shiftResetRunnable, 350)
+            shiftResetHandler.postDelayed(shiftResetRunnable, 50)
         }
     }
 

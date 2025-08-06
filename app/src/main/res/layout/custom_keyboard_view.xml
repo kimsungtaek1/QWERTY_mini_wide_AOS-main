@@ -7,10 +7,18 @@
     android:orientation="vertical"
     android:background="#D3D3D3">
 
-    <!-- 1) 제안 바 -->
+    <!-- 1) 제안 바 - 전체 너비 -->
     <include
         layout="@layout/suggestion_bar"
         />
+
+    <!-- 키보드 영역을 감싸는 LinearLayout - 여기에 패딩 적용 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/keyboard_horizontal_padding"
+        android:paddingEnd="@dimen/keyboard_horizontal_padding">
 
     <LinearLayout
         android:id="@+id/hanja_linear"
@@ -316,6 +324,11 @@
     </LinearLayout>
 
     <Space
+        android:id="@+id/space_below_keyboard"
         android:layout_width="match_parent"
         android:layout_height="20dp" />
+        
+    </LinearLayout>
+    <!-- 키보드 영역 끝 -->
+    
 </LinearLayout>

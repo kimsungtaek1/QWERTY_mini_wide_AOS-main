@@ -36,21 +36,28 @@
     <EditText
         android:id="@+id/inputField"
         android:layout_width="0dp"
-        android:layout_height="120dp"
+        android:layout_height="80dp"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:background="@android:drawable/editbox_background"
         android:gravity="top|start"
         android:hint="여기에 입력된 텍스트가 표시됩니다"
         android:inputType="textMultiLine"
-        android:padding="16dp"
+        android:padding="12dp"
         android:textColor="@color/textPrimary"
         android:textColorHint="@color/key_text_secondary"
-        android:textSize="16sp"
+        android:textSize="14sp"
         app:layout_constraintBottom_toTopOf="@+id/customKeyboard"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
 
     <ImageButton
         android:id="@+id/btnBack"

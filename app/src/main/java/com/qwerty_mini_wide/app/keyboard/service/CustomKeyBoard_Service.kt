@@ -66,6 +66,7 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         binding.customKeyboard.setOnKeyboardActionListener(this)
 
         setBackgroundBg()
+        setupSuggestionBar()
         binding.customKeyboard.findViewById<LinearLayout>(R.id.suggestion_bar).visibility = GONE
 
         val extracted = currentInputConnection.getExtractedText(ExtractedTextRequest(), 0)
@@ -100,14 +101,14 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
     }
 
     override fun onKey(code: KeyType, text: String?) {
-        // 적당한 햅틱 피드백 (100ms, 약한 강도)
+        // 햅틱 피드백 (100ms, 강도 100)
         vibrator?.let { v ->
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                // 20ms 시간, 매우 약한 강도(30)로 진동
-                v.vibrate(VibrationEffect.createOneShot(20, 30))
+                // 100ms 시간, 강도 100으로 진동
+                v.vibrate(VibrationEffect.createOneShot(100, 150))
             } else {
                 @Suppress("DEPRECATION")
-                v.vibrate(20)
+                v.vibrate(150)
             }
         }
 
@@ -446,5 +447,49 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
             Log.e("SpeechRecognizer", "Error showing permission dialog", e)
             Toast.makeText(this, "설정 > 앱 > QWERTY_mini_wide > 권한에서 마이크 권한을 허용해 주세요", Toast.LENGTH_LONG).show()
         }
+    }
+    
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        setupSuggestionBar()
+        binding.customKeyboard.updateConfiguration()
+    }
+    
+    private fun setupSuggestionBar() {
+        val suggestionBar = binding.customKeyboard.findViewById<LinearLayout>(R.id.suggestion_bar)
+        val displayMetrics = resources.displayMetrics
+        val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
+        val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
+        
+        // 화면 방향에 따라 높이 비율 설정 (세로: 5%, 가로: 10%)
+        val heightRatio = if (screenWidthDp < screenHeightDp) 0.05f else 0.10f
+        val suggestionBarHeight = (displayMetrics.heightPixels * heightRatio).toInt()
+        
+        // suggestion bar의 높이 설정
+        val layoutParams = suggestionBar.layoutParams
+        layoutParams.height = suggestionBarHeight
+        suggestionBar.layoutParams = layoutParams
+        
+        // 화살표 버튼 크기 조정
+        val arrowSize = (suggestionBarHeight * 0.5f).toInt()
+        val btnArrowDown = suggestionBar.findViewById<View>(R.id.btnArrowDown)
+        val btnArrowUp = suggestionBar.findViewById<View>(R.id.btnArrowUp)
+        
+        btnArrowDown?.let { btn ->
+            val params = btn.layoutParams
+            params.width = arrowSize
+            params.height = arrowSize
+            btn.layoutParams = params
+        }
+        btnArrowUp?.let { btn ->
+            val params = btn.layoutParams
+            params.width = arrowSize
+            params.height = arrowSize
+            btn.layoutParams = params
+        }
+        
+        // 텍스트 크기 조정
+        val tvDone = suggestionBar.findViewById<android.widget.TextView>(R.id.tvDone)
+        tvDone?.textSize = suggestionBarHeight * 0.35f / displayMetrics.density
     }
 }
