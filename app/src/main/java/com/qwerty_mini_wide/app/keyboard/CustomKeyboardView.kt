@@ -818,6 +818,26 @@ class CustomKeyboardView @JvmOverloads constructor(
             "두번째: lt=${second.keyModel?.ltText}, rt=${second.keyModel?.rtText}, rb=${second.keyModel?.rbText}"
         )
         
+        // Check if one of the keys is uppercase W or O
+        val isFirstW = first.keyModel?.ltText == "W"
+        val isSecondW = second.keyModel?.ltText == "W"
+        val isFirstO = first.keyModel?.ltText == "O"
+        val isSecondO = second.keyModel?.ltText == "O"
+        
+        if ((isFirstW || isSecondW || isFirstO || isSecondO) && currentState == KeyType.ONSHIFT) {
+            // Handle W/O + other key combination for upper-left key input
+            val isW = isFirstW || isSecondW
+            val targetKey = if (isFirstW || isFirstO) second else first
+            val upperLeftText = targetKey.keyModel?.ltText
+            
+            if (!upperLeftText.isNullOrEmpty()) {
+                val comboKey = if (isW) "W" else "O"
+                Log.d("Keyboard", "$comboKey + key combination: outputting upper-left key '$upperLeftText'")
+                listener?.onKey(KeyType.LETTER, upperLeftText)
+                return
+            }
+        }
+        
         val touchedButtons = mutableListOf<CustomKeyButton>()
         touchedButtons.add(first)
         touchedButtons.add(second)
