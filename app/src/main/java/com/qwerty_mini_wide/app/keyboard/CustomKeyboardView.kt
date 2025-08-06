@@ -24,8 +24,8 @@ import com.qwerty_mini_wide.app.keyboard.model.CurrentLanguage
 import com.qwerty_mini_wide.app.keyboard.model.KeyLetter
 import com.qwerty_mini_wide.app.keyboard.model.KeyModel
 import com.qwerty_mini_wide.app.keyboard.model.KeyType
-import com.qwerty_mini_wide.app.keyboard.manager.HangulAutomata
-import com.qwerty_mini_wide.app.keyboard.manager.HanjaManager
+// import com.qwerty_mini_wide.app.keyboard.manager.HangulAutomata // Korean support removed
+// import com.qwerty_mini_wide.app.keyboard.manager.HanjaManager // Chinese support removed
 import com.qwerty_mini_wide.app.keyboard.manager.InputManager
 import com.qwerty_mini_wide.app.keyboard.model.HanjaEntry
 import com.qwerty_mini_wide.app.keyboard.service.CustomKeyBoard_Service
@@ -45,7 +45,7 @@ class CustomKeyboardView @JvmOverloads constructor(
     var composingLength = 0
     var currentState:KeyType = KeyType.ENG
     var currentLanguage: CurrentLanguage = CurrentLanguage.ENG
-    var automata = HangulAutomata()
+    // var automata = HangulAutomata() // Korean support removed
     //var proxy: InputConnection? = null
     var touchSize:Int = 0
     private var keyPopupWindow: KeyPopupWindow? = null
@@ -82,17 +82,8 @@ class CustomKeyboardView @JvmOverloads constructor(
     }
 
     fun baseDelete(){
-        if (composingLength > 0) {
-
-            automata.deleteBuffer()
-            val composed = automata.buffer.joinToString("")
-            listener?.onKey(KeyType.KOR, composed)
-            //proxy?.commitText(composed, 1)
-            composingLength = composed.length
-        } else {
-            listener?.onKey(KeyType.DELETE, "")
-
-        }
+        // Korean support removed - just handle delete
+        listener?.onKey(KeyType.DELETE, "")
     }
 
     interface OnKeyboardActionListener {
@@ -113,7 +104,7 @@ class CustomKeyboardView @JvmOverloads constructor(
         binding.hanjaRecycler.layoutManager = LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false)
         binding.hanjaRecycler.adapter = Hanja_Adapter(this)
 
-        HanjaManager.init(context)
+        // HanjaManager.init(context) // Chinese support removed
         
         // Initialize popup window
         keyPopupWindow = KeyPopupWindow(context)
@@ -130,21 +121,7 @@ class CustomKeyboardView @JvmOverloads constructor(
 
     @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
     override fun onItemClick(hanjaEntry: HanjaEntry) {
-
-        Log.i("chnLastWord.count()",chnLastWord.count().toString())
-        Log.i("chnLastWord",chnLastWord)
-        for(i in 0..<chnLastWord.count()){
-            listener?.onKey(KeyType.DELETE, "")
-           // proxy?.deleteSurroundingText(1, 0)
-        }
-        listener?.onKey(KeyType.LETTER, hanjaEntry.hanja)
-        //proxy?.commitText(hanjaEntry.hanja,1)
-        (binding.hanjaRecycler.adapter as Hanja_Adapter).setitem(arrayListOf())
-        automata.deleteBuffer()
-        composingLength = 0
-       // proxy?.finishComposingText()
-        automata = HangulAutomata()
-
+        // Chinese character support removed - disabled
         hanjaLinearIsVisible(false)
     }
 
@@ -192,17 +169,8 @@ class CustomKeyboardView @JvmOverloads constructor(
             Log.d("MyKeyboardService", ">>> '$lastWordWithSpaces'")
         }
 
-        // 5) ViewModel에 한자 조회 결과 전달
-        val entries = HanjaManager.entries(lastWord) ?: emptyList()
-        if(entries.count() ==0){
-            hanjaLinearIsVisible(false)
-        }else{
-            hanjaLinearIsVisible(true)
-            (binding.hanjaRecycler.adapter as Hanja_Adapter).setitem(entries)
-            // 6) 마지막 단어 저장
-            chnLastWord = lastWord
-            Log.d("MyKeyboardService", "word : $lastWord")
-        }
+        // Chinese support removed - disable hanja lookup
+        hanjaLinearIsVisible(false)
 
 
 
@@ -542,7 +510,7 @@ class CustomKeyboardView @JvmOverloads constructor(
                     }
 
                     keyModel.keyType == KeyType.NUMBER ->{
-                        automata.deleteBuffer()
+                        // Korean support removed - no automata needed
                         currentState = KeyType.NUMBER
                         //binding.spaceEnter.visibility = GONE
                         setLetter(KeyLetter.getNumberLetter())
@@ -551,7 +519,7 @@ class CustomKeyboardView @JvmOverloads constructor(
                     }
 
                     keyModel.keyType == KeyType.SPECIAL ->{
-                        automata.deleteBuffer()
+                        // Korean support removed - no automata needed
                         currentState = KeyType.SPECIAL
                        // binding.spaceEnter.visibility = GONE
                         setLetter(KeyLetter.getSpecialLetter())
@@ -626,11 +594,10 @@ class CustomKeyboardView @JvmOverloads constructor(
     }
 
     fun commitText(){
-        automata.deleteBuffer()
+        // Korean support removed - just finish composing
         composingLength = 0
         val service = context as? com.qwerty_mini_wide.app.keyboard.service.CustomKeyBoard_Service
         service?.currentInputConnection?.finishComposingText()
-        automata = HangulAutomata()
     }
 
     private fun isShiftOn(): Boolean {
@@ -647,7 +614,7 @@ class CustomKeyboardView @JvmOverloads constructor(
 
     @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
     fun tapLetter(keyButton: CustomKeyButton) {
-        // base.currentState: KeyType, base.proxy: ProxyInterface?, base.automata: Automata, base.composingLength: Int
+        // base.currentState: KeyType, base.proxy: ProxyInterface?, base.composingLength: Int
         val ch = InputManager.shared.handleTap(keyButton, currentState, isShiftOn())
 
         Log.d("Keyboard", "ch : $ch, isShiftOn: ${isShiftOn()}, tapCount: ${InputManager.shared.tapCount}")
@@ -656,58 +623,23 @@ class CustomKeyboardView @JvmOverloads constructor(
 
 
             if (currentState == KeyType.KOR) {
-
-                // 2) 새로운 키 처리
-                automata.hangulAutomata(ch)
-                val composed = automata.buffer.joinToString("")
-                Log.d("Keyboard", "composed : $composed")
-                // 3) 새로 조합된 문자열 삽입
-                listener?.onKey(KeyType.KOR, composed)
-               // proxy?.commitText(composed,0)
-
-                // 4) 삭제할 길이 갱신
-                composingLength = composed.length
+                // Korean support removed - fallback to letter input
+                listener?.onKey(KeyType.LETTER, ch)
             } else {
                 listener?.onKey(KeyType.LETTER, ch)
-               // proxy?.commitText(ch,1)
             }
 
         } else {
             if (currentState == KeyType.KOR) {
-                if(arrayOf("ㅅ","ㅗ","ㅏ","ㅜ","ㅓ","ㅜ").contains(keyButton.keyModel!!.mainText) ){
-                            if(InputManager.shared.tapCount > 2){
-                                InputManager.shared.tapCount = 1
-                            }else{
-                                automata.deleteBuffer()
-                            }
-                }else{
-                    if(InputManager.shared.tapCount > 3){
-                        InputManager.shared.tapCount = 1
-                    }else{
-                        automata.deleteBuffer()
-                    }
-                }
-
-                // 2) 새로운 키 처리
-                automata.hangulAutomata(ch)
-                val composed = automata.buffer.joinToString("")
-                listener?.onKey(KeyType.KOR, composed)
-                // 3) 새로 조합된 문자열 삽입
-                //proxy?.commitText(composed,1)
-
-                // 4) 삭제할 길이 갱신
-                composingLength = composed.length
+                // Korean support removed - handle as English
+                listener?.onKey(KeyType.DELETE, "")
+                listener?.onKey(KeyType.LETTER, ch)
             } else {
-
                 if (InputManager.shared.tapCount > 1){
                     InputManager.shared.tapCount = 0
-                }else{
-                   automata.deleteBuffer()
                 }
                 listener?.onKey(KeyType.DELETE, "")
                 listener?.onKey(KeyType.LETTER, ch)
-             //   proxy?.deleteSurroundingText(1,0)
-               // proxy?.commitText(ch,1)
             }
         }
         
@@ -853,15 +785,9 @@ class CustomKeyboardView @JvmOverloads constructor(
         }
         
         if (currentState == KeyType.KOR) {
+            // Korean support removed - treat as normal letters
             for(i in 0..split.count() - 1){
-                // 2) 새로운 키 처리
-                automata.hangulAutomata(split[i])
-                val composed = automata.buffer.joinToString("")
-                Log.d("Keyboard", "composed : $composed")
-                // 3) 새로 조합된 문자열 삽입
-                listener?.onKey(KeyType.KOR, composed)
-                // 4) 삭제할 길이 갱신
-                composingLength = composed.length
+                listener?.onKey(KeyType.LETTER, split[i])
             }
         } else if (currentState == KeyType.ENG) {
             // 영어 모드에서 동시 입력 처리

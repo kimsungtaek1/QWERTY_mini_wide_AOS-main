@@ -5,9 +5,14 @@ import androidx.annotation.ColorInt
 
 /**
  * Supported languages for the keyboard
+ * @Deprecated KOR and CHN are deprecated and will be removed
  */
 enum class CurrentLanguage {
-    KOR, ENG, CHN
+    @Deprecated("Korean support will be removed")
+    KOR, 
+    ENG, 
+    @Deprecated("Chinese support will be removed")
+    CHN
 }
 
 /**

@@ -34,7 +34,7 @@ import com.qwerty_mini_wide.app.R
 import com.qwerty_mini_wide.app.databinding.ServiceKeyboardviewBinding
 import com.qwerty_mini_wide.app.keyboard.CustomKeyboardView
 import com.qwerty_mini_wide.app.keyboard.currentLanguage
-import com.qwerty_mini_wide.app.keyboard.manager.HangulAutomata
+// import com.qwerty_mini_wide.app.keyboard.manager.HangulAutomata // Korean support removed
 import com.qwerty_mini_wide.app.keyboard.model.KeyLetter
 import com.qwerty_mini_wide.app.keyboard.model.KeyType
 
@@ -92,7 +92,7 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         super.onStartInputView(editorInfo, restarting)
         // 키보드 상태 및 뷰 완전 초기화
         binding.customKeyboard.composingLength = 0
-        binding.customKeyboard.automata = HangulAutomata()
+        // binding.customKeyboard.automata = HangulAutomata() // Korean support removed
         binding.customKeyboard.currentState = KeyType.ENG // 기본값(필요시 변경)
         currentLanguage = com.qwerty_mini_wide.app.keyboard.model.CurrentLanguage.ENG // 기본값(필요시 변경)
         binding.customKeyboard.initViews() // 뷰도 항상 초기화
@@ -133,9 +133,8 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
                 if (selectionLength > 0) {
                     // 텍스트 선택됨 → 삭제
                     ic.commitText("", 1)
-                    binding.customKeyboard.automata.deleteBuffer()
+                    // Korean support removed - no automata handling
                     binding.customKeyboard.composingLength = 0
-                    binding.customKeyboard.automata = HangulAutomata()
                 } else {
                     ic.deleteSurroundingText(1, 0)
                     if (typedBuffer.isNotEmpty()) {
@@ -143,7 +142,7 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
                         }
                 }
             }
-            KeyType.KOR -> setComposingTextWithoutUnderline(text)
+            KeyType.KOR -> ic.commitText(text ?: "", 1) // Korean support removed - treat as normal text
             KeyType.ENG -> ic.finishComposingText()
             KeyType.CHN -> ic.finishComposingText()
             KeyType.NUMBER -> ic.finishComposingText()
@@ -230,9 +229,8 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         val typedRecently = now - lastKeyTypedTime < 300
 
         if ((newSelStart != previousSelStart || newSelEnd != previousSelStart) && !typedRecently) {
-            binding.customKeyboard.automata.deleteBuffer()
+            // Korean support removed - no automata handling
             binding.customKeyboard.composingLength = 0
-            binding.customKeyboard.automata = HangulAutomata()
             currentInputConnection.finishComposingText()
         }
 

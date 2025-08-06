@@ -38,54 +38,17 @@ class InputManager private constructor() {
         lastTapTime = now
 
         return when (currentState) {
-            KeyType.KOR -> handleKorTap(keyButton)
+            KeyType.KOR -> "" // Korean support removed
             KeyType.ENG, KeyType.NUMBER, KeyType.SPECIAL -> handleOtherTap(keyButton, currentState, isShiftOn)
             else -> ""
         }
     }
 
 
+    @Deprecated("Korean support has been removed")
     private fun handleKorTap(keyButton: CustomKeyButton): String {
-        if(getThirdTapKey(keyButton) != null){
-            return when (tapCount % 3) {
-                1 -> keyButton.keyModel?.mainText.orEmpty()
-                2 ->
-                    (if(keyButton.keyModel?.ltText == ""){
-                        if(keyButton.keyModel?.mainText == "ㅅ"){
-                            return "ㅆ"
-                        } else {
-                            return ""
-                        }
-                    }else{
-                        return keyButton.keyModel?.ltText ?: ""
-                    }).toString()
-
-
-
-                0 -> getThirdTapKey(keyButton)
-                    ?: keyButton.keyModel?.mainText.orEmpty()
-                else -> ""
-            }
-
-
-        }else{
-            return when (tapCount % 2) {
-                1 -> keyButton.keyModel?.mainText.orEmpty()
-                0 -> (if(keyButton.keyModel?.ltText == ""){
-                    if(keyButton.keyModel?.mainText == "ㅅ"){
-                        return "ㅆ"
-                    } else {
-                        return ""
-                    }
-                }else{
-                    return keyButton.keyModel?.ltText ?: ""
-                }).toString()
-                else -> ""
-            }
-        }
-
-
-
+        // Korean handling removed - return empty string
+        return ""
     }
 
     private fun handleOtherTap(keyButton: CustomKeyButton, state: KeyType, isShiftOn: Boolean = false): String {
@@ -155,14 +118,10 @@ class InputManager private constructor() {
         return getSimultaneousKey(keyButtons, currLanguage)
     }
 
+    @Deprecated("Korean support has been removed")
     private fun getThirdTapKey(keyButton: CustomKeyButton): String? {
-        return when (keyButton.keyModel?.mainText) {
-            "ㅂ" -> "ㅃ"
-            "ㅈ" -> "ㅉ"
-            "ㄷ" -> "ㄸ"
-            "ㄱ" -> "ㄲ"
-            else -> null
-        }
+        // Korean handling removed
+        return null
     }
 
 
@@ -285,7 +244,7 @@ class InputManager private constructor() {
         }
         return when (currLanguage) {
             CurrentLanguage.KOR -> {
-                // Korean keyboard removed - return English handling
+                // Korean support removed - fallback to English
                 keyViews[0].keyModel?.ltText.orEmpty()
             }
 
