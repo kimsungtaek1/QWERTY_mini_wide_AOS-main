@@ -64,9 +64,15 @@ iOS App
 ```
 [제안 바]
 [@] [#] [$(£)] [%(¥)] [^] [&(•)] [*] [+(=)]
-[~] [/] [:(;)] [(<)] [(>)] [{([)] [}(])] [|(\)]
+[~] [.] [:(;)] [(<)] [(>)] [{([)] [}(])] [|(\)]
 [123] [ABC] [Space] [Enter] [⌫] [빈공간]
 ```
+
+#### 특수문자 색상 규칙
+- **메인 텍스트 (좌상단)**: #000000 (검은색)
+- **보조 텍스트 (우하단 괄호 안)**: 
+  - 일반 문자: #8F8F8F (회색)
+  - 특수 기호 (£, ¥, •, =, ;, <, >, [, ], \\): #000000 (검은색)
 
 #### 점(Dot) 표시 규칙
 - **점 위치**: W, O, A, L 키에만 위치
@@ -74,8 +80,7 @@ iOS App
   - 세로 모드: 60pt (DOT_SIZE)
   - 가로 모드: 90pt (DOT_SIZE)  
 - **점 색상**: 
-  - W, O키: textColor (메인 색상)
-  - A, L키: subletterColor (보조 색상)
+  - 모든 점(W, O, A, L): #000000 (검은색)
 - **점 위치 상세**:
   - W키: 우상단 (rtTextMarginRight: 10, rtTextMarginTop: DOT_MARGIN_TOP)
   - O키: 우상단 (rtTextMarginRight: 10, rtTextMarginTop: DOT_MARGIN_TOP)
@@ -226,12 +231,18 @@ let textPrimary = UIColor(hex: "#222222")  // 제목 텍스트
 let textSecondary = UIColor(hex: "#666666") // 설명 텍스트
 
 // 키보드 색상
-let keyWhite = UIColor(hex: "#FFFFFF")
-let keyGrey = UIColor(hex: "#AAB0C0")
-let keyDarkGrey = UIColor(hex: "#464747")
-let bgDarkKeyboard = UIColor(hex: "#323232")
-let suggestionBg = UIColor(hex: "#F3F3F8")
-let keyboardBg = UIColor(hex: "#D0D5DD")
+let keyWhite = UIColor(hex: "#FFFFFF")        // 일반 키 배경
+let keyGrey = UIColor(hex: "#B8BFCB")         // 특수키 배경 (shift, 123, enter, del)
+let keyDarkGrey = UIColor(hex: "#464747")     // 다크모드 특수키 배경
+let keyKeyDarkGrey = UIColor(hex: "#676767")  // 다크모드 일반키 배경
+let bgDarkKeyboard = UIColor(hex: "#323232")  // 다크모드 키보드 배경
+let suggestionBg = UIColor(hex: "#F3F3F8")    // 제안 바 배경
+let keyboardBg = UIColor(hex: "#D0D3D9")      // 키보드 바깥쪽 배경
+let searchColor = UIColor(hex: "#007AFF")     // 검색 버튼 색상
+
+// 텍스트 색상
+let keyTextPrimary = UIColor(hex: "#000000")    // 키 기본 텍스트 (검은색)
+let keyTextSecondary = UIColor(hex: "#8F8F8F") // 키 보조 텍스트 (회색)
 ```
 
 ### 타이포그래피 (반응형)
@@ -541,6 +552,59 @@ if activeKeys.contains("shift") ||
 }
 ```
 
+#### Shift 상태에서의 특수 동시 키 입력 규칙
+```swift
+// Shift가 켜진 상태에서 W/O 키 조합 처리
+func handleShiftCombination(first: KeyButton, second: KeyButton) {
+    guard isShiftOn() else { return }
+    
+    let isFirstW = first.leftTopText == "W"
+    let isSecondW = second.leftTopText == "W" 
+    let isFirstO = first.leftTopText == "O"
+    let isSecondO = second.leftTopText == "O"
+    
+    if (isFirstW || isSecondW || isFirstO || isSecondO) {
+        if (isFirstW && isSecondO) || (isFirstO && isSecondW) {
+            // W+O 조합: 대문자 W 출력
+            insertText("W")
+        } else if isFirstW || isSecondW {
+            // W + 다른 키 처리
+            let wKey = isFirstW ? first : second
+            let otherKey = isFirstW ? second : first
+            
+            // 다른 키가 점(dot)을 가진 키인지 확인 (L, A, O 키)
+            let hasDot = otherKey.rightTopText != nil && !otherKey.rightTopText.isEmpty
+            
+            if hasDot {
+                // W + 점키(L, A, O): W의 rbText(Q) 출력
+                if let text = wKey.rightBottomText {
+                    insertText(text) // 예: W+L → "Q"
+                }
+            } else {
+                // W + 일반키: 다른 키의 ltText 출력
+                if let text = otherKey.leftTopText {
+                    insertText(text) // 예: W+M → "M"
+                }
+            }
+        } else if isFirstO || isSecondO {
+            // O + 다른 키: 다른 키의 rbText(서브키) 또는 ltText 출력
+            let otherKey = isFirstO ? second : first
+            let outputText = otherKey.rightBottomText ?? otherKey.leftTopText
+            if let text = outputText {
+                insertText(text)
+            }
+        }
+    }
+}
+
+// 동시 입력 판단 기준
+let SIMULTANEOUS_THRESHOLD: TimeInterval = 0.1 // 100ms
+// 두 키가 100ms 이내에 눌리면 동시 입력으로 처리
+
+// 점(dot)을 가진 키 목록
+let dotKeys = ["W", "O", "A", "L"] // 이 키들은 rtText에 점(˙)을 가짐
+```
+
 #### 화면 회전 시 처리
 ```swift
 // 회전 중 입력 차단
@@ -658,5 +722,30 @@ keyButton.accessibilityHint = "두 번 탭하여 Q 입력"
 
 ---
 
+## 📌 최종 키보드 색상 사양
+
+### 라이트 모드 (기본)
+- **키보드 바깥쪽 배경**: #D0D3D9
+- **일반 키 배경**: #FFFFFF (흰색)
+- **특수키 배경** (Shift, 123, Enter, Delete): #B8BFCB
+- **Space 키 배경**: #FFFFFF (흰색)
+- **제안 바 배경**: #F3F3F8
+
+### 텍스트 색상
+- **메인 텍스트** (키의 주요 문자): #000000 (검은색)
+- **보조 텍스트** (괄호 안 문자): 
+  - 일반 문자: #8F8F8F (회색)
+  - 특수 기호 (£, ¥, •, =, ;, <, >, [, ], \\): #000000 (검은색)
+- **가운데 점 (˙)**: #000000 (검은색) - W, O, A, L 키에만 표시
+- **특수키 텍스트**: #000000 (검은색)
+
+### 다크 모드
+- **키보드 바깥쪽 배경**: #323232
+- **일반 키 배경**: #676767
+- **특수키 배경**: #464747
+- **텍스트 색상**: #FFFFFF (흰색)
+
+---
+
 *이 문서는 QWERTY Mini Wide 영어 키보드 Android 앱의 iOS 포팅을 위한 종합 가이드입니다.*
-*마지막 업데이트: 2025년 8월 6일*
+*마지막 업데이트: 2025년 8월 8일*

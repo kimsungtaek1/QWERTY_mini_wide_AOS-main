@@ -756,17 +756,47 @@ class CustomKeyboardView @JvmOverloads constructor(
         val isFirstO = first.keyModel?.ltText == "O"
         val isSecondO = second.keyModel?.ltText == "O"
         
-        if ((isFirstW || isSecondW || isFirstO || isSecondO) && currentState == KeyType.ONSHIFT) {
-            // Handle W/O + other key combination for upper-left key input
-            val isW = isFirstW || isSecondW
-            val targetKey = if (isFirstW || isFirstO) second else first
-            val upperLeftText = targetKey.keyModel?.ltText
-            
-            if (!upperLeftText.isNullOrEmpty()) {
-                val comboKey = if (isW) "W" else "O"
-                Log.d("Keyboard", "$comboKey + key combination: outputting upper-left key '$upperLeftText'")
-                listener?.onKey(KeyType.LETTER, upperLeftText)
+        if ((isFirstW || isSecondW || isFirstO || isSecondO) && isShiftOn()) {
+            // Handle W/O + other key combination
+            if ((isFirstW && isSecondO) || (isFirstO && isSecondW)) {
+                // W+O combination: output W
+                Log.d("Keyboard", "W+O combination: outputting 'W'")
+                listener?.onKey(KeyType.LETTER, "W")
                 return
+            } else if (isFirstW || isSecondW) {
+                // W + other key
+                val wKey = if (isFirstW) first else second
+                val otherKey = if (isFirstW) second else first
+                
+                // Check if the other key has a dot (rtText)
+                val hasDot = !otherKey.keyModel?.rtText.isNullOrEmpty()
+                
+                if (hasDot) {
+                    // W + dot key (L, A, O): output W's rbText (Q)
+                    val rbText = wKey.keyModel?.rbText
+                    if (!rbText.isNullOrEmpty()) {
+                        Log.d("Keyboard", "W + dot key combination: outputting '$rbText'")
+                        listener?.onKey(KeyType.LETTER, rbText)
+                        return
+                    }
+                } else {
+                    // W + non-dot key: output the other key's ltText
+                    val ltText = otherKey.keyModel?.ltText
+                    if (!ltText.isNullOrEmpty()) {
+                        Log.d("Keyboard", "W + other key combination: outputting '$ltText'")
+                        listener?.onKey(KeyType.LETTER, ltText)
+                        return
+                    }
+                }
+            } else if (isFirstO || isSecondO) {
+                // O + other key: output the other key's rbText or ltText
+                val otherKey = if (isFirstO) second else first
+                val outputText = otherKey.keyModel?.rbText ?: otherKey.keyModel?.ltText
+                if (!outputText.isNullOrEmpty()) {
+                    Log.d("Keyboard", "O + other key combination: outputting '$outputText'")
+                    listener?.onKey(KeyType.LETTER, outputText)
+                    return
+                }
             }
         }
         

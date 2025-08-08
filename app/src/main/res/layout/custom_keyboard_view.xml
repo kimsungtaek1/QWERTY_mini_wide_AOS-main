@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="#D3D3D3">
+    android:background="#D0D3D9">
 
     <!-- 1) 제안 바 - 전체 너비 -->
     <include
