@@ -241,9 +241,9 @@ class CustomKeyboardView @JvmOverloads constructor(
             val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
             val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
             
-            // 가로 모드일 때만 좌우 패딩 10% 적용
+            // 가로 모드일 때만 좌우 패딩 20% 적용
             val horizontalPadding = if (screenWidthDp > screenHeightDp) {
-                (displayMetrics.widthPixels * 0.10f).toInt()
+                (displayMetrics.widthPixels * 0.20f).toInt()
             } else {
                 0
             }

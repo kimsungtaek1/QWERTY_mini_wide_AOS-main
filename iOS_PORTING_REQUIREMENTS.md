@@ -1,16 +1,16 @@
 # QWERTY Mini Wide iOS 포팅 요구사항
 
 ## 📱 프로젝트 개요
-QWERTY Mini Wide는 한국어 키보드 앱으로, 컴팩트한 QWERTY 레이아웃과 고급 한글 조합 기능을 제공하는 Android 키보드 애플리케이션입니다.
+QWERTY Mini Wide는 컴팩트한 QWERTY 레이아웃을 제공하는 영어 키보드 Android 애플리케이션입니다.
 
 ### 핵심 특징
-- 한글 자모 자동 조합 엔진
-- 다중 언어 지원 (한국어/영어)
+- 영어 전용 QWERTY 키보드
 - 멀티탭 입력 시스템
 - 동시 키 입력 지원
 - 음성 입력 기능
 - 진동 피드백
 - 다크/라이트 테마 자동 전환
+- 숫자 및 특수문자 키보드
 
 ## 🏗️ iOS 앱 구조
 
@@ -35,12 +35,55 @@ iOS App
 ## ⌨️ 키보드 확장 (Keyboard Extension)
 
 ### 키보드 레이아웃 구조
+
+#### 영어 소문자 레이아웃 (기본)
 ```
 [제안 바 - 화살표 버튼, 완료 버튼]
-[ㅂ(ㅍ)] [ㅈ(ㅊ)] [ㄷ(ㅌ)] [ㄱ(ㅋ)] [ㅅ] [ㅗ(ㅛ)] [ㅏ(ㅑ)] [ㅣ]
-[ㅁ] [ㄴ] [ㅇ] [ㄹ] [ㅎ] [ㅜ(ㅠ)] [ㅓ(ㅕ)] [ㅡ]
-[Shift] [123] [Space] [Enter] [Backspace]
+[w(q)•] [e] [r(f)] [t(g)] [y(p)] [u(')]  [i] [o•]
+[a•] [s(z)] [d(x)] [c(v)] [h(b)] [n(j)] [m(k)] [l•]
+[Shift] [123] [Space] [Enter] [⌫] [빈공간]
 ```
+
+#### 영어 대문자 레이아웃 (Shift 활성)
+```
+[제안 바 - 화살표 버튼, 완료 버튼]
+[W(Q)•] [E] [R(F)] [T(G)] [Y(P)] [U(')]  [I] [O•]
+[A•] [S(Z)] [D(X)] [C(V)] [H(B)] [N(J)] [M(K)] [L•]
+[Shift(on)] [123] [Space] [Enter] [⌫] [빈공간]
+```
+
+#### 숫자 레이아웃
+```
+[제안 바]
+[1] [2] [3] [4] [5] [6] [7] [8]
+[0] [.] [,] [?] [!] ['(") ] [-(_)] [9]
+[#+=] [ABC] [Space] [Enter] [⌫] [빈공간]
+```
+
+#### 특수문자 레이아웃
+```
+[제안 바]
+[@] [#] [$(£)] [%(¥)] [^] [&(•)] [*] [+(=)]
+[~] [/] [:(;)] [(<)] [(>)] [{([)] [}(])] [|(\)]
+[123] [ABC] [Space] [Enter] [⌫] [빈공간]
+```
+
+#### 점(Dot) 표시 규칙
+- **점 위치**: W, O, A, L 키에만 위치
+- **점 크기**: 
+  - 세로 모드: 60pt (DOT_SIZE)
+  - 가로 모드: 90pt (DOT_SIZE)  
+- **점 색상**: 
+  - W, O키: textColor (메인 색상)
+  - A, L키: subletterColor (보조 색상)
+- **점 위치 상세**:
+  - W키: 우상단 (rtTextMarginRight: 10, rtTextMarginTop: DOT_MARGIN_TOP)
+  - O키: 우상단 (rtTextMarginRight: 10, rtTextMarginTop: DOT_MARGIN_TOP)
+  - A키: 우상단 (rtTextMarginRight: 10, rtTextMarginTop: DOT_MARGIN_TOP)
+  - L키: 우상단 (rtTextMarginRight: 10, rtTextMarginTop: DOT_MARGIN_TOP)
+- **DOT_MARGIN_TOP**: 
+  - 세로 모드: 키 높이의 -40%
+  - 가로 모드: 키 높이의 -45%
 
 ### 핵심 클래스 및 iOS 대체 구현
 
@@ -54,7 +97,7 @@ class CustomKeyboardViewController: UIInputViewController {
     - 진동 피드백 (UIFeedbackGenerator)
     - 음성 인식 (SFSpeechRecognizer)
     - 커서 위치 추적
-    - 언어 전환 (한/영/숫자)
+    - 키보드 타입 전환 (영어/숫자/특수문자)
 }
 ```
 
@@ -64,10 +107,24 @@ class CustomKeyboardView: UIView {
     // 필수 구현 사항
     - 멀티터치 제스처 인식
     - 키 프리뷰 팝업 표시
-    - 한글 자모 조합 처리
     - 멀티탭 입력 처리 (300ms 타이머)
     - Shift 상태 관리 (일반/활성/잠금)
     - 동시 키 입력 조합
+    - 대소문자 전환
+    
+    // Shift 로직 상세
+    enum ShiftState {
+        case off        // 소문자 모드
+        case on         // 대문자 모드 (한 번 입력 후 off로 전환)
+        case locked     // Caps Lock (계속 대문자)
+    }
+    
+    // Shift 동작 규칙
+    - 1회 탭: off → on (다음 입력만 대문자)
+    - 2회 연속 탭: on → locked (Caps Lock)
+    - locked 상태에서 탭: locked → off
+    - on 상태에서 문자 입력 시: 자동으로 off로 전환
+    - 특수 키(숫자, 기호) 입력 시: Shift 상태 유지
 }
 ```
 
@@ -76,13 +133,33 @@ class CustomKeyboardView: UIView {
 class CustomKeyButton: UIControl {
     // 4개 텍스트 위치 지원
     var mainText: String      // 중앙 메인 텍스트
-    var leftTopText: String   // 좌상단 보조 텍스트
-    var rightTopText: String  // 우상단 보조 텍스트
-    var rightBottomText: String // 우하단 보조 텍스트
+    var leftTopText: String   // 좌상단 보조 텍스트 (메인 키)
+    var rightTopText: String  // 우상단 점(•) 또는 텍스트
+    var rightBottomText: String // 우하단 보조 텍스트 (괄호 안 키)
     
-    // 동적 텍스트 크기 조정
-    - 메인 텍스트: 18pt
-    - 보조 텍스트: 10pt
+    // 반응형 텍스트 크기 조정
+    // 세로 모드 (Portrait)
+    - 영어 대문자: 20pt * scaleFactor
+    - 영어 소문자: 21pt * scaleFactor  
+    - 특수문자: 20pt * scaleFactor
+    - 숫자: 24pt * scaleFactor
+    - 기능키: 15pt * scaleFactor
+    - Space: 18pt * scaleFactor
+    - Delete: 20pt * scaleFactor
+    - 점(•): 60pt * scaleFactor
+    
+    // 가로 모드 (Landscape)
+    - 영어 대문자: 30pt * scaleFactor
+    - 영어 소문자: 31.5pt * scaleFactor
+    - 특수문자: 30pt * scaleFactor
+    - 숫자: 36pt * scaleFactor
+    - 기능키: 22.5pt * scaleFactor
+    - Space: 27pt * scaleFactor
+    - Delete: 30pt * scaleFactor
+    - 점(•): 90pt * scaleFactor
+    
+    // scaleFactor 계산
+    let scaleFactor = min(screenWidth/393, screenHeight/852)
     
     // 백그라운드 상태
     - 일반/누름 상태 처리
@@ -90,35 +167,20 @@ class CustomKeyButton: UIControl {
 }
 ```
 
-#### 4. HangulAutomata (HangulAutomata.kt 대체)
-```swift
-class HangulAutomata {
-    // 한글 조합 엔진
-    - 초성/중성/종성 분리 및 조합
-    - 복합 모음 지원 (ㅘ, ㅙ, ㅚ 등)
-    - 쌍자음 지원 (ㄲ, ㄸ, ㅃ, ㅆ, ㅉ)
-    - 백스페이스 시 자소 분해
-    - 실시간 음절 조합/분해
-    
-    // 상태 관리
-    - 현재 조합 중인 자소 버퍼
-    - 조합 완성 상태 추적
-}
-```
 
-#### 5. InputManager (InputManager.kt 대체)
+#### 4. InputManager (InputManager.kt 대체)
 ```swift
 class InputManager {
     // 입력 처리 로직
     - 멀티탭 감지 (300ms 타임아웃)
     - 동시 키 조합 처리
-    - 언어별 입력 규칙 적용
     - Shift 상태에 따른 대소문자 변환
     - 특수 키 조합 (W+O, W+A 등)
+    - 키보드 타입별 입력 처리
 }
 ```
 
-## 🎨 UI 구성 요소
+## 🎨 UI 구성 요소 및 동작 규칙
 
 ### 1. 키 프리뷰 팝업
 ```swift
@@ -172,30 +234,73 @@ let suggestionBg = UIColor(hex: "#F3F3F8")
 let keyboardBg = UIColor(hex: "#D0D5DD")
 ```
 
-### 타이포그래피
+### 타이포그래피 (반응형)
 ```swift
-// 텍스트 크기
-let mainKeyText: CGFloat = 18      // 메인 키 텍스트
-let subKeyText: CGFloat = 10       // 보조 키 텍스트
-let suggestionText: CGFloat = 14   // 제안 텍스트
-let titleText: CGFloat = 26        // 제목 텍스트
-let bodyText: CGFloat = 16         // 본문 텍스트
+// 화면 크기 기반 계산
+let screenWidth = UIScreen.main.bounds.width
+let screenHeight = UIScreen.main.bounds.height
+let isLandscape = screenWidth > screenHeight
+let scaleFactor = min(screenWidth/393, screenHeight/852)
+
+// 세로 모드 텍스트 크기
+let portraitTextSizes = [
+    "largeEng": 20 * scaleFactor,
+    "smallEng": 21 * scaleFactor,
+    "special": 20 * scaleFactor,
+    "number": 24 * scaleFactor,
+    "function": 15 * scaleFactor,
+    "space": 18 * scaleFactor,
+    "delete": 20 * scaleFactor,
+    "dot": 60 * scaleFactor
+]
+
+// 가로 모드 텍스트 크기
+let landscapeTextSizes = [
+    "largeEng": 30 * scaleFactor,
+    "smallEng": 31.5 * scaleFactor,
+    "special": 30 * scaleFactor,
+    "number": 36 * scaleFactor,
+    "function": 22.5 * scaleFactor,
+    "space": 27 * scaleFactor,
+    "delete": 30 * scaleFactor,
+    "dot": 90 * scaleFactor
+]
 ```
 
-### 간격 및 크기
+### 간격 및 크기 (반응형)
 ```swift
-// 키보드 레이아웃
+// 키보드 레이아웃 - 반응형 크기
+// 세로 모드
+let portraitKeyWidth = screenWidth * 0.096
+let portraitKeyHeight = screenHeight * 0.07
+let portraitFunctionWidth = screenWidth * 0.124
+
+// 가로 모드
+let landscapeKeyWidth = screenWidth * 0.088
+let landscapeKeyHeight = screenHeight * 0.117
+let landscapeFunctionWidth = screenWidth * 0.109
+
+// 반응형 마진 (키 너비 기반 백분율)
+let margins = [
+    "xsmall": keyWidth * 0.08,    // 극소 여백
+    "small": keyWidth * 0.13,     // 작은 여백
+    "smallRight": keyWidth * 0.20, // 우하단 키용
+    "medium": keyWidth * 0.27,    // 보통 여백
+    "large": keyWidth * 0.53,     // 큰 여백
+    "xlarge": keyWidth * 0.66,    // 더 큰 여백
+    "xxlarge": keyWidth * 0.80,   // 아주 큰 여백
+    "xxxlarge": keyWidth * 0.93   // 최대 여백
+]
+
+// 점 마진 (키 높이 기반)
+let dotMarginTop = isLandscape ? 
+    -(keyHeight * 0.45) : -(keyHeight * 0.40)
+
+// 기본 설정
 let keySpacing: CGFloat = 6        // 키 간격
 let edgeMargin: CGFloat = 2        // 가장자리 여백
 let keyCornerRadius: CGFloat = 6   // 키 모서리 반경
-
-// 패딩
-let standardPadding: CGFloat = 16
-let largePadding: CGFloat = 24
-let smallPadding: CGFloat = 8
-
-// 아이콘 크기
-let iconSize: CGFloat = 24
+let iconSize: CGFloat = 24         // 아이콘 크기
 ```
 
 ## 🌏 로컬라이제이션
@@ -206,24 +311,24 @@ let iconSize: CGFloat = 24
 "app_name" = "QWERTY_mini_wide";
 "settings" = "설정";
 "back" = "뒤로가기";
-"keyboard_label" = "키보드";
-"how_to_use" = "키보드 사용방법";
-"keyboard_preview" = "키보드 미리보기";
-"terms_privacy" = "이용약관 및 개인정보 보호";
-"share_app" = "앱 공유하기";
-"open_system_settings" = "시스템 설정 열기";
-"share_message" = "QWERTY_mini_wide 앱을 공유합니다!";
+"keyboard_label" = "Keyboard";
+"how_to_use" = "How to Use Keyboard";
+"keyboard_preview" = "Keyboard Preview";
+"terms_privacy" = "Terms & Privacy";
+"share_app" = "Share App";
+"open_system_settings" = "Open System Settings";
+"share_message" = "Share QWERTY_mini_wide App!";
 ```
 
 
 ## 🔧 핵심 기능 구현 체크리스트
 
 ### 필수 기능
-- [ ] 한글 자모 조합 엔진
+- [ ] 영어 입력 시스템
 - [ ] 멀티탭 입력 시스템
 - [ ] 동시 키 입력 처리
 - [ ] Shift 키 상태 관리 (일반/활성/잠금)
-- [ ] 언어 전환 (한/영/숫자)
+- [ ] 키보드 타입 전환 (영어/숫자/특수문자)
 - [ ] 키 프리뷰 팝업
 - [ ] 진동 피드백
 - [ ] 다크/라이트 테마 자동 전환
@@ -264,7 +369,7 @@ import Speech          // 음성 인식
 import CoreHaptics     // 햅틱 피드백
 ```
 
-### 3. Auto Layout 제약사항
+### 3. Auto Layout 제약사항 및 반응형 디자인
 ```swift
 // 키보드 높이 제약
 let portraitHeight: CGFloat = 216
@@ -272,6 +377,38 @@ let landscapeHeight: CGFloat = 162
 
 // Safe Area 고려
 view.safeAreaLayoutGuide
+
+// 화면 회전 감지 및 레이아웃 업데이트
+override func viewWillTransition(to size: CGSize, 
+    with coordinator: UIViewControllerTransitionCoordinator) {
+    super.viewWillTransition(to: size, with: coordinator)
+    
+    coordinator.animate(alongsideTransition: { _ in
+        // 가로/세로 모드 전환
+        let isLandscape = size.width > size.height
+        self.updateKeyboardLayout(isLandscape: isLandscape)
+        self.updateTextSizes(isLandscape: isLandscape)
+        self.updateKeyDimensions(isLandscape: isLandscape)
+    })
+}
+
+// 반응형 키보드 업데이트 함수
+func updateKeyboardLayout(isLandscape: Bool) {
+    // 키 크기 업데이트
+    keyWidth = isLandscape ? 
+        screenWidth * 0.088 : screenWidth * 0.096
+    keyHeight = isLandscape ? 
+        screenHeight * 0.117 : screenHeight * 0.07
+    functionWidth = isLandscape ? 
+        screenWidth * 0.109 : screenWidth * 0.124
+    
+    // 텍스트 크기 업데이트
+    updateAllKeyTextSizes()
+    
+    // 레이아웃 재구성
+    invalidateIntrinsicContentSize()
+    setNeedsLayout()
+}
 ```
 
 ### 4. 제스처 인식기
@@ -286,13 +423,13 @@ view.safeAreaLayoutGuide
 ## 📝 테스트 체크리스트
 
 ### 기능 테스트
-- [ ] 한글 입력 정확성
 - [ ] 영어 입력 정확성
+- [ ] 대소문자 전환
 - [ ] 숫자/특수문자 입력
 - [ ] 멀티탭 동작
 - [ ] 동시 키 입력
-- [ ] 백스페이스 자소 분해
-- [ ] 언어 전환
+- [ ] 백스페이스 동작
+- [ ] 키보드 타입 전환
 - [ ] Shift 키 동작
 
 ### UI 테스트
@@ -343,7 +480,6 @@ view.safeAreaLayoutGuide
 ## 📚 참고 자료
 - [iOS Keyboard Extension Programming Guide](https://developer.apple.com/documentation/uikit/keyboards_and_input)
 - [Human Interface Guidelines - Custom Keyboards](https://developer.apple.com/design/human-interface-guidelines/inputs-and-interactions#Custom-keyboards)
-- [Korean Input Method Documentation](https://developer.apple.com/documentation/uikit/uitextinputmode)
 
 ## 🎯 개발 우선순위
 
@@ -352,30 +488,175 @@ view.safeAreaLayoutGuide
 2. 영어 입력 기능
 3. 기본 UI 구성
 
-### Phase 2 - 한글 지원 (2-3주)
-1. 한글 자모 조합 엔진
-2. 멀티탭 입력
+### Phase 2 - 고급 입력 기능 (2-3주)
+1. 멀티탭 입력 최적화
+2. 동시 키 입력 처리
 
-### Phase 3 - 고급 기능 (1-2주)
+### Phase 3 - 추가 기능 (1-2주)
 1. 음성 입력
-2. 동시 키 입력
-3. 진동 피드백
-4. 테마 지원
+2. 진동 피드백
+3. 테마 지원
+4. 특수문자 키보드
 
 ### Phase 4 - 최적화 및 완성 (1주)
 1. 성능 최적화
 2. 버그 수정
 3. App Store 제출 준비
 
-## ⚠️ 주의사항
+## ⚠️ 주의사항 및 특수 케이스 처리
 
-1. **메모리 관리**: iOS 키보드 확장은 엄격한 메모리 제한이 있음
+### 일반 주의사항
+1. **메모리 관리**: iOS 키보드 확장은 엄격한 메모리 제한이 있음 (약 50MB)
 2. **권한 처리**: RequestsOpenAccess 설정 시 사용자 동의 필요
 3. **앱 그룹**: 메인 앱과 데이터 공유 시 App Groups 설정 필수
 4. **키보드 높이**: 시스템 권장 높이 준수 필요
 5. **응답성**: 입력 지연 최소화를 위한 최적화 필수
 
+### 특수 케이스 및 예외 처리
+
+#### 멀티탭 예외 상황
+```swift
+// 특수키 멀티탭 예외
+- Space, Delete, Enter: 멀티탭 미적용
+- 숫자키: 멀티탭 미적용
+- Shift 후 멀티탭: Shift 상태 유지
+- 키보드 전환 후: 멀티탭 타이머 리셋
+```
+
+#### 동시 키 입력 예외
+```swift
+// 3개 이상 키 동시 입력
+if activeKeys.count >= 3 {
+    // 무시하거나 첫 2개만 처리
+    let firstTwo = Array(activeKeys.prefix(2))
+    processKeys(firstTwo)
+}
+
+// 기능키 포함 동시 입력
+if activeKeys.contains("shift") || 
+   activeKeys.contains("delete") {
+    // 기능키 우선 처리
+    processFunctionKey()
+    return
+}
+```
+
+#### 화면 회전 시 처리
+```swift
+// 회전 중 입력 차단
+var isRotating = false
+
+override func viewWillTransition(to size: CGSize, 
+    with coordinator: UIViewControllerTransitionCoordinator) {
+    isRotating = true
+    
+    coordinator.animate(alongsideTransition: { _ in
+        // 레이아웃 업데이트
+    }, completion: { _ in
+        self.isRotating = false
+    })
+}
+
+func handleKeyInput(key: String) {
+    guard !isRotating else { return }
+    // 정상 처리
+}
+```
+
+#### 키보드 나타남/사라짐 처리
+```swift
+// 키보드 나타날 때
+override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    // 상태 초기화
+    resetAllKeyStates()
+    loadUserPreferences()
+}
+
+// 키보드 사라질 때
+override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    // 타이머 정리
+    cancelAllTimers()
+    // 진행 중인 애니메이션 정리
+    layer.removeAllAnimations()
+}
+```
+
+#### 메모리 부족 처리
+```swift
+override func didReceiveMemoryWarning() {
+    super.didReceiveMemoryWarning()
+    // 캐시 정리
+    clearImageCache()
+    // 불필요한 뷰 제거
+    removeUnusedViews()
+}
+```
+
+#### 텍스트 필드별 처리
+```swift
+// 비밀번호 필드
+if textDocumentProxy.keyboardType == .asciiCapable {
+    // 자동 완성 비활성화
+    disableAutocomplete()
+}
+
+// 이메일 필드
+if textDocumentProxy.keyboardType == .emailAddress {
+    // @ 키 강조
+    highlightAtKey()
+}
+
+// 숫자 필드
+if textDocumentProxy.keyboardType == .numberPad {
+    // 숫자 키보드로 자동 전환
+    switchToNumericKeyboard()
+}
+```
+
+#### 빠른 연속 입력 처리
+```swift
+// 입력 큐 관리
+var inputQueue: [String] = []
+var isProcessing = false
+
+func queueInput(key: String) {
+    inputQueue.append(key)
+    processQueue()
+}
+
+func processQueue() {
+    guard !isProcessing, !inputQueue.isEmpty else { return }
+    
+    isProcessing = true
+    let key = inputQueue.removeFirst()
+    
+    // 실제 입력 처리
+    insertText(key)
+    
+    // 다음 입력까지 최소 대기
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+        self.isProcessing = false
+        self.processQueue()
+    }
+}
+```
+
+#### 접근성 지원
+```swift
+// VoiceOver 지원
+override var accessibilityTraits: UIAccessibilityTraits {
+    get { [.keyboardKey] }
+    set {}
+}
+
+// 각 키별 접근성 레이블
+keyButton.accessibilityLabel = "W, 멀티탭으로 Q 입력 가능"
+keyButton.accessibilityHint = "두 번 탭하여 Q 입력"
+```
+
 ---
 
-*이 문서는 QWERTY Mini Wide Android 앱의 완전한 iOS 포팅을 위한 종합 가이드입니다.*
+*이 문서는 QWERTY Mini Wide 영어 키보드 Android 앱의 iOS 포팅을 위한 종합 가이드입니다.*
 *마지막 업데이트: 2025년 8월 6일*
