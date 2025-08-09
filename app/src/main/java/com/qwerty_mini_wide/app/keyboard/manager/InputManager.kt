@@ -155,6 +155,14 @@ class InputManager private constructor() {
             // l 키 찾기 (소문자 또는 대문자)
             val lKey = keyViews.find { it.keyModel?.ltText == "l" || it.keyModel?.ltText == "L" }
             
+            // wq + l = q (대소문자 구분)
+            if (wqKey != null && lKey != null) {
+                val isUpperCase = wqKey.keyModel?.ltText == "W"
+                val result = if (isUpperCase) "Q" else "q"
+                android.util.Log.d("InputManager", "WQ + L combo: returning $result")
+                return result
+            }
+            
             // wq + o = w
             if (wqKey != null && oKey != null) {
                 android.util.Log.d("InputManager", "WQ + O combo: returning w")
@@ -165,6 +173,20 @@ class InputManager private constructor() {
             if (wqKey != null && aKey != null) {
                 android.util.Log.d("InputManager", "WQ + A combo: returning w")
                 return "w"
+            }
+            
+            // o + l = o (대소문자 유지)
+            if (oKey != null && lKey != null) {
+                val result = oKey.keyModel?.ltText?.lowercase() ?: "o"
+                android.util.Log.d("InputManager", "O + L combo: returning $result")
+                return result
+            }
+            
+            // a + l = a (대소문자 유지)
+            if (aKey != null && lKey != null) {
+                val result = aKey.keyModel?.ltText?.lowercase() ?: "a"
+                android.util.Log.d("InputManager", "A + L combo: returning $result")
+                return result
             }
             
             // o와 다른 키의 조합 - 대문자 모드에서 ltText 반환
