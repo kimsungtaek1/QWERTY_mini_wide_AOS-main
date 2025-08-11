@@ -175,6 +175,24 @@ class InputManager private constructor() {
                 return "w"
             }
             
+            // wq + e = w (e 키 찾기)
+            val eKey = keyViews.find { it.keyModel?.ltText == "e" || it.keyModel?.ltText == "E" }
+            if (wqKey != null && eKey != null) {
+                val isUpperCase = wqKey.keyModel?.ltText == "W"
+                val result = if (isUpperCase) "W" else "w"
+                android.util.Log.d("InputManager", "WQ + E combo: returning $result")
+                return result
+            }
+            
+            // wq + i = w (i 키 찾기)
+            val iKey = keyViews.find { it.keyModel?.ltText == "i" || it.keyModel?.ltText == "I" }
+            if (wqKey != null && iKey != null) {
+                val isUpperCase = wqKey.keyModel?.ltText == "W"
+                val result = if (isUpperCase) "W" else "w"
+                android.util.Log.d("InputManager", "WQ + I combo: returning $result")
+                return result
+            }
+            
             // o + l = o (대소문자 유지)
             if (oKey != null && lKey != null) {
                 val result = oKey.keyModel?.ltText?.lowercase() ?: "o"
