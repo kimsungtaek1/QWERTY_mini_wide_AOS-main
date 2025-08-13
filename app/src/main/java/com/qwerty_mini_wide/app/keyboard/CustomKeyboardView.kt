@@ -750,50 +750,87 @@ class CustomKeyboardView @JvmOverloads constructor(
             "두번째: lt=${second.keyModel?.ltText}, rt=${second.keyModel?.rtText}, rb=${second.keyModel?.rbText}"
         )
         
-        // Check if one of the keys is uppercase W or O
-        val isFirstW = first.keyModel?.ltText == "W"
-        val isSecondW = second.keyModel?.ltText == "W"
-        val isFirstO = first.keyModel?.ltText == "O"
-        val isSecondO = second.keyModel?.ltText == "O"
-        
-        if ((isFirstW || isSecondW || isFirstO || isSecondO) && isShiftOn()) {
-            // Handle W/O + other key combination
+        // Check if shift is on for special handling
+        if (isShiftOn()) {
+            // Check for uppercase keys (1열 점 키: W, O / 2열 점 키: A, L)
+            val isFirstW = first.keyModel?.ltText == "W"
+            val isSecondW = second.keyModel?.ltText == "W"
+            val isFirstO = first.keyModel?.ltText == "O"
+            val isSecondO = second.keyModel?.ltText == "O"
+            val isFirstA = first.keyModel?.ltText == "A"
+            val isSecondA = second.keyModel?.ltText == "A"
+            val isFirstL = first.keyModel?.ltText == "L"
+            val isSecondL = second.keyModel?.ltText == "L"
+            
+            // 특수 조합 처리
             if ((isFirstW && isSecondO) || (isFirstO && isSecondW)) {
                 // W+O combination: output W
                 Log.d("Keyboard", "W+O combination: outputting 'W'")
                 listener?.onKey(KeyType.LETTER, "W")
                 return
-            } else if (isFirstW || isSecondW) {
-                // W + other key
-                val wKey = if (isFirstW) first else second
+            } else if ((isFirstW && isSecondL) || (isFirstL && isSecondW)) {
+                // W+L combination: output Q
+                Log.d("Keyboard", "W+L combination: outputting 'Q'")
+                listener?.onKey(KeyType.LETTER, "Q")
+                return
+            } else if ((isFirstW && isSecondA) || (isFirstA && isSecondW)) {
+                // W+A combination: output W
+                Log.d("Keyboard", "W+A combination: outputting 'W'")
+                listener?.onKey(KeyType.LETTER, "W")
+                return
+            } else if ((isFirstO && isSecondL) || (isFirstL && isSecondO)) {
+                // O+L combination: output O
+                Log.d("Keyboard", "O+L combination: outputting 'O'")
+                listener?.onKey(KeyType.LETTER, "O")
+                return
+            } else if ((isFirstA && isSecondL) || (isFirstL && isSecondA)) {
+                // A+L combination: output A
+                Log.d("Keyboard", "A+L combination: outputting 'A'")
+                listener?.onKey(KeyType.LETTER, "A")
+                return
+            }
+            
+            // 1열 점 키 규칙 (W, O): 상대 키의 ltText 출력
+            if (isFirstW || isSecondW) {
                 val otherKey = if (isFirstW) second else first
-                
-                // Check if the other key has a dot (rtText)
-                val hasDot = !otherKey.keyModel?.rtText.isNullOrEmpty()
-                
-                if (hasDot) {
-                    // W + dot key (L, A, O): output W's rbText (Q)
-                    val rbText = wKey.keyModel?.rbText
-                    if (!rbText.isNullOrEmpty()) {
-                        Log.d("Keyboard", "W + dot key combination: outputting '$rbText'")
-                        listener?.onKey(KeyType.LETTER, rbText)
-                        return
-                    }
-                } else {
-                    // W + non-dot key: output the other key's ltText
-                    val ltText = otherKey.keyModel?.ltText
-                    if (!ltText.isNullOrEmpty()) {
-                        Log.d("Keyboard", "W + other key combination: outputting '$ltText'")
-                        listener?.onKey(KeyType.LETTER, ltText)
-                        return
-                    }
+                val outputText = otherKey.keyModel?.ltText?.uppercase() ?: otherKey.keyModel?.ltText
+                if (!outputText.isNullOrEmpty()) {
+                    Log.d("Keyboard", "W + other key (Row 1 dot key): outputting ltText='$outputText'")
+                    listener?.onKey(KeyType.LETTER, outputText)
+                    return
                 }
             } else if (isFirstO || isSecondO) {
-                // O + other key: output the other key's rbText or ltText
                 val otherKey = if (isFirstO) second else first
-                val outputText = otherKey.keyModel?.rbText ?: otherKey.keyModel?.ltText
+                val outputText = otherKey.keyModel?.ltText?.uppercase() ?: otherKey.keyModel?.ltText
                 if (!outputText.isNullOrEmpty()) {
-                    Log.d("Keyboard", "O + other key combination: outputting '$outputText'")
+                    Log.d("Keyboard", "O + other key (Row 1 dot key): outputting ltText='$outputText'")
+                    listener?.onKey(KeyType.LETTER, outputText)
+                    return
+                }
+            }
+            
+            // 2열 점 키 규칙 (A, L): 상대 키의 rbText 출력
+            if (isFirstA || isSecondA) {
+                val otherKey = if (isFirstA) second else first
+                val outputText = if (!otherKey.keyModel?.rbText.isNullOrEmpty()) {
+                    otherKey.keyModel?.rbText?.uppercase() ?: otherKey.keyModel?.rbText
+                } else {
+                    otherKey.keyModel?.ltText?.uppercase() ?: otherKey.keyModel?.ltText
+                }
+                if (!outputText.isNullOrEmpty()) {
+                    Log.d("Keyboard", "A + other key (Row 2 dot key): outputting rbText='$outputText'")
+                    listener?.onKey(KeyType.LETTER, outputText)
+                    return
+                }
+            } else if (isFirstL || isSecondL) {
+                val otherKey = if (isFirstL) second else first
+                val outputText = if (!otherKey.keyModel?.rbText.isNullOrEmpty()) {
+                    otherKey.keyModel?.rbText?.uppercase() ?: otherKey.keyModel?.rbText
+                } else {
+                    otherKey.keyModel?.ltText?.uppercase() ?: otherKey.keyModel?.ltText
+                }
+                if (!outputText.isNullOrEmpty()) {
+                    Log.d("Keyboard", "L + other key (Row 2 dot key): outputting rbText='$outputText'")
                     listener?.onKey(KeyType.LETTER, outputText)
                     return
                 }

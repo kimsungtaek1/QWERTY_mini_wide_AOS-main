@@ -143,6 +143,11 @@ class InputManager private constructor() {
         
         // 영어 모드에서 특수 조합 체크
         if (currLanguage == CurrentLanguage.ENG) {
+            // 디버그: 입력된 키 확인
+            android.util.Log.d("InputManager", "=== Simultaneous Key Debug ===")
+            android.util.Log.d("InputManager", "Key1: ltText=${keyViews[0].keyModel?.ltText}, rbText=${keyViews[0].keyModel?.rbText}")
+            android.util.Log.d("InputManager", "Key2: ltText=${keyViews[1].keyModel?.ltText}, rbText=${keyViews[1].keyModel?.rbText}")
+            
             // wq 키 찾기 (소문자 또는 대문자)
             val wqKey = keyViews.find { 
                 (it.keyModel?.ltText == "w" && it.keyModel?.rbText == "q") ||
@@ -154,6 +159,8 @@ class InputManager private constructor() {
             val aKey = keyViews.find { it.keyModel?.ltText == "a" || it.keyModel?.ltText == "A" }
             // l 키 찾기 (소문자 또는 대문자)
             val lKey = keyViews.find { it.keyModel?.ltText == "l" || it.keyModel?.ltText == "L" }
+            
+            android.util.Log.d("InputManager", "Found keys - wqKey: ${wqKey != null}, oKey: ${oKey != null}, aKey: ${aKey != null}, lKey: ${lKey != null}")
             
             // wq + l = q (대소문자 구분)
             if (wqKey != null && lKey != null) {
@@ -207,18 +214,67 @@ class InputManager private constructor() {
                 return result
             }
             
-            // o와 다른 키의 조합 - 대문자 모드에서 ltText 반환
-            if (oKey != null) {
+            // ===== 1열 점 키 규칙 먼저 처리 (W/Q, O) =====
+            // O와 다른 키의 조합 (1열 점 키 규칙: ltText 반환)
+            if (oKey != null && lKey == null && wqKey == null && aKey == null) {  // 특수 조합은 제외
                 val otherKey = keyViews.find { it != oKey }
                 if (otherKey != null) {
-                    // 대문자 O와 조합시 상대 키의 좌상단 텍스트 반환
+                    // O키는 1열 점 키이므로 상대 키의 좌상단 텍스트 반환
                     val isUpperCase = oKey.keyModel?.ltText == "O"
                     val result = if (isUpperCase) {
                         otherKey.keyModel?.ltText?.uppercase() ?: otherKey.keyModel?.ltText
                     } else {
                         otherKey.keyModel?.ltText
                     }
-                    android.util.Log.d("InputManager", "O combo with key: ltText=$result")
+                    android.util.Log.d("InputManager", "O combo (Row 1 dot key): otherKey=${otherKey.keyModel?.ltText}, returning ltText=$result (uppercase=$isUpperCase)")
+                    return result
+                }
+            }
+            
+            // W/Q와 다른 키의 조합 (특수 조합 제외)
+            if (wqKey != null && lKey == null && oKey == null && aKey == null && eKey == null && iKey == null) {
+                val otherKey = keyViews.find { it != wqKey }
+                if (otherKey != null) {
+                    val isUpperCase = wqKey.keyModel?.ltText == "W"
+                    val result = if (isUpperCase) {
+                        otherKey.keyModel?.ltText?.uppercase() ?: otherKey.keyModel?.ltText
+                    } else {
+                        otherKey.keyModel?.ltText
+                    }
+                    android.util.Log.d("InputManager", "WQ combo (Row 1 dot key): returning ltText=$result (uppercase=$isUpperCase)")
+                    return result
+                }
+            }
+            
+            // ===== 2열 점 키 규칙 나중에 처리 (A, L) =====
+            // A와 다른 키의 조합 (2열 점 키 규칙: rbText 반환)
+            if (aKey != null && lKey == null && wqKey == null && oKey == null) {  // 특수 조합 제외
+                val otherKey = keyViews.find { it != aKey }
+                if (otherKey != null && !otherKey.keyModel?.rbText.isNullOrEmpty()) {
+                    // A키는 2열 점 키이므로 상대 키의 우하단 텍스트 반환
+                    val isUpperCase = aKey.keyModel?.ltText == "A"
+                    val result = if (isUpperCase) {
+                        otherKey.keyModel?.rbText?.uppercase() ?: otherKey.keyModel?.rbText
+                    } else {
+                        otherKey.keyModel?.rbText
+                    }
+                    android.util.Log.d("InputManager", "A combo (Row 2 dot key): returning rbText=$result (uppercase=$isUpperCase)")
+                    return result
+                }
+            }
+            
+            // L과 다른 키의 조합 (2열 점 키 규칙: rbText 반환) - 특수 조합 이후에 처리
+            if (lKey != null && aKey == null && oKey == null && wqKey == null) {
+                val otherKey = keyViews.find { it != lKey }
+                if (otherKey != null && !otherKey.keyModel?.rbText.isNullOrEmpty()) {
+                    // L키는 2열 점 키이므로 상대 키의 우하단 텍스트 반환
+                    val isUpperCase = lKey.keyModel?.ltText == "L"
+                    val result = if (isUpperCase) {
+                        otherKey.keyModel?.rbText?.uppercase() ?: otherKey.keyModel?.rbText
+                    } else {
+                        otherKey.keyModel?.rbText
+                    }
+                    android.util.Log.d("InputManager", "L combo (Row 2 dot key): returning rbText=$result (uppercase=$isUpperCase)")
                     return result
                 }
             }
@@ -236,44 +292,24 @@ class InputManager private constructor() {
                 return otherDualKey.keyModel?.ltText
             }
             
-            // a 또는 l과 다른 통합키의 조합
-            if ((aKey != null || lKey != null) && otherDualKey != null) {
-                android.util.Log.d("InputManager", "A/L combo with dual key: ${otherDualKey.keyModel?.rbText}")
-                return otherDualKey.keyModel?.rbText
-            }
-            
-            // 점이 있는 키와의 조합
-            if (isDotKey(keyViews)) {
-                val dotKey = keyViews.find { it.keyModel?.rtText == "˙" }
-                android.util.Log.d("InputManager", "ENG Dot key combo - dotKey: ${dotKey?.keyModel?.ltText}, rtText: ${dotKey?.keyModel?.rtText}")
-                
-                // 점이 있는 키의 rtText 반환 (우상단 텍스트)
-                dotKey?.keyModel?.rtText?.let { 
-                    if (it.isNotEmpty() && it != "˙") {
-                        // 점이 아닌 다른 텍스트가 있으면 반환
-                        return it
-                    }
-                }
-                // rtText가 점만 있거나 비어있으면 rbText 반환
-                dotKey?.keyModel?.rbText?.let { 
-                    if (it.isNotEmpty()) return it 
-                }
-            }
-            
-            // 두 키 모두 rbText를 가지고 있는 경우 처리
+            // 기타 통합키 조합 처리 (점 키 규칙이 적용되지 않는 경우)
+            // 두 키 모두 rbText를 가지고 있고, 점 키가 아닌 경우
             val key0 = keyViews[0]
             val key1 = keyViews[1]
             
-            // 첫 번째 키가 rbText를 가지고 있는 경우
-            if (!key0.keyModel?.rbText.isNullOrEmpty()) {
-                android.util.Log.d("InputManager", "Key0 has rbText: ${key0.keyModel?.ltText} -> ${key0.keyModel?.rbText}")
-                return key0.keyModel?.rbText
-            }
-            
-            // 두 번째 키가 rbText를 가지고 있는 경우
-            if (!key1.keyModel?.rbText.isNullOrEmpty()) {
-                android.util.Log.d("InputManager", "Key1 has rbText: ${key1.keyModel?.ltText} -> ${key1.keyModel?.rbText}")
-                return key1.keyModel?.rbText
+            // 점 키가 포함되지 않은 경우에만 rbText 처리
+            if (oKey == null && aKey == null && lKey == null && wqKey == null) {
+                // 첫 번째 키가 rbText를 가지고 있는 경우
+                if (!key0.keyModel?.rbText.isNullOrEmpty()) {
+                    android.util.Log.d("InputManager", "Non-dot key combo: Key0 has rbText: ${key0.keyModel?.ltText} -> ${key0.keyModel?.rbText}")
+                    return key0.keyModel?.rbText
+                }
+                
+                // 두 번째 키가 rbText를 가지고 있는 경우
+                if (!key1.keyModel?.rbText.isNullOrEmpty()) {
+                    android.util.Log.d("InputManager", "Non-dot key combo: Key1 has rbText: ${key1.keyModel?.ltText} -> ${key1.keyModel?.rbText}")
+                    return key1.keyModel?.rbText
+                }
             }
         }
         

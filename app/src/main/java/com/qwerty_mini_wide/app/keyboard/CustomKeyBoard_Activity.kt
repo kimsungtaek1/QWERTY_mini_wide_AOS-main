@@ -38,6 +38,43 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
     fun bind(){
         inputField = binding.inputField
         
+        // 30개의 육각별과 유니코드를 기본 텍스트로 설정
+        val starText = """
+            1. ✱ (U+2731) HEAVY ASTERISK OPERATOR
+            2. ✲ (U+2732) OPEN CENTRE ASTERISK  
+            3. ✳ (U+2733) EIGHT SPOKED ASTERISK
+            4. ✶ (U+2736) SIX POINTED BLACK STAR
+            5. 🔯 (U+1F52F) SIX POINTED STAR WITH MIDDLE DOT
+            6. ⚹ (U+26B9) SEXTILE
+            7. ＊ (U+FF0A) FULLWIDTH ASTERISK
+            8. ⁎ (U+204E) LOW ASTERISK
+            9. ✡ (U+2721) STAR OF DAVID
+            10. ⛤ (U+26E4) PENTAGRAM
+            11. ⛥ (U+26E5) RIGHT-HANDED INTERLACED PENTAGRAM
+            12. ⛦ (U+26E6) LEFT-HANDED INTERLACED PENTAGRAM
+            13. ⛧ (U+26E7) INVERTED PENTAGRAM
+            14. ❅ (U+2745) TIGHT TRIFOLIATE SNOWFLAKE
+            15. ❆ (U+2746) HEAVY CHEVRON SNOWFLAKE
+            16. ❇ (U+2747) SPARKLE
+            17. ❈ (U+2748) HEAVY SPARKLE
+            18. ❉ (U+2749) BALLOON-SPOKED ASTERISK
+            19. ❊ (U+274A) EIGHT TEARDROP-SPOKED PROPELLER ASTERISK
+            20. ❋ (U+274B) HEAVY EIGHT TEARDROP-SPOKED PROPELLER ASTERISK
+            21. ※ (U+203B) REFERENCE MARK
+            22. ⁕ (U+2055) FLOWER PUNCTUATION MARK
+            23. ⁜ (U+205C) DOTTED CROSS
+            24. ✻ (U+273B) TEARDROP-SPOKED ASTERISK
+            25. ✼ (U+273C) OPEN CENTRE TEARDROP-SPOKED ASTERISK
+            26. ✽ (U+273D) HEAVY TEARDROP-SPOKED ASTERISK
+            27. ✾ (U+273E) SIX PETALLED BLACK AND WHITE FLORETTE
+            28. ✿ (U+273F) BLACK FLORETTE
+            29. ❀ (U+2740) WHITE FLORETTE
+            30. ❁ (U+2741) EIGHT PETALLED OUTLINED BLACK FLORETTE
+        """.trimIndent()
+        
+        inputField.setText(starText)
+        inputField.setSelection(starText.length)
+        
         binding.btnBack.setOnClickListener{
             finish()
         }
