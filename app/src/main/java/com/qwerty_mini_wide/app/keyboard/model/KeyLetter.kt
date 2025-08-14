@@ -30,7 +30,7 @@ object KeyLetter {
     private val DELETE_TEXT_SIZE: Float
         get() = (if (screenWidthDp > screenHeightDp) 30f else 20f) * scaleFactor
     private val DOT_SIZE: Float
-        get() = (if (screenWidthDp > screenHeightDp) 90f else 60f) * scaleFactor
+        get() = (if (screenWidthDp > screenHeightDp) 60f else 45f) * scaleFactor
     
     // 반응형 마진 값 (키 너비의 백분율로 계산) - 5의 배수
     private val MARGIN_5: Int
@@ -190,12 +190,11 @@ object KeyLetter {
     
     // English function row
     fun getEngFunction(): List<KeyModel> = listOf(
-        createFunctionKey(KeyType.SHIFT, image = R.drawable.ic_shift, selectImage = R.drawable.ic_shift_on),
-        createFunctionKey(KeyType.NUMBER, mainText = "123"),
-        KeyModel(keyType = KeyType.SPACE, mainText = "Space", mainTextSize = SPACE_TEXT_SIZE, mainColor = textColor, backgroundColor = backgroundColor),
-        createFunctionKey(KeyType.RETURN, image = R.drawable.ic_enter, selectImage = R.drawable.ic_enter, width = functionWidth + keyWidth + 6, layoutWeight = 8f),
-        KeyModel(keyType = KeyType.DELETE, mainText = "⌫", mainTextSize = DELETE_TEXT_SIZE, mainColor = Color.parseColor("#000000"), backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth, layout_weight = 9f),
-        createFunctionKey(KeyType.NONE, width = functionWidth + keyWidth + 6)
+        createFunctionKey(KeyType.SHIFT, image = R.drawable.ic_shift, selectImage = R.drawable.ic_shift_on, layoutWeight = 4f),
+        createFunctionKey(KeyType.NUMBER, mainText = "123", layoutWeight = 4f),
+        KeyModel(keyType = KeyType.SPACE, mainText = "Space", mainTextSize = SPACE_TEXT_SIZE, mainColor = textColor, backgroundColor = backgroundColor, layout_weight = 15f),
+        createFunctionKey(KeyType.RETURN, image = R.drawable.ic_enter, selectImage = R.drawable.ic_enter, width = functionWidth + keyWidth + 6, layoutWeight = 5f),
+        KeyModel(keyType = KeyType.DELETE, mainText = "⌫", mainTextSize = DELETE_TEXT_SIZE, mainColor = Color.parseColor("#000000"), backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth, layout_weight = 4f)
     )
 
 
@@ -275,12 +274,11 @@ object KeyLetter {
     fun getNumberFuntion(): List<KeyModel> = listOf(
         KeyModel(
             keyType = KeyType.SPECIAL, mainText = "#+=",mainTextSize = 15f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg,
-            height = keyHeight, width = keyWidth),
-        KeyModel(keyType = KeyType.ENG, mainText = "ABC", mainColor = textColor, mainTextSize = 15f, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 9f),
-        KeyModel(keyType = KeyType.SPACE, mainText = "Space",mainTextSize = 18f, mainColor = textColor, backgroundColor = backgroundColor),
-        KeyModel(keyType = KeyType.RETURN, image = R.drawable.ic_enter, mainTextSize = 15f, selectImage = R.drawable.ic_enter, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6, layout_weight = 8f),
-        KeyModel(keyType = KeyType.DELETE, mainText = "⌫", mainTextSize = 20f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 9f),
-        KeyModel(keyType = KeyType.NONE, mainText = "", mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6)
+            height = keyHeight, width = keyWidth, layout_weight = 4f),
+        KeyModel(keyType = KeyType.ENG, mainText = "ABC", mainColor = textColor, mainTextSize = 15f, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 4f),
+        KeyModel(keyType = KeyType.SPACE, mainText = "Space",mainTextSize = 18f, mainColor = textColor, backgroundColor = backgroundColor, layout_weight = 15f),
+        KeyModel(keyType = KeyType.RETURN, image = R.drawable.ic_enter, mainTextSize = 15f, selectImage = R.drawable.ic_enter, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6, layout_weight = 5f),
+        KeyModel(keyType = KeyType.DELETE, mainText = "⌫", mainTextSize = 20f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 4f)
     )
 
     fun getSpecialLetter(): List<List<KeyModel>> = listOf(
@@ -309,14 +307,13 @@ object KeyLetter {
     fun getSpectialFuntion(): List<KeyModel> = listOf(
         KeyModel(
             keyType = KeyType.NUMBER, mainText = "123", mainTextSize = 15f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg,
-            height = keyHeight, width = keyWidth),
+            height = keyHeight, width = keyWidth, layout_weight = 4f),
         KeyModel(
             keyType = KeyType.ENG, mainText = "ABC", mainColor = textColor,
-            mainTextSize = 15f, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 9f),
-        KeyModel(keyType = KeyType.SPACE, mainText = "Space",mainTextSize = 18f, mainColor = textColor, backgroundColor = backgroundColor),
-        KeyModel(keyType = KeyType.RETURN, image = R.drawable.ic_enter, mainTextSize = 15f, selectImage = R.drawable.ic_enter, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6, layout_weight = 8f),
-        KeyModel(keyType = KeyType.DELETE, mainText = "⌫", mainTextSize = 20f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 9f),
-        KeyModel(keyType = KeyType.NONE, mainText = "", mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6)
+            mainTextSize = 15f, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 4f),
+        KeyModel(keyType = KeyType.SPACE, mainText = "Space",mainTextSize = 18f, mainColor = textColor, backgroundColor = backgroundColor, layout_weight = 15f),
+        KeyModel(keyType = KeyType.RETURN, image = R.drawable.ic_enter, mainTextSize = 15f, selectImage = R.drawable.ic_enter, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = functionWidth + keyWidth + 6, layout_weight = 5f),
+        KeyModel(keyType = KeyType.DELETE, mainText = "⌫", mainTextSize = 20f, mainColor = textColor, backgroundColor = functionBg, selectBackgroundColor = functionBg, height = keyHeight, width = keyWidth, layout_weight = 4f)
     )
 
 }

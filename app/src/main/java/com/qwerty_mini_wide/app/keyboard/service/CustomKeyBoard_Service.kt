@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.media.AudioManager
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
@@ -49,12 +50,14 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
     private var speechRecognizer: SpeechRecognizer? = null
     private var isListening = false
     private var vibrator: Vibrator? = null
+    private var audioManager: AudioManager? = null
 
     override fun onCreate() {
         super.onCreate()
         val view = layoutInflater.inflate(R.layout.service_keyboardview, null)
         binding = ServiceKeyboardviewBinding.bind(view)
         vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
+        audioManager = getSystemService(AUDIO_SERVICE) as? AudioManager
     }
 
 
@@ -95,20 +98,23 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         // binding.customKeyboard.automata = HangulAutomata() // Korean support removed
         binding.customKeyboard.currentState = KeyType.ENG // 기본값(필요시 변경)
         currentLanguage = com.qwerty_mini_wide.app.keyboard.model.CurrentLanguage.ENG // 기본값(필요시 변경)
-        binding.customKeyboard.initViews() // 뷰도 항상 초기화
         actionId = (editorInfo?.imeOptions ?: 0) and EditorInfo.IME_MASK_ACTION
+        binding.customKeyboard.initViews(actionId) // 뷰도 항상 초기화
         typedBuffer.clear()
     }
 
     override fun onKey(code: KeyType, text: String?) {
-        // 햅틱 피드백 (100ms, 강도 100)
+        // 햅틱 피드백 - 고정 강도로 설정
         vibrator?.let { v ->
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                // 100ms 시간, 강도 100으로 진동
-                v.vibrate(VibrationEffect.createOneShot(100, 150))
+                // 고정 강도 30 (시스템 설정과 무관하게 일정)
+                val fixedIntensity = 30
+                
+                // 100ms 시간, 고정 강도로 진동
+                v.vibrate(VibrationEffect.createOneShot(100, fixedIntensity))
             } else {
                 @Suppress("DEPRECATION")
-                v.vibrate(150)
+                v.vibrate(100)
             }
         }
 
@@ -258,7 +264,7 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         KeyLetter.isLightMode = isDay
         Log.i("Is LightMode : ", KeyLetter.isLightMode.toString())
         Log.i("Is LightMode : ", isDay.toString())
-        binding.customKeyboard.initViews()
+        binding.customKeyboard.initViews(actionId)
         setBackgroundBg()
 
     }
@@ -489,5 +495,85 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         // 텍스트 크기 조정
         val tvDone = suggestionBar.findViewById<android.widget.TextView>(R.id.tvDone)
         tvDone?.textSize = suggestionBarHeight * 0.35f / displayMetrics.density
+    }
+    
+    private fun getSystemVibrationIntensity(): Int {
+        return try {
+            // 삼성 기기의 진동 강도 설정 키들
+            val possibleKeys = listOf(
+                "VIB_FEEDBACK_MAGNITUDE",  // 삼성 터치 진동 강도
+                "VIB_RECVCALL_MAGNITUDE",  // 삼성 통화 진동 강도
+                "SEM_VIBRATION_NOTIFICATION_INTENSITY",  // 삼성 알림 진동
+                "SEM_VIBRATION_FORCE_TOUCH_INTENSITY"   // 삼성 터치 강도
+            )
+            
+            var intensity = -1
+            
+            // Settings.System에서 시도
+            for (key in possibleKeys) {
+                try {
+                    intensity = Settings.System.getInt(contentResolver, key)
+                    if (intensity != -1) {
+                        // 찾았으면 로그 출력하고 break
+                        Log.d("VibrationIntensity", "Found key: $key with value: $intensity")
+                        break
+                    }
+                } catch (e: Exception) {
+                    // 이 키가 없으면 다음 키 시도
+                }
+            }
+            
+            // Settings.Global에서도 시도
+            if (intensity == -1) {
+                for (key in possibleKeys) {
+                    try {
+                        intensity = Settings.Global.getInt(contentResolver, key)
+                        if (intensity != -1) {
+                            Log.d("VibrationIntensity", "Found global key: $key with value: $intensity")
+                            break
+                        }
+                    } catch (e: Exception) {
+                        // 이 키가 없으면 다음 키 시도
+                    }
+                }
+            }
+            
+            // AudioManager를 통해 진동 모드 확인
+            if (intensity == -1 && audioManager != null) {
+                val ringerMode = audioManager!!.ringerMode
+                Log.d("VibrationIntensity", "Ringer mode: $ringerMode")
+                intensity = when (ringerMode) {
+                    AudioManager.RINGER_MODE_SILENT -> 0
+                    AudioManager.RINGER_MODE_VIBRATE -> 2
+                    AudioManager.RINGER_MODE_NORMAL -> 3
+                    else -> 2
+                }
+            }
+            
+            // 삼성 기기는 0-5 범위, 다른 기기는 0-3 범위
+            val result = when (intensity) {
+                -1 -> 100  // 찾지 못함
+                0 -> 0     // 진동 끔
+                1 -> 40    // 매우 약함
+                2 -> 80    // 약함  
+                3 -> 120   // 중간
+                4 -> 160   // 강함
+                5 -> 200   // 매우 강함
+                else -> {
+                    // 다른 범위의 값이면 스케일링
+                    if (intensity > 5) {
+                        (intensity * 255 / 100).coerceIn(0, 255)
+                    } else {
+                        100 // 기본값
+                    }
+                }
+            }
+            
+            Log.d("VibrationIntensity", "Final intensity value: $result (raw: $intensity)")
+            result
+        } catch (e: Exception) {
+            Log.e("VibrationIntensity", "Error getting vibration intensity", e)
+            100 // 오류 시 기본값 반환
+        }
     }
 }

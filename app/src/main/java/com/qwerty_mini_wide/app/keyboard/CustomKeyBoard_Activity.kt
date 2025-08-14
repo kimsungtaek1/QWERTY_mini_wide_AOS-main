@@ -2,9 +2,14 @@ package com.qwerty_mini_wide.app.keyboard
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.media.AudioManager
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.Settings
+import android.os.Handler
+import android.os.Looper
 import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.qwerty_mini_wide.app.R
 import com.qwerty_mini_wide.app.databinding.ViewCustomkeyboardBinding
@@ -17,7 +22,16 @@ var currentLanguage:CurrentLanguage = CurrentLanguage.ENG
 class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboardActionListener {
     private lateinit var binding: ViewCustomkeyboardBinding
     private lateinit var inputField: EditText
+    private lateinit var vibrationIntensityText: TextView
     private var vibrator: Vibrator? = null
+    private var audioManager: AudioManager? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private val updateRunnable = object : Runnable {
+        override fun run() {
+            updateVibrationIntensityDisplay()
+            handler.postDelayed(this, 500) // 0.5초마다 업데이트
+        }
+    }
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +39,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         binding = ViewCustomkeyboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
         vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
+        audioManager = getSystemService(AUDIO_SERVICE) as? AudioManager
 
         if(KeyLetter.isLightMode){
             binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg) )
@@ -37,6 +52,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
 
     fun bind(){
         inputField = binding.inputField
+        vibrationIntensityText = binding.root.findViewById(R.id.vibrationIntensityText)
         
         // 30개의 육각별과 유니코드를 기본 텍스트로 설정
         val starText = """
@@ -72,8 +88,8 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
             30. ❁ (U+2741) EIGHT PETALLED OUTLINED BLACK FLORETTE
         """.trimIndent()
         
-        inputField.setText(starText)
-        inputField.setSelection(starText.length)
+        // inputField.setText(starText)
+        // inputField.setSelection(starText.length)
         
         binding.btnBack.setOnClickListener{
             finish()
@@ -81,17 +97,46 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         
         // 키보드 액션 리스너 설정
         binding.customKeyboard.setOnKeyboardActionListener(this)
+        
+        // 시스템 진동 강도 표시 시작
+        updateVibrationIntensityDisplay()
+        handler.post(updateRunnable)
+    }
+    
+    private fun updateVibrationIntensityDisplay() {
+        // 고정된 진동 강도 값 30 사용
+        val intensity = 30
+        
+        // Ringer Mode 정보도 함께 표시
+        val ringerMode = audioManager?.ringerMode ?: -1
+        val ringerModeText = when (ringerMode) {
+            AudioManager.RINGER_MODE_SILENT -> "무음"
+            AudioManager.RINGER_MODE_VIBRATE -> "진동"
+            AudioManager.RINGER_MODE_NORMAL -> "소리"
+            else -> "알수없음"
+        }
+        
+        val displayText = "진동강도: $intensity | 모드: $ringerModeText"
+        vibrationIntensityText.text = displayText
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(updateRunnable)
     }
 
     override fun onKey(code: KeyType, text: String?) {
-        // 적당한 햅틱 피드백 (100ms, 약한 강도)
+        // 햅틱 피드백 - 고정 강도로 설정
         vibrator?.let { v ->
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                // 20ms 시간, 매우 약한 강도(30)로 진동
-                v.vibrate(VibrationEffect.createOneShot(20, 30))
+                // 고정 강도 30 (시스템 설정과 무관하게 일정)
+                val fixedIntensity = 30
+                
+                // 100ms 시간, 고정 강도로 진동
+                v.vibrate(VibrationEffect.createOneShot(100, fixedIntensity))
             } else {
                 @Suppress("DEPRECATION")
-                v.vibrate(20)
+                v.vibrate(100)
             }
         }
         
@@ -131,6 +176,86 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
             KeyType.RETURN -> inputField.append("\n")
             KeyType.LOCKSHIFT -> { /* Handle caps lock */ }
             KeyType.EMPTY -> { /* Do nothing */ }
+        }
+    }
+    
+    private fun getSystemVibrationIntensity(): Int {
+        return try {
+            // 삼성 기기의 진동 강도 설정 키들
+            val possibleKeys = listOf(
+                "VIB_FEEDBACK_MAGNITUDE",  // 삼성 터치 진동 강도
+                "VIB_RECVCALL_MAGNITUDE",  // 삼성 통화 진동 강도
+                "SEM_VIBRATION_NOTIFICATION_INTENSITY",  // 삼성 알림 진동
+                "SEM_VIBRATION_FORCE_TOUCH_INTENSITY"   // 삼성 터치 강도
+            )
+            
+            var intensity = -1
+            
+            // Settings.System에서 시도
+            for (key in possibleKeys) {
+                try {
+                    intensity = Settings.System.getInt(contentResolver, key)
+                    if (intensity != -1) {
+                        // 찾았으면 로그 출력하고 break
+                        android.util.Log.d("VibrationIntensity", "Found key: $key with value: $intensity")
+                        break
+                    }
+                } catch (e: Exception) {
+                    // 이 키가 없으면 다음 키 시도
+                }
+            }
+            
+            // Settings.Global에서도 시도
+            if (intensity == -1) {
+                for (key in possibleKeys) {
+                    try {
+                        intensity = Settings.Global.getInt(contentResolver, key)
+                        if (intensity != -1) {
+                            android.util.Log.d("VibrationIntensity", "Found global key: $key with value: $intensity")
+                            break
+                        }
+                    } catch (e: Exception) {
+                        // 이 키가 없으면 다음 키 시도
+                    }
+                }
+            }
+            
+            // AudioManager를 통해 진동 모드 확인
+            if (intensity == -1 && audioManager != null) {
+                val ringerMode = audioManager!!.ringerMode
+                android.util.Log.d("VibrationIntensity", "Ringer mode: $ringerMode")
+                intensity = when (ringerMode) {
+                    AudioManager.RINGER_MODE_SILENT -> 0
+                    AudioManager.RINGER_MODE_VIBRATE -> 2
+                    AudioManager.RINGER_MODE_NORMAL -> 3
+                    else -> 2
+                }
+            }
+            
+            // 삼성 기기는 0-5 범위, 다른 기기는 0-3 범위
+            val result = when (intensity) {
+                -1 -> 100  // 찾지 못함
+                0 -> 0     // 진동 끔
+                1 -> 40    // 매우 약함
+                2 -> 80    // 약함  
+                3 -> 120   // 중간
+                4 -> 160   // 강함
+                5 -> 200   // 매우 강함
+                else -> {
+                    // 다른 범위의 값이면 스케일링
+                    if (intensity > 5) {
+                        (intensity * 255 / 100).coerceIn(0, 255)
+                    } else {
+                        100 // 기본값
+                    }
+                }
+            }
+            
+            android.util.Log.d("VibrationIntensity", "Final intensity value: $result (raw: $intensity)")
+            result
+        } catch (e: Exception) {
+            android.util.Log.e("VibrationIntensity", "Error getting vibration intensity", e)
+            100 // 오류 시 기본값 반환
         }
     }
 }

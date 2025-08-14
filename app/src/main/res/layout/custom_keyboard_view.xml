@@ -267,9 +267,9 @@
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="8.5"
+            android:layout_weight="10"
             app:icon="@drawable/ic_shift"
             app:keyStyle="grey" />
 
@@ -279,9 +279,9 @@
 
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="8.5"
+            android:layout_weight="10"
             app:keyStyle="grey"
             app:mainText="123" />
 
@@ -290,9 +290,9 @@
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="5.5"
+            android:layout_weight="3"
             app:keyStyle="white"
             app:mainText="Space" />
 
@@ -301,9 +301,9 @@
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="7"
+            android:layout_weight="8"
             app:icon="@drawable/ic_enter"
             app:keyStyle="grey" />
 
@@ -312,9 +312,9 @@
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="8.5"
+            android:layout_weight="10"
             app:icon="@drawable/ic_backspace"
             app:keyStyle="grey" />
 

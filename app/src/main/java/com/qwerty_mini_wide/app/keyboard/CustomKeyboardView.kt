@@ -92,6 +92,7 @@ class CustomKeyboardView @JvmOverloads constructor(
     }
 
     private var listener: OnKeyboardActionListener? = null
+    var currentActionId: Int = 0
 
     init {
         orientation = VERTICAL
@@ -100,7 +101,7 @@ class CustomKeyboardView @JvmOverloads constructor(
         setupSuggestionBar()
         setupKeyboardPadding()
         setupKeySpacing()
-        initViews()
+        initViews(0) // 초기에는 actionId가 0
         binding.hanjaRecycler.layoutManager = LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false)
         binding.hanjaRecycler.adapter = Hanja_Adapter(this)
 
@@ -112,11 +113,12 @@ class CustomKeyboardView @JvmOverloads constructor(
 
     }
 
-    fun initViews(){
+    fun initViews(actionId: Int = 0){
+        currentActionId = actionId
         setupKeys()
         // Always use English keyboard
         setLetter(KeyLetter.getEngLetter())
-        setFuntion(KeyLetter.getEngFunction())
+        setFuntion(KeyLetter.getEngFunction(), actionId)
     }
 
     @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
@@ -334,14 +336,12 @@ class CustomKeyboardView @JvmOverloads constructor(
         setupKeySpacing()
     }
 
-    fun setFuntion(fountions:List<KeyModel>){
+    fun setFuntion(fountions:List<KeyModel>, actionId: Int = 0){
         var count = 0
         for(i in 0 until binding.funtionLinear.childCount){
             if(binding.funtionLinear.getChildAt(i) is CustomKeyButton){
                 val keyButon = binding.funtionLinear.getChildAt(i) as CustomKeyButton
-                val service = context as? CustomKeyBoard_Service
-
-                keyButon.setData(fountions[count],service?.actionId ?: 0)
+                keyButon.setData(fountions[count], actionId)
                 count++
             }
         }
@@ -482,7 +482,7 @@ class CustomKeyboardView @JvmOverloads constructor(
                        // binding.spaceEnter.visibility = GONE
                         currentLanguage = CurrentLanguage.ENG
                         setLetter(KeyLetter.getEngLetter())
-                        setFuntion(KeyLetter.getEngFunction())
+                        setFuntion(KeyLetter.getEngFunction(), currentActionId)
                         listener?.onKey(KeyType.ENG,"")
                     }
 
@@ -492,7 +492,7 @@ class CustomKeyboardView @JvmOverloads constructor(
                         currentState = KeyType.ENG
                         currentLanguage = CurrentLanguage.ENG
                         setLetter(KeyLetter.getEngLetter())
-                        setFuntion(KeyLetter.getEngFunction())
+                        setFuntion(KeyLetter.getEngFunction(), currentActionId)
                         listener?.onKey(KeyType.ENG,"")
                     }
 
@@ -514,7 +514,7 @@ class CustomKeyboardView @JvmOverloads constructor(
                         currentState = KeyType.NUMBER
                         //binding.spaceEnter.visibility = GONE
                         setLetter(KeyLetter.getNumberLetter())
-                        setFuntion(KeyLetter.getNumberFuntion())
+                        setFuntion(KeyLetter.getNumberFuntion(), currentActionId)
                         listener?.onKey(KeyType.NUMBER,"")
                     }
 
@@ -523,7 +523,7 @@ class CustomKeyboardView @JvmOverloads constructor(
                         currentState = KeyType.SPECIAL
                        // binding.spaceEnter.visibility = GONE
                         setLetter(KeyLetter.getSpecialLetter())
-                        setFuntion(KeyLetter.getSpectialFuntion())
+                        setFuntion(KeyLetter.getSpectialFuntion(), currentActionId)
                     }
 
                     keyModel.keyType == KeyType.SPACE ->{

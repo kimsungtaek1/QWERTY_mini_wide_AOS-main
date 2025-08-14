@@ -190,13 +190,15 @@ class CustomKeyButton @JvmOverloads constructor(
 
 
 
-        if (returnType == EditorInfo.IME_ACTION_SEARCH && (_keyModel.mainText == "return" || _keyModel.image == R.drawable.ic_enter)) {
+        if (returnType == EditorInfo.IME_ACTION_SEARCH && _keyModel.keyType == KeyType.RETURN) {
+            android.util.Log.d("CustomKeyButton", "Search action detected! returnType=$returnType, keyType=${_keyModel.keyType}")
             tvMain.text = ""
             setBackgroundDrawable(resources.getDrawable(R.drawable.shape_search_key))
             tvMain.setTextColor(Color.WHITE)
             val searchIcon = ContextCompat.getDrawable(context, R.drawable.ic_search)
             searchIcon?.setTint(Color.WHITE)
             ivIcon.setImageDrawable(searchIcon)
+            ivIcon.visibility = View.VISIBLE
         } else {
             tvMain.text = _keyModel.mainText
             tvMain.setTextColor(_keyModel.mainColor)
@@ -238,10 +240,12 @@ class CustomKeyButton @JvmOverloads constructor(
 
 
 
-        if(_keyModel.layout_weight != 0f && _keyModel.keyType != KeyType.SPACE){
+        if(_keyModel.layout_weight != 0f){
             val params1 = layoutParams as LinearLayout.LayoutParams
             params1.weight = _keyModel.layout_weight
+            params1.width = 0  // Weight를 사용할 때는 width를 0으로 설정해야 함
             layoutParams = params1
+            android.util.Log.d("CustomKeyButton", "Setting weight for ${_keyModel.keyType}: ${_keyModel.layout_weight}, mainText: ${_keyModel.mainText}")
         }
 
 
