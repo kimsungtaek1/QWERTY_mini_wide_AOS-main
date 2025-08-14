@@ -36,7 +36,7 @@
     <EditText
         android:id="@+id/inputField"
         android:layout_width="0dp"
-        android:layout_height="240dp"
+        android:layout_height="120dp"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:background="@android:drawable/editbox_background"
@@ -47,17 +47,38 @@
         android:textColor="@color/textPrimary"
         android:textColorHint="@color/key_text_secondary"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/vibrationIntensityText"
+        app:layout_constraintBottom_toTopOf="@+id/searchField"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    
+    <EditText
+        android:id="@+id/searchField"
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="4dp"
+        android:background="@android:drawable/editbox_background"
+        android:gravity="top|start"
+        android:hint="검색 테스트 (검색키를 눌러보세요)"
+        android:inputType="text"
+        android:imeOptions="actionSearch"
+        android:padding="16dp"
+        android:textColor="@color/textPrimary"
+        android:textColorHint="@color/key_text_secondary"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/vibrationIntensityText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/inputField" />
     
     <TextView
         android:id="@+id/vibrationIntensityText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
         android:text="시스템 진동 강도: 100"
         android:textColor="#FF0000"
         android:textSize="14sp"
@@ -65,7 +86,7 @@
         app:layout_constraintBottom_toTopOf="@+id/customKeyboard"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/inputField" />
+        app:layout_constraintTop_toBottomOf="@+id/searchField" />
 
     <ImageButton
         android:id="@+id/btnBack"

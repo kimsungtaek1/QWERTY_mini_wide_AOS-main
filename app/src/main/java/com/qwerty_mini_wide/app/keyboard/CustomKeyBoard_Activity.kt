@@ -10,6 +10,8 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
+import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
 import com.qwerty_mini_wide.app.R
 import com.qwerty_mini_wide.app.databinding.ViewCustomkeyboardBinding
@@ -22,6 +24,7 @@ var currentLanguage:CurrentLanguage = CurrentLanguage.ENG
 class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboardActionListener {
     private lateinit var binding: ViewCustomkeyboardBinding
     private lateinit var inputField: EditText
+    private lateinit var searchField: EditText
     private lateinit var vibrationIntensityText: TextView
     private var vibrator: Vibrator? = null
     private var audioManager: AudioManager? = null
@@ -52,7 +55,11 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
 
     fun bind(){
         inputField = binding.inputField
+        searchField = binding.root.findViewById(R.id.searchField)
         vibrationIntensityText = binding.root.findViewById(R.id.vibrationIntensityText)
+        
+        // 검색 필드 설정
+        setupSearchField()
         
         // 30개의 육각별과 유니코드를 기본 텍스트로 설정
         val starText = """
@@ -101,6 +108,19 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         // 시스템 진동 강도 표시 시작
         updateVibrationIntensityDisplay()
         handler.post(updateRunnable)
+    }
+    
+    private fun setupSearchField() {
+        searchField.setOnEditorActionListener { textView, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val searchText = textView.text.toString()
+                Toast.makeText(this, "검색: $searchText", Toast.LENGTH_SHORT).show()
+                android.util.Log.d("CustomKeyBoard_Activity", "Search key pressed with text: $searchText")
+                true
+            } else {
+                false
+            }
+        }
     }
     
     private fun updateVibrationIntensityDisplay() {
