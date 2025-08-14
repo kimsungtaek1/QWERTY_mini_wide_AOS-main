@@ -25,6 +25,8 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
     private lateinit var binding: ViewCustomkeyboardBinding
     private lateinit var inputField: EditText
     private lateinit var searchField: EditText
+    private lateinit var sendField: EditText
+    private lateinit var goField: EditText
     private lateinit var vibrationIntensityText: TextView
     private var vibrator: Vibrator? = null
     private var audioManager: AudioManager? = null
@@ -56,10 +58,15 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
     fun bind(){
         inputField = binding.inputField
         searchField = binding.root.findViewById(R.id.searchField)
+        sendField = binding.root.findViewById(R.id.sendField)
+        goField = binding.root.findViewById(R.id.goField)
         vibrationIntensityText = binding.root.findViewById(R.id.vibrationIntensityText)
         
-        // 검색 필드 설정
-        setupSearchField()
+        // 각 필드의 포커스 변경 시 키보드 업데이트
+        setupFieldFocusListeners()
+        
+        // 각 필드의 액션 처리
+        setupFieldActions()
         
         // 30개의 육각별과 유니코드를 기본 텍스트로 설정
         val starText = """
@@ -110,12 +117,60 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         handler.post(updateRunnable)
     }
     
-    private fun setupSearchField() {
+    private fun setupFieldFocusListeners() {
+        inputField.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.customKeyboard.initViews(0) // 기본 엔터키
+            }
+        }
+        
+        searchField.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.customKeyboard.initViews(EditorInfo.IME_ACTION_SEARCH)
+            }
+        }
+        
+        sendField.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.customKeyboard.initViews(EditorInfo.IME_ACTION_SEND)
+            }
+        }
+        
+        goField.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.customKeyboard.initViews(EditorInfo.IME_ACTION_GO)
+            }
+        }
+    }
+    
+    private fun setupFieldActions() {
         searchField.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val searchText = textView.text.toString()
-                Toast.makeText(this, "검색: $searchText", Toast.LENGTH_SHORT).show()
-                android.util.Log.d("CustomKeyBoard_Activity", "Search key pressed with text: $searchText")
+                val text = textView.text.toString()
+                Toast.makeText(this, "검색: $text", Toast.LENGTH_SHORT).show()
+                android.util.Log.d("CustomKeyBoard_Activity", "Search: $text")
+                true
+            } else {
+                false
+            }
+        }
+        
+        sendField.setOnEditorActionListener { textView, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEND) {
+                val text = textView.text.toString()
+                Toast.makeText(this, "전송: $text", Toast.LENGTH_SHORT).show()
+                android.util.Log.d("CustomKeyBoard_Activity", "Send: $text")
+                true
+            } else {
+                false
+            }
+        }
+        
+        goField.setOnEditorActionListener { textView, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_GO) {
+                val text = textView.text.toString()
+                Toast.makeText(this, "이동: $text", Toast.LENGTH_SHORT).show()
+                android.util.Log.d("CustomKeyBoard_Activity", "Go: $text")
                 true
             } else {
                 false
@@ -193,7 +248,22 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
             }
             KeyType.SHIFT -> { /* Handle shift mode */ }
             KeyType.ONSHIFT -> { /* Handle shift on mode */ }
-            KeyType.RETURN -> inputField.append("\n")
+            KeyType.RETURN -> {
+                // 현재 포커스된 필드 확인
+                val currentFocus = currentFocus as? EditText
+                when (currentFocus) {
+                    searchField -> {
+                        Toast.makeText(this, "검색: ${searchField.text}", Toast.LENGTH_SHORT).show()
+                    }
+                    sendField -> {
+                        Toast.makeText(this, "전송: ${sendField.text}", Toast.LENGTH_SHORT).show()
+                    }
+                    goField -> {
+                        Toast.makeText(this, "이동: ${goField.text}", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> inputField.append("\n")
+                }
+            }
             KeyType.LOCKSHIFT -> { /* Handle caps lock */ }
             KeyType.EMPTY -> { /* Do nothing */ }
         }

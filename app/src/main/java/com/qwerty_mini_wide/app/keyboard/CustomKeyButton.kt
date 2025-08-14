@@ -190,15 +190,63 @@ class CustomKeyButton @JvmOverloads constructor(
 
 
 
-        if (returnType == EditorInfo.IME_ACTION_SEARCH && _keyModel.keyType == KeyType.RETURN) {
-            android.util.Log.d("CustomKeyButton", "Search action detected! returnType=$returnType, keyType=${_keyModel.keyType}")
-            tvMain.text = ""
-            setBackgroundDrawable(resources.getDrawable(R.drawable.shape_search_key))
-            tvMain.setTextColor(Color.WHITE)
-            val searchIcon = ContextCompat.getDrawable(context, R.drawable.ic_search)
-            searchIcon?.setTint(Color.WHITE)
-            ivIcon.setImageDrawable(searchIcon)
-            ivIcon.visibility = View.VISIBLE
+        if (_keyModel.keyType == KeyType.RETURN) {
+            when (returnType) {
+                EditorInfo.IME_ACTION_SEARCH -> {
+                    android.util.Log.d("CustomKeyButton", "Search action detected! returnType=$returnType")
+                    tvMain.text = ""
+                    setBackgroundDrawable(resources.getDrawable(R.drawable.shape_search_key))
+                    tvMain.setTextColor(Color.WHITE)
+                    val searchIcon = ContextCompat.getDrawable(context, R.drawable.ic_action_search)
+                    searchIcon?.setTint(Color.WHITE)
+                    ivIcon.setImageDrawable(searchIcon)
+                    ivIcon.visibility = View.VISIBLE
+                }
+                EditorInfo.IME_ACTION_SEND -> {
+                    tvMain.text = ""
+                    setBackgroundDrawable(resources.getDrawable(R.drawable.shape_search_key))
+                    tvMain.setTextColor(Color.WHITE)
+                    val sendIcon = ContextCompat.getDrawable(context, R.drawable.ic_action_send)
+                    sendIcon?.setTint(Color.WHITE)
+                    ivIcon.setImageDrawable(sendIcon)
+                    ivIcon.visibility = View.VISIBLE
+                }
+                EditorInfo.IME_ACTION_GO -> {
+                    tvMain.text = ""
+                    setBackgroundDrawable(resources.getDrawable(R.drawable.shape_search_key))
+                    tvMain.setTextColor(Color.WHITE)
+                    val goIcon = ContextCompat.getDrawable(context, R.drawable.ic_action_go)
+                    goIcon?.setTint(Color.WHITE)
+                    ivIcon.setImageDrawable(goIcon)
+                    ivIcon.visibility = View.VISIBLE
+                }
+                else -> {
+                    // 기본 엔터키 설정
+                    tvMain.text = _keyModel.mainText
+                    tvMain.setTextColor(_keyModel.mainColor)
+                    tvMain.gravity = _keyModel.mainTextGravity
+                    
+                    // Apply individual margins to main text
+                    val params = tvMain.layoutParams as FrameLayout.LayoutParams
+                    params.setMargins(
+                        _keyModel.mainTextMarginLeft,
+                        _keyModel.mainTextMarginTop,
+                        _keyModel.mainTextMarginRight,
+                        _keyModel.mainTextMarginBottom
+                    )
+                    tvMain.layoutParams = params
+                    
+                    setBackgroundDrawable(resources.getDrawable(_keyModel.backgroundColor))
+
+                    if (_keyModel.image != 0) {
+                        val image = ContextCompat.getDrawable(context, _keyModel.image.toInt())
+                        image?.setTint(if (isLightMode(context)) Color.BLACK else Color.WHITE)
+                        ivIcon.setImageDrawable(resources.getDrawable( _keyModel.image))
+                    } else {
+                        ivIcon.setImageDrawable(null)
+                    }
+                }
+            }
         } else {
             tvMain.text = _keyModel.mainText
             tvMain.setTextColor(_keyModel.mainColor)
