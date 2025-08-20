@@ -14,14 +14,17 @@
     <color name="key_grey">#B8BFCB</color>
     <color name="key_darkgrey">#464747</color>
     <color name="key_keydarkgrey">#676767</color>
-    <color name="bg_darkkeyboard">#323232</color>
+    <color name="bg_darkkeyboard">#2D2D2D</color>
     <color name="suggestion_bg">#F3F3F8</color>
 
     <!-- 이미 있던 색상들 외에 아래 두 개를 추가 -->
     <color name="key_text_primary">#222222</color>
     <color name="key_text_secondary">#888888</color>
 
-    <color name="keyboard_bg">#d0d5dd</color>
+    <!-- 키보드 배경색: 라이트/다크 모드 -->
+    <color name="keyboard_bg_light">#D0D3D9</color>  <!-- 라이트 모드 배경색 -->
+    <color name="keyboard_bg_dark">#2D2D2D</color>   <!-- 다크 모드 배경색 -->
+    <color name="keyboard_bg">#D0D3D9</color>        <!-- 기본값 (호환성 유지) -->
     <color name="keyboardBackground">#F0F0F0</color>
     <color name="search">#007AFF</color>
 </resources>

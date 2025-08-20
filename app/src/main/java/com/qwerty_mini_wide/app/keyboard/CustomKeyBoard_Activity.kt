@@ -47,9 +47,9 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         audioManager = getSystemService(AUDIO_SERVICE) as? AudioManager
 
         if(KeyLetter.isLightMode){
-            binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg) )
+            binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg_light) )
         }else{
-            binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.bg_darkkeyboard) )
+            binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg_dark) )
         }
 
         bind()

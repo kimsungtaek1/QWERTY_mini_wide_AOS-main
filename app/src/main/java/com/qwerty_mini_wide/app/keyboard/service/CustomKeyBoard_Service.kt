@@ -84,9 +84,9 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
 
     fun setBackgroundBg(){
         if(KeyLetter.isLightMode){
-            binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg) )
+            binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg_light) )
         }else{
-            binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.bg_darkkeyboard) )
+            binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg_dark) )
         }
     }
 
