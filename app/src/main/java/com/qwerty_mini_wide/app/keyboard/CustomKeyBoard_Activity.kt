@@ -70,7 +70,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         
         // 30개의 육각별과 유니코드를 기본 텍스트로 설정
         val starText = """
-            1. ✱ (U+2731) HEAVY ASTERISK OPERATOR
+            1. * (U+002A) ASTERISK
             2. ✲ (U+2732) OPEN CENTRE ASTERISK  
             3. ✳ (U+2733) EIGHT SPOKED ASTERISK
             4. ✶ (U+2736) SIX POINTED BLACK STAR
