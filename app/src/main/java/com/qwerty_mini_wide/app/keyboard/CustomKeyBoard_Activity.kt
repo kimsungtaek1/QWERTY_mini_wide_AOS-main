@@ -25,10 +25,10 @@ var currentLanguage:CurrentLanguage = CurrentLanguage.ENG
 class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboardActionListener {
     private lateinit var binding: ViewCustomkeyboardBinding
     private lateinit var inputField: EditText
-    private lateinit var searchField: EditText
-    private lateinit var sendField: EditText
-    private lateinit var goField: EditText
-    private lateinit var vibrationIntensityText: TextView
+    private var searchField: EditText? = null
+    private var sendField: EditText? = null
+    private var goField: EditText? = null
+    private var vibrationIntensityText: TextView? = null
     private var vibrator: Vibrator? = null
     private var audioManager: AudioManager? = null
     private val handler = Handler(Looper.getMainLooper())
@@ -62,10 +62,10 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
 
     fun bind(){
         inputField = binding.inputField
-        searchField = binding.root.findViewById(R.id.searchField)
-        sendField = binding.root.findViewById(R.id.sendField)
-        goField = binding.root.findViewById(R.id.goField)
-        vibrationIntensityText = binding.root.findViewById(R.id.vibrationIntensityText)
+        searchField = binding.searchField
+        sendField = binding.sendField
+        goField = binding.goField
+        vibrationIntensityText = binding.vibrationIntensityText
         
         // 각 필드의 포커스 변경 시 키보드 업데이트
         setupFieldFocusListeners()
@@ -144,8 +144,8 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
             // 이전 필드로 포커스 이동
             when (currentFocus) {
                 searchField -> inputField.requestFocus()
-                sendField -> searchField.requestFocus()
-                goField -> sendField.requestFocus()
+                sendField -> searchField?.requestFocus()
+                goField -> sendField?.requestFocus()
                 else -> { /* 첫 번째 필드에서는 아무 동작 없음 */ }
             }
         }
@@ -153,9 +153,9 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         btnArrowDown?.setOnClickListener {
             // 다음 필드로 포커스 이동
             when (currentFocus) {
-                inputField -> searchField.requestFocus()
-                searchField -> sendField.requestFocus()
-                sendField -> goField.requestFocus()
+                inputField -> searchField?.requestFocus()
+                searchField -> sendField?.requestFocus()
+                sendField -> goField?.requestFocus()
                 else -> { /* 마지막 필드에서는 아무 동작 없음 */ }
             }
         }
@@ -174,19 +174,19 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
             }
         }
         
-        searchField.setOnFocusChangeListener { _, hasFocus ->
+        searchField?.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 binding.customKeyboard.initViews(EditorInfo.IME_ACTION_SEARCH)
             }
         }
         
-        sendField.setOnFocusChangeListener { _, hasFocus ->
+        sendField?.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 binding.customKeyboard.initViews(EditorInfo.IME_ACTION_SEND)
             }
         }
         
-        goField.setOnFocusChangeListener { _, hasFocus ->
+        goField?.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 binding.customKeyboard.initViews(EditorInfo.IME_ACTION_GO)
             }
@@ -194,7 +194,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
     }
     
     private fun setupFieldActions() {
-        searchField.setOnEditorActionListener { textView, actionId, _ ->
+        searchField?.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val text = textView.text.toString()
                 Toast.makeText(this, "검색: $text", Toast.LENGTH_SHORT).show()
@@ -205,7 +205,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
             }
         }
         
-        sendField.setOnEditorActionListener { textView, actionId, _ ->
+        sendField?.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEND) {
                 val text = textView.text.toString()
                 Toast.makeText(this, "전송: $text", Toast.LENGTH_SHORT).show()
@@ -216,7 +216,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
             }
         }
         
-        goField.setOnEditorActionListener { textView, actionId, _ ->
+        goField?.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_GO) {
                 val text = textView.text.toString()
                 Toast.makeText(this, "이동: $text", Toast.LENGTH_SHORT).show()
@@ -242,7 +242,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         }
         
         val displayText = "진동강도: $intensity | 모드: $ringerModeText"
-        vibrationIntensityText.text = displayText
+        vibrationIntensityText?.text = displayText
     }
     
     override fun onDestroy() {
@@ -325,13 +325,13 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
                 val currentFocus = currentFocus as? EditText
                 when (currentFocus) {
                     searchField -> {
-                        Toast.makeText(this, "검색: ${searchField.text}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "검색: ${searchField?.text}", Toast.LENGTH_SHORT).show()
                     }
                     sendField -> {
-                        Toast.makeText(this, "전송: ${sendField.text}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "전송: ${sendField?.text}", Toast.LENGTH_SHORT).show()
                     }
                     goField -> {
-                        Toast.makeText(this, "이동: ${goField.text}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "이동: ${goField?.text}", Toast.LENGTH_SHORT).show()
                     }
                     else -> inputField.append("\n")
                 }
