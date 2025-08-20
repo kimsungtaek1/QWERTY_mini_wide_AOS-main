@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 가로 모드에서 키보드 좌우 패딩 -->
-    <dimen name="keyboard_horizontal_padding">100dp</dimen>
+    <!-- 가로 모드에서 키보드 좌우 패딩 - 코드에서 동적으로 설정하므로 0dp로 유지 -->
+    <dimen name="keyboard_horizontal_padding">0dp</dimen>
     
 </resources>

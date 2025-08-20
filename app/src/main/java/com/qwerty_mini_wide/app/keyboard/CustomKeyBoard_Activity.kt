@@ -53,6 +53,9 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
 
         // 실제 키보드와 동일하게 R.color.keyboard_bg 사용 (시스템이 다크모드에 따라 자동 선택)
         binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg))
+        
+        // 키보드 레이아웃 업데이트 (가로/세로 모드에 따른 패딩 적용)
+        updateKeyboardLayout()
 
         bind()
     }
@@ -245,6 +248,28 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(updateRunnable)
+    }
+    
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // 화면 회전 시 키보드 레이아웃 업데이트
+        updateKeyboardLayout()
+        // 키보드 뷰 재초기화
+        binding.customKeyboard.updateConfiguration()
+        binding.customKeyboard.requestLayout()
+        binding.customKeyboard.invalidate()
+    }
+    
+    private fun updateKeyboardLayout() {
+        // 실제 키보드 서비스와 동일하게 가로/세로 모드에 따른 레이아웃 업데이트
+        val configuration = resources.configuration
+        val orientation = configuration.orientation
+        
+        // 키보드가 다시 초기화되도록 요청
+        binding.customKeyboard.post {
+            binding.customKeyboard.requestLayout()
+            binding.customKeyboard.invalidate()
+        }
     }
 
     override fun onKey(code: KeyType, text: String?) {

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/keyboard_bg_light">
+    android:background="@color/keyboard_bg">
 
     <!-- 1) 구분선 - 0.5dp 두께 -->
     <View

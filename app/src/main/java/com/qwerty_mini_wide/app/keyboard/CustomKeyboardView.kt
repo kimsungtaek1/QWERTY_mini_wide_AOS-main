@@ -230,21 +230,26 @@ class CustomKeyboardView @JvmOverloads constructor(
     }
     
     private fun setupKeyboardPadding() {
-        // 키보드 영역을 감싸는 LinearLayout 찾기 (suggestion bar 다음의 LinearLayout)
-        val keyboardContainer = (getChildAt(0) as? ViewGroup)?.getChildAt(1) as? LinearLayout
-        if (keyboardContainer != null) {
-            val displayMetrics = resources.displayMetrics
-            val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
-            val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
-            
-            // 가로 모드일 때만 좌우 패딩 20% 적용
-            val horizontalPadding = if (screenWidthDp > screenHeightDp) {
-                (displayMetrics.widthPixels * 0.20f).toInt()
-            } else {
-                0
+        // custom_keyboard_view.xml의 구조에 맞게 수정
+        // 구조: LinearLayout (root) > View (divider) + include (suggestion bar) + LinearLayout (keyboard container)
+        val rootLayout = getChildAt(0) as? ViewGroup
+        if (rootLayout != null && rootLayout.childCount > 2) {
+            // 세 번째 자식이 키보드 컨테이너 (index 2)
+            val keyboardContainer = rootLayout.getChildAt(2) as? LinearLayout
+            if (keyboardContainer != null) {
+                val displayMetrics = resources.displayMetrics
+                val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
+                val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
+                
+                // 가로 모드일 때만 좌우 패딩 20% 적용
+                val horizontalPadding = if (screenWidthDp > screenHeightDp) {
+                    (displayMetrics.widthPixels * 0.20f).toInt()
+                } else {
+                    0
+                }
+                
+                keyboardContainer.setPadding(horizontalPadding, 0, horizontalPadding, 0)
             }
-            
-            keyboardContainer.setPadding(horizontalPadding, 0, horizontalPadding, 0)
         }
         
         // 스페이스 키 아래 여백 조정
