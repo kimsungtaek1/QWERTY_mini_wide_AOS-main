@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 가로 모드용 키보드 레이아웃 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/keyboard_bg_light">
+
+    <!-- 1) 구분선 - 0.5dp 두께 -->
+    <View
+        android:id="@+id/suggestion_bar_divider"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/divider" />
+        
+    <!-- 2) 제안 바 - 전체 너비 -->
+    <include
+        layout="@layout/suggestion_bar"
+        />
+
+    <!-- 키보드 영역을 감싸는 LinearLayout - 가로 모드용 패딩 적용 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/keyboard_horizontal_padding"
+        android:paddingEnd="@dimen/keyboard_horizontal_padding">
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="4dp" />
+    
+    <!-- 첫 번째 행: QWERTY 레이아웃 -->
+    <LinearLayout
+        android:id="@+id/first_linear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="2dp"
+            android:layout_height="match_parent" />
+            
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/key_background_selector"
+            app:keyStyle="white"
+            app:lt_Text="ㅍ"
+            app:mainText="ㅂ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:lt_Text="ㅊ"
+            app:mainText="ㅈ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:lt_Text="ㅌ"
+            app:mainText="ㄷ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:lt_Text="ㅋ"
+            app:mainText="ㄱ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:lt_Text=""
+            app:mainText="ㅅ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:lt_Text="ㅛ"
+            app:mainText="ㅗ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:lt_Text="ㅕ"
+            app:mainText="ㅏ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:mainText="ㅣ" />
+
+        <Space
+            android:layout_width="2dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="4dp" />
+    
+    <!-- 두 번째 행: ASDFGHJKL 레이아웃 -->
+    <LinearLayout
+        android:id="@+id/second_linear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="2dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:mainText="ㅁ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:mainText="ㄴ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:mainText="ㅇ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:mainText="ㄹ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:mainText="ㅎ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:lt_Text="ㅠ"
+            app:mainText="ㅜ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:lt_Text="ㅕ"
+            app:mainText="ㅓ" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:keyStyle="white"
+            app:mainText="ㅡ" />
+
+        <Space
+            android:layout_width="2dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="4dp" />
+    
+    <!-- 세 번째 행: 기능키 행 -->
+    <LinearLayout
+        android:id="@+id/funtion_linear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="2dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.2"
+            app:icon="@drawable/ic_shift"
+            app:keyStyle="grey" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.2"
+            app:keyStyle="grey"
+            app:mainText="123" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="4"
+            app:keyStyle="white"
+            app:mainText="Space" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            app:icon="@drawable/ic_enter"
+            app:keyStyle="grey" />
+
+        <Space
+            android:layout_width="4dp"
+            android:layout_height="match_parent" />
+
+        <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.2"
+            app:icon="@drawable/ic_backspace"
+            app:keyStyle="grey" />
+
+        <Space
+            android:layout_width="2dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <Space
+        android:id="@+id/space_below_keyboard"
+        android:layout_width="match_parent"
+        android:layout_height="12dp" />
+        
+    </LinearLayout>
+    <!-- 키보드 영역 끝 -->
+    
+</LinearLayout>

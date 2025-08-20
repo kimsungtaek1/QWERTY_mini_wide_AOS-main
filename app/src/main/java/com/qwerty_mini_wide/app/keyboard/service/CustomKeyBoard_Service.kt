@@ -279,14 +279,37 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         try {
             // 화면 회전 시 키보드 재초기화
             if (::binding.isInitialized) {
+                // 키보드 뷰 재생성 필요시 처리
+                val orientation = newConfig.orientation
+                Log.d("CustomKeyBoard_Service", "Configuration changed - Orientation: $orientation")
+                
+                // 레이아웃이 변경되었으므로 뷰를 다시 inflate
+                val inputView = onCreateInputView()
+                setInputView(inputView)
+                
+                // 키보드 상태 복원
                 binding.customKeyboard.updateConfiguration()
                 binding.customKeyboard.requestLayout()
                 binding.customKeyboard.invalidate()
+                
+                // 테마 및 제안 바 업데이트
                 applySystemTheme()
-                setupSuggestionBar() // suggestion bar 크기 재조정
+                setupSuggestionBar()
+                
+                // 현재 액션 ID 유지
+                binding.customKeyboard.initViews(actionId)
             }
         } catch (e: Exception) {
             Log.e("CustomKeyBoard_Service", "Error in onConfigurationChanged: ${e.message}", e)
+            // 실패 시 기본 뷰 유지
+            try {
+                if (::binding.isInitialized) {
+                    binding.customKeyboard.requestLayout()
+                    binding.customKeyboard.invalidate()
+                }
+            } catch (fallbackError: Exception) {
+                Log.e("CustomKeyBoard_Service", "Fallback error: ${fallbackError.message}", fallbackError)
+            }
         }
     }
 
