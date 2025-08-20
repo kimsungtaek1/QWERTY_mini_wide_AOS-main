@@ -69,10 +69,14 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
     override fun onCreateInputView(): View {
         // 커스텀 키보드 레이아웃 inflate
         try {
-            if (!::binding.isInitialized) {
-                val view = layoutInflater.inflate(R.layout.service_keyboardview, null)
-                binding = ServiceKeyboardviewBinding.bind(view)
+            // 기존 뷰가 부모를 가지고 있으면 제거
+            if (::binding.isInitialized) {
+                (binding.root.parent as? android.view.ViewGroup)?.removeView(binding.root)
             }
+            
+            // 새로운 뷰 생성
+            val view = layoutInflater.inflate(R.layout.service_keyboardview, null)
+            binding = ServiceKeyboardviewBinding.bind(view)
 
             binding.customKeyboard.setOnKeyboardActionListener(this)
 
@@ -283,9 +287,18 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
                 val orientation = newConfig.orientation
                 Log.d("CustomKeyBoard_Service", "Configuration changed - Orientation: $orientation")
                 
-                // 레이아웃이 변경되었으므로 뷰를 다시 inflate
-                val inputView = onCreateInputView()
-                setInputView(inputView)
+                // 기존 뷰의 parent를 제거하고 새로운 뷰를 생성
+                (binding.root.parent as? android.view.ViewGroup)?.removeView(binding.root)
+                
+                // 새로운 뷰를 inflate
+                val view = layoutInflater.inflate(R.layout.service_keyboardview, null)
+                binding = ServiceKeyboardviewBinding.bind(view)
+                
+                // 리스너 재설정
+                binding.customKeyboard.setOnKeyboardActionListener(this)
+                
+                // 입력 뷰 설정
+                setInputView(binding.root)
                 
                 // 키보드 상태 복원
                 binding.customKeyboard.updateConfiguration()
