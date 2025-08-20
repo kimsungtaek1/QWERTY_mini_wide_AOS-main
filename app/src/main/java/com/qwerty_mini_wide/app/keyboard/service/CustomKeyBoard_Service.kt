@@ -550,13 +550,20 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         if (KeyLetter.isLightMode) {
             suggestionBar.setBackgroundColor(ContextCompat.getColor(this, R.color.key_white))
         } else {
-            suggestionBar.setBackgroundColor(ContextCompat.getColor(this, R.color.key_keydarkgrey))
+            // iOS 스타일 다크 모드 색상 적용
+            suggestionBar.setBackgroundColor(ContextCompat.getColor(this, R.color.suggestion_bar_dark_bg))
         }
         
-        // 화살표 버튼 크기 조정
+        // 화살표 버튼 크기 조정 및 색상 설정
         val arrowSize = (suggestionBarHeight * 0.5f).toInt()
-        val btnArrowDown = suggestionBar.findViewById<View>(R.id.btnArrowDown)
-        val btnArrowUp = suggestionBar.findViewById<View>(R.id.btnArrowUp)
+        val btnArrowDown = suggestionBar.findViewById<android.widget.ImageButton>(R.id.btnArrowDown)
+        val btnArrowUp = suggestionBar.findViewById<android.widget.ImageButton>(R.id.btnArrowUp)
+        
+        // 화살표 버튼 색상 설정 (다크 모드에서 iOS 스타일)
+        if (!KeyLetter.isLightMode) {
+            btnArrowDown?.setColorFilter(ContextCompat.getColor(this, R.color.suggestion_arrow_inactive))
+            btnArrowUp?.setColorFilter(ContextCompat.getColor(this, R.color.suggestion_arrow_inactive))
+        }
         
         btnArrowDown?.let { btn ->
             val params = btn.layoutParams
@@ -571,9 +578,14 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
             btn.layoutParams = params
         }
         
-        // 텍스트 크기 조정
+        // 텍스트 크기 조정 및 색상 설정
         val tvDone = suggestionBar.findViewById<android.widget.TextView>(R.id.tvDone)
         tvDone?.textSize = suggestionBarHeight * 0.35f / displayMetrics.density
+        
+        // 다크 모드에서 '완료' 버튼 색상 설정
+        if (!KeyLetter.isLightMode) {
+            tvDone?.setTextColor(ContextCompat.getColor(this, R.color.suggestion_btn_text))
+        }
     }
     
     private fun getSystemVibrationIntensity(): Int {

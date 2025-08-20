@@ -132,11 +132,19 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         val btnArrowDown = binding.customKeyboard.findViewById<android.widget.ImageButton>(R.id.btnArrowDown)
         val tvDone = binding.customKeyboard.findViewById<android.widget.TextView>(R.id.tvDone)
         
+        // 다크 모드에서 화살표 버튼 및 텍스트 색상 설정
+        if (!KeyLetter.isLightMode) {
+            btnArrowUp?.setColorFilter(resources.getColor(R.color.suggestion_arrow_inactive))
+            btnArrowDown?.setColorFilter(resources.getColor(R.color.suggestion_arrow_inactive))
+            tvDone?.setTextColor(resources.getColor(R.color.suggestion_btn_text))
+        }
+        
         // Suggestion bar 배경색을 실제 키보드와 동일하게 설정
         if (KeyLetter.isLightMode) {
             suggestionBar?.setBackgroundColor(resources.getColor(R.color.key_white))
         } else {
-            suggestionBar?.setBackgroundColor(resources.getColor(R.color.key_keydarkgrey))
+            // iOS 스타일 다크 모드 색상 적용
+            suggestionBar?.setBackgroundColor(resources.getColor(R.color.suggestion_bar_dark_bg))
         }
         
         // iOS 스타일 버튼 기능 설정 (미리보기에서는 포커스 이동 시뮬레이션)
