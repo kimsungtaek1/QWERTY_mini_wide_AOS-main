@@ -27,16 +27,14 @@ import com.qwerty_mini_wide.app.keyboard.model.KeyType
 // import com.qwerty_mini_wide.app.keyboard.manager.HangulAutomata // Korean support removed
 // import com.qwerty_mini_wide.app.keyboard.manager.HanjaManager // Chinese support removed
 import com.qwerty_mini_wide.app.keyboard.manager.InputManager
-import com.qwerty_mini_wide.app.keyboard.model.HanjaEntry
 import com.qwerty_mini_wide.app.keyboard.service.CustomKeyBoard_Service
-import com.qwerty_mini_wide.app.keyboard.viewholder.Hanja_Adapter
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
 
 class CustomKeyboardView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
-) : LinearLayout(context, attrs),Hanja_Adapter.OnItemClickListener {
+) : LinearLayout(context, attrs) {
 
 
 
@@ -102,9 +100,6 @@ class CustomKeyboardView @JvmOverloads constructor(
         setupKeyboardPadding()
         setupKeySpacing()
         initViews(0) // 초기에는 actionId가 0
-        binding.hanjaRecycler.layoutManager = LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false)
-        binding.hanjaRecycler.adapter = Hanja_Adapter(this)
-
         // HanjaManager.init(context) // Chinese support removed
         
         // Initialize popup window
@@ -121,11 +116,6 @@ class CustomKeyboardView @JvmOverloads constructor(
         setFuntion(KeyLetter.getEngFunction(), actionId)
     }
 
-    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-    override fun onItemClick(hanjaEntry: HanjaEntry) {
-        // Chinese character support removed - disabled
-        hanjaLinearIsVisible(false)
-    }
 
     // 마지막 단어 저장용
     var chnLastWord: String = ""
@@ -171,8 +161,6 @@ class CustomKeyboardView @JvmOverloads constructor(
             Log.d("MyKeyboardService", ">>> '$lastWordWithSpaces'")
         }
 
-        // Chinese support removed - disable hanja lookup
-        hanjaLinearIsVisible(false)
 
 
 
@@ -223,15 +211,21 @@ class CustomKeyboardView @JvmOverloads constructor(
         val padding = (suggestionBarHeight * 0.15f).toInt()
         suggestionBar.setPadding(padding * 2, padding, padding * 2, padding)
         
-        // 클릭 리스너 설정
-        btnArrowDown.setOnClickListener {
-            listener?.onKey(KeyType.LETTER, "ㅏ")
-        }
+        // 클릭 리스너 설정 - iOS 스타일 기능
         btnArrowUp.setOnClickListener {
-           // listener?.onKey(CODE_NEXT, null)
+            // 이전 입력 필드로 이동
+            val service = context as? CustomKeyBoard_Service
+            service?.currentInputConnection?.performEditorAction(android.view.inputmethod.EditorInfo.IME_ACTION_PREVIOUS)
+        }
+        btnArrowDown.setOnClickListener {
+            // 다음 입력 필드로 이동
+            val service = context as? CustomKeyBoard_Service
+            service?.currentInputConnection?.performEditorAction(android.view.inputmethod.EditorInfo.IME_ACTION_NEXT)
         }
         tvDone.setOnClickListener {
-           // listener?.onKey(CODE_DONE, null)
+            // 키보드 숨기기
+            val service = context as? CustomKeyBoard_Service
+            service?.requestHideSelf(0)
         }
     }
     
@@ -388,14 +382,6 @@ class CustomKeyboardView @JvmOverloads constructor(
         }
     }
 
-    fun hanjaLinearIsVisible(isVisible:Boolean){
-
-        if(isVisible){
-            binding.hanjaLinear.visibility = VISIBLE
-        }else{
-            binding.hanjaLinear.visibility = GONE
-        }
-    }
 
     fun Context.loadJsonFromAssets(fileName: String): String {
         assets.open(fileName).use { inputStream ->
@@ -470,7 +456,6 @@ class CustomKeyboardView @JvmOverloads constructor(
 
 
             key.setOnClickListener {
-                hanjaLinearIsVisible(false)
                 val icon = key.getIconRes()
                 val main = key.getMainText()
                 val keyModel = key.keyModel

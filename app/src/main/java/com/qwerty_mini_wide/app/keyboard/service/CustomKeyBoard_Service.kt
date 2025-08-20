@@ -54,53 +54,70 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
 
     override fun onCreate() {
         super.onCreate()
-        val view = layoutInflater.inflate(R.layout.service_keyboardview, null)
-        binding = ServiceKeyboardviewBinding.bind(view)
-        vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
-        audioManager = getSystemService(AUDIO_SERVICE) as? AudioManager
+        try {
+            val view = layoutInflater.inflate(R.layout.service_keyboardview, null)
+            binding = ServiceKeyboardviewBinding.bind(view)
+            vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
+            audioManager = getSystemService(AUDIO_SERVICE) as? AudioManager
+        } catch (e: Exception) {
+            Log.e("CustomKeyBoard_Service", "Error in onCreate: ${e.message}", e)
+        }
     }
 
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateInputView(): View {
         // 커스텀 키보드 레이아웃 inflate
+        try {
+            if (!::binding.isInitialized) {
+                val view = layoutInflater.inflate(R.layout.service_keyboardview, null)
+                binding = ServiceKeyboardviewBinding.bind(view)
+            }
 
+            binding.customKeyboard.setOnKeyboardActionListener(this)
 
-        binding.customKeyboard.setOnKeyboardActionListener(this)
+            setBackgroundBg()
+            setupSuggestionBar()
+            // suggestion bar를 보이도록 설정 - 숨김 처리 제거
 
-        setBackgroundBg()
-        setupSuggestionBar()
-        binding.customKeyboard.findViewById<LinearLayout>(R.id.suggestion_bar).visibility = GONE
+            val extracted = currentInputConnection?.getExtractedText(ExtractedTextRequest(), 0)
+            previousSelStart = extracted?.selectionStart ?: -1
 
-        val extracted = currentInputConnection.getExtractedText(ExtractedTextRequest(), 0)
-        previousSelStart = extracted?.selectionStart ?: -1
-
-        typedBuffer.clear()
-        //requestLocationPermission()
-        return binding.root
+            typedBuffer.clear()
+            //requestLocationPermission()
+            return binding.root
+        } catch (e: Exception) {
+            Log.e("CustomKeyBoard_Service", "Error in onCreateInputView: ${e.message}", e)
+            // 기본 뷰를 반환하여 크래시 방지
+            return View(this)
+        }
     }
 
 
 
     fun setBackgroundBg(){
-        if(KeyLetter.isLightMode){
-            binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg_light) )
-        }else{
-            binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg_dark) )
-        }
+        // 시스템 테마에 따라 자동으로 적절한 색상이 선택됨
+        binding.customKeyboard.setBackgroundColor(ContextCompat.getColor(this, R.color.keyboard_bg))
     }
 
 
     override fun onStartInputView(editorInfo: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(editorInfo, restarting)
-        // 키보드 상태 및 뷰 완전 초기화
-        binding.customKeyboard.composingLength = 0
-        // binding.customKeyboard.automata = HangulAutomata() // Korean support removed
-        binding.customKeyboard.currentState = KeyType.ENG // 기본값(필요시 변경)
-        currentLanguage = com.qwerty_mini_wide.app.keyboard.model.CurrentLanguage.ENG // 기본값(필요시 변경)
-        actionId = (editorInfo?.imeOptions ?: 0) and EditorInfo.IME_MASK_ACTION
-        binding.customKeyboard.initViews(actionId) // 뷰도 항상 초기화
-        typedBuffer.clear()
+        try {
+            if (!::binding.isInitialized) {
+                return
+            }
+            // 키보드 상태 및 뷰 완전 초기화
+            binding.customKeyboard.composingLength = 0
+            // binding.customKeyboard.automata = HangulAutomata() // Korean support removed
+            binding.customKeyboard.currentState = KeyType.ENG // 기본값(필요시 변경)
+            currentLanguage = com.qwerty_mini_wide.app.keyboard.model.CurrentLanguage.ENG // 기본값(필요시 변경)
+            actionId = (editorInfo?.imeOptions ?: 0) and EditorInfo.IME_MASK_ACTION
+            binding.customKeyboard.initViews(actionId) // 뷰도 항상 초기화
+            typedBuffer.clear()
+        } catch (e: Exception) {
+            Log.e("CustomKeyBoard_Service", "Error in onStartInputView: ${e.message}", e)
+        }
     }
 
     override fun onKey(code: KeyType, text: String?) {
@@ -250,7 +267,27 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
         super.onStartInput(attribute, restarting)
-        applySystemTheme()
+        try {
+            applySystemTheme()
+        } catch (e: Exception) {
+            Log.e("CustomKeyBoard_Service", "Error in onStartInput: ${e.message}", e)
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        try {
+            // 화면 회전 시 키보드 재초기화
+            if (::binding.isInitialized) {
+                binding.customKeyboard.updateConfiguration()
+                binding.customKeyboard.requestLayout()
+                binding.customKeyboard.invalidate()
+                applySystemTheme()
+                setupSuggestionBar() // suggestion bar 크기 재조정
+            }
+        } catch (e: Exception) {
+            Log.e("CustomKeyBoard_Service", "Error in onConfigurationChanged: ${e.message}", e)
+        }
     }
 
     private fun applySystemTheme() {
@@ -260,13 +297,18 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
     }
 
     private fun updateKeyboardAppearance(isDay: Boolean) {
-
-        KeyLetter.isLightMode = isDay
-        Log.i("Is LightMode : ", KeyLetter.isLightMode.toString())
-        Log.i("Is LightMode : ", isDay.toString())
-        binding.customKeyboard.initViews(actionId)
-        setBackgroundBg()
-
+        try {
+            if (!::binding.isInitialized) {
+                return
+            }
+            KeyLetter.isLightMode = isDay
+            Log.i("Is LightMode : ", KeyLetter.isLightMode.toString())
+            Log.i("Is LightMode : ", isDay.toString())
+            binding.customKeyboard.initViews(actionId)
+            setBackgroundBg()
+        } catch (e: Exception) {
+            Log.e("CustomKeyBoard_Service", "Error in updateKeyboardAppearance: ${e.message}", e)
+        }
     }
 
     private fun setComposingTextWithoutUnderline(text: String?) {
@@ -453,12 +495,6 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         }
     }
     
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        setupSuggestionBar()
-        binding.customKeyboard.updateConfiguration()
-    }
-    
     private fun setupSuggestionBar() {
         val suggestionBar = binding.customKeyboard.findViewById<LinearLayout>(R.id.suggestion_bar)
         val displayMetrics = resources.displayMetrics
@@ -473,6 +509,13 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         val layoutParams = suggestionBar.layoutParams
         layoutParams.height = suggestionBarHeight
         suggestionBar.layoutParams = layoutParams
+        
+        // suggestion bar 배경색을 키 색상과 일치시키기
+        if (KeyLetter.isLightMode) {
+            suggestionBar.setBackgroundColor(ContextCompat.getColor(this, R.color.key_white))
+        } else {
+            suggestionBar.setBackgroundColor(ContextCompat.getColor(this, R.color.key_keydarkgrey))
+        }
         
         // 화살표 버튼 크기 조정
         val arrowSize = (suggestionBarHeight * 0.5f).toInt()

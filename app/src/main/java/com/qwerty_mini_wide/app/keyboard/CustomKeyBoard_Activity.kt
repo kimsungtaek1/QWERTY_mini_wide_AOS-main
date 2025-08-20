@@ -18,6 +18,7 @@ import com.qwerty_mini_wide.app.databinding.ViewCustomkeyboardBinding
 import com.qwerty_mini_wide.app.keyboard.model.CurrentLanguage
 import com.qwerty_mini_wide.app.keyboard.model.KeyLetter
 import com.qwerty_mini_wide.app.keyboard.model.KeyType
+import android.content.res.Configuration
 
 var currentLanguage:CurrentLanguage = CurrentLanguage.ENG
 
@@ -46,11 +47,12 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
         audioManager = getSystemService(AUDIO_SERVICE) as? AudioManager
 
-        if(KeyLetter.isLightMode){
-            binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg_light) )
-        }else{
-            binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg_dark) )
-        }
+        // 시스템의 다크모드 설정 확인 및 KeyLetter에 반영
+        val nightModeFlags = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        KeyLetter.isLightMode = nightModeFlags != Configuration.UI_MODE_NIGHT_YES
+
+        // 실제 키보드와 동일하게 R.color.keyboard_bg 사용 (시스템이 다크모드에 따라 자동 선택)
+        binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg))
 
         bind()
     }
@@ -112,9 +114,54 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         // 키보드 액션 리스너 설정
         binding.customKeyboard.setOnKeyboardActionListener(this)
         
+        // Suggestion bar 버튼 설정
+        setupSuggestionBarButtons()
+        
         // 시스템 진동 강도 표시 시작
         updateVibrationIntensityDisplay()
         handler.post(updateRunnable)
+    }
+    
+    private fun setupSuggestionBarButtons() {
+        // Suggestion bar 버튼 찾기
+        val suggestionBar = binding.customKeyboard.findViewById<android.widget.LinearLayout>(R.id.suggestion_bar)
+        val btnArrowUp = binding.customKeyboard.findViewById<android.widget.ImageButton>(R.id.btnArrowUp)
+        val btnArrowDown = binding.customKeyboard.findViewById<android.widget.ImageButton>(R.id.btnArrowDown)
+        val tvDone = binding.customKeyboard.findViewById<android.widget.TextView>(R.id.tvDone)
+        
+        // Suggestion bar 배경색을 실제 키보드와 동일하게 설정
+        if (KeyLetter.isLightMode) {
+            suggestionBar?.setBackgroundColor(resources.getColor(R.color.key_white))
+        } else {
+            suggestionBar?.setBackgroundColor(resources.getColor(R.color.key_keydarkgrey))
+        }
+        
+        // iOS 스타일 버튼 기능 설정 (미리보기에서는 포커스 이동 시뮬레이션)
+        btnArrowUp?.setOnClickListener {
+            // 이전 필드로 포커스 이동
+            when (currentFocus) {
+                searchField -> inputField.requestFocus()
+                sendField -> searchField.requestFocus()
+                goField -> sendField.requestFocus()
+                else -> { /* 첫 번째 필드에서는 아무 동작 없음 */ }
+            }
+        }
+        
+        btnArrowDown?.setOnClickListener {
+            // 다음 필드로 포커스 이동
+            when (currentFocus) {
+                inputField -> searchField.requestFocus()
+                searchField -> sendField.requestFocus()
+                sendField -> goField.requestFocus()
+                else -> { /* 마지막 필드에서는 아무 동작 없음 */ }
+            }
+        }
+        
+        tvDone?.setOnClickListener {
+            // 키보드 숨기기 시뮬레이션 (포커스 제거)
+            currentFocus?.clearFocus()
+            Toast.makeText(this, "완료", Toast.LENGTH_SHORT).show()
+        }
     }
     
     private fun setupFieldFocusListeners() {

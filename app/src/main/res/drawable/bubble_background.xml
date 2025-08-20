@@ -63,20 +63,17 @@
     <item android:bottom="1dp">
         <shape android:shape="rectangle">
             <gradient
-                android:startColor="#E8E8E8"
-                android:endColor="#D0D0D0"
+                android:startColor="#E0E0E0"
+                android:endColor="#C8C8C8"
                 android:angle="270" />
             <corners android:radius="8dp" />
         </shape>
     </item>
     
-    <!-- 말풍선 본체 내부 (그라데이션 효과) -->
+    <!-- 말풍선 본체 내부 (흰색) -->
     <item android:bottom="1.3dp" android:left="0.3dp" android:right="0.3dp" android:top="0.3dp">
         <shape android:shape="rectangle">
-            <gradient
-                android:startColor="#FFFFFF"
-                android:endColor="#F8F8F8"
-                android:angle="270" />
+            <solid android:color="@color/key_white" />
             <corners android:radius="7.7dp" />
             <padding
                 android:left="12dp"
@@ -86,7 +83,7 @@
         </shape>
     </item>
     
-    <!-- 꼬리 본체 (더 뛰족한 삼각형) -->
+    <!-- 꼬리 본체 (흰색) -->
     <item
         android:gravity="bottom|center_horizontal"
         android:bottom="-5dp">
@@ -98,7 +95,7 @@
                 <size
                     android:width="7dp"
                     android:height="7dp" />
-                <solid android:color="#FAFAFA" />
+                <solid android:color="@color/key_white" />
             </shape>
         </rotate>
     </item>
@@ -124,7 +121,7 @@
         </rotate>
     </item>
     
-    <!-- 꼬리의 윗부분을 가리는 사각형 (그라데이션) -->
+    <!-- 꼬리의 윗부분을 가리는 사각형 (흰색) -->
     <item
         android:gravity="bottom|center_horizontal"
         android:bottom="0dp">
@@ -132,10 +129,7 @@
             <size
                 android:width="10dp"
                 android:height="4dp" />
-            <gradient
-                android:startColor="#FFFFFF"
-                android:endColor="#F8F8F8"
-                android:angle="270" />
+            <solid android:color="@color/key_white" />
         </shape>
     </item>
 </layer-list>

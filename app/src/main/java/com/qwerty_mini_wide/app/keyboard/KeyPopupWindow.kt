@@ -90,11 +90,19 @@ class KeyPopupWindow(private val context: Context) {
     private fun updateStyle() {
         val isLightMode = KeyLetter.isLightMode
         popupView?.findViewById<View>(R.id.popup_container)?.apply {
-            setBackgroundResource(R.drawable.bubble_background)
+            if (isLightMode) {
+                setBackgroundResource(R.drawable.bubble_background)
+            } else {
+                setBackgroundResource(R.drawable.bubble_background_dark)
+            }
         }
         
         popupView?.findViewById<TextView>(R.id.popup_text)?.apply {
-            setTextColor(context.getColor(android.R.color.black))
+            if (isLightMode) {
+                setTextColor(context.getColor(android.R.color.black))
+            } else {
+                setTextColor(context.getColor(android.R.color.white))
+            }
         }
     }
     

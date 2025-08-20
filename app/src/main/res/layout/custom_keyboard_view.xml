@@ -7,7 +7,14 @@
     android:orientation="vertical"
     android:background="@color/keyboard_bg_light">
 
-    <!-- 1) 제안 바 - 전체 너비 -->
+    <!-- 1) 구분선 - 0.5dp 두께 -->
+    <View
+        android:id="@+id/suggestion_bar_divider"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/divider" />
+        
+    <!-- 2) 제안 바 - 전체 너비 -->
     <include
         layout="@layout/suggestion_bar"
         />
@@ -19,21 +26,6 @@
         android:orientation="vertical"
         android:paddingStart="@dimen/keyboard_horizontal_padding"
         android:paddingEnd="@dimen/keyboard_horizontal_padding">
-
-    <LinearLayout
-        android:id="@+id/hanja_linear"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/hanja_recycler"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="visible" />
-    </LinearLayout>
-
 
     <Space
         android:layout_width="match_parent"

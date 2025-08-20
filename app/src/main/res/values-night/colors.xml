@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 다크모드에서 사용할 색상들 -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="primaryBlue">#3478F5</color>  <!-- 버튼 파란색 -->
+    <color name="textPrimary">#222222</color> <!-- 타이틀 텍스트 -->
+    <color name="textSecondary">#666666</color> <!-- 설명 텍스트 -->
+
+    <color name="iconTint">#666666</color>
+    <color name="divider">#2D2D2D</color> <!-- 다크모드에서 키보드 배경색과 동일하게 설정 -->
+
+    <color name="key_white">#FFFFFF</color>
+    <color name="key_grey">#B8BFCB</color>
+    <color name="key_darkgrey">#464747</color>
+    <color name="key_keydarkgrey">#676767</color>
+    <color name="bg_darkkeyboard">#2D2D2D</color>
+    <color name="suggestion_bg">#F3F3F8</color>
+
+    <color name="key_text_primary">#222222</color>
+    <color name="key_text_secondary">#888888</color>
+
+    <!-- 키보드 배경색: 다크모드 -->
+    <color name="keyboard_bg_light">#2D2D2D</color>  <!-- 다크모드에서는 이것도 어두운 색 -->
+    <color name="keyboard_bg_dark">#2D2D2D</color>   <!-- 다크모드 배경색 -->
+    <color name="keyboard_bg">#2D2D2D</color>        <!-- 다크모드 기본값 -->
+    <color name="keyboardBackground">#F0F0F0</color>
+    <color name="search">#007AFF</color>
+</resources>
