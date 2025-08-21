@@ -337,8 +337,8 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
             if (!::binding.isInitialized) {
                 return
             }
-            KeyLetter.isLightMode = isDay
-            Log.i("Is LightMode : ", KeyLetter.isLightMode.toString())
+            // CustomKeyboardView의 init에서 다크모드를 처리하므로 여기서는 initViews만 호출
+            // KeyLetter.isLightMode는 CustomKeyboardView에서 관리
             Log.i("Is LightMode : ", isDay.toString())
             binding.customKeyboard.initViews(actionId)
             setBackgroundBg()

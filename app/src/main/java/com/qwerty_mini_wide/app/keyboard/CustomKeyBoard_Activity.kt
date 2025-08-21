@@ -47,10 +47,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
         audioManager = getSystemService(AUDIO_SERVICE) as? AudioManager
 
-        // 시스템의 다크모드 설정 확인 및 KeyLetter에 반영
-        val nightModeFlags = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        KeyLetter.isLightMode = nightModeFlags != Configuration.UI_MODE_NIGHT_YES
-
+        // CustomKeyboardView의 init에서 다크모드 설정을 처리하므로 여기서는 제거
         // 실제 키보드와 동일하게 R.color.keyboard_bg 사용 (시스템이 다크모드에 따라 자동 선택)
         binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg))
         

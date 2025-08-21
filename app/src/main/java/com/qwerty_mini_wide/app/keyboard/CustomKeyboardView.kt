@@ -93,6 +93,10 @@ class CustomKeyboardView @JvmOverloads constructor(
     var currentActionId: Int = 0
 
     init {
+        // 시스템의 다크모드 설정을 바로 확인하여 KeyLetter에 반영
+        val nightModeFlags = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        KeyLetter.isLightMode = nightModeFlags != android.content.res.Configuration.UI_MODE_NIGHT_YES
+        
         orientation = VERTICAL
         val view = inflate(context, R.layout.custom_keyboard_view, this)
         binding = CustomKeyboardViewBinding.bind(view)
@@ -638,7 +642,7 @@ class CustomKeyboardView @JvmOverloads constructor(
             // Cancel any pending shift reset
             shiftResetHandler.removeCallbacks(shiftResetRunnable)
             // Schedule new shift reset after 300ms (multi-tap timeout)
-            shiftResetHandler.postDelayed(shiftResetRunnable, 50)
+            shiftResetHandler.postDelayed(shiftResetRunnable, 350)
         }
     }
 

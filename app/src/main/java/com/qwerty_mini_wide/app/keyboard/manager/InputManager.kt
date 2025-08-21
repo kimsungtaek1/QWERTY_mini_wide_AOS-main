@@ -65,10 +65,10 @@ class InputManager private constructor() {
             }
             0 -> when (state) {
                 KeyType.ENG -> {
-                    val text = keyButton.keyModel?.rbText
+                    val baseText = keyButton.keyModel?.rbText
                         .takeIf { it?.isNotEmpty() ?: false }
                         ?: keyButton.keyModel?.ltText.orEmpty()
-                    if (isShiftOn) text.uppercase() else text
+                    if (isShiftOn) baseText.uppercase() else baseText
                 }
                 KeyType.SPECIAL -> {
                     val text = keyButton.keyModel?.rbText
