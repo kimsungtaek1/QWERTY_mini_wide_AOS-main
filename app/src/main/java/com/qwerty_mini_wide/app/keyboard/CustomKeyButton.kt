@@ -42,6 +42,16 @@ class CustomKeyButton @JvmOverloads constructor(
         tv_rt = findViewById(R.id.tv_rt)
         tv_rb = findViewById(R.id.tv_rb)
         pressed_overlay = findViewById(R.id.pressed_overlay) as View
+        
+        // 가로모드에서 키 높이 조정
+        val orientation = context.resources.configuration.orientation
+        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            val keyHeightLand = context.resources.getDimensionPixelSize(R.dimen.key_height_land)
+            layoutParams = layoutParams?.apply {
+                height = keyHeightLand
+            } ?: LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, keyHeightLand)
+            minimumHeight = keyHeightLand
+        }
 
         context.theme.obtainStyledAttributes(
             attrs, R.styleable.CustomKeyButton, 0, 0

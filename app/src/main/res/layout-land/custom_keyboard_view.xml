@@ -29,7 +29,7 @@
 
     <Space
         android:layout_width="match_parent"
-        android:layout_height="4dp" />
+        android:layout_height="@dimen/row_spacing_land" />
     
     <!-- 첫 번째 행: QWERTY 레이아웃 -->
     <LinearLayout
@@ -52,7 +52,7 @@
             app:mainText="ㅂ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -64,7 +64,7 @@
             app:mainText="ㅈ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -76,7 +76,7 @@
             app:mainText="ㄷ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -88,7 +88,7 @@
             app:mainText="ㄱ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -100,7 +100,7 @@
             app:mainText="ㅅ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -112,7 +112,7 @@
             app:mainText="ㅗ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -124,7 +124,7 @@
             app:mainText="ㅏ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -141,7 +141,7 @@
 
     <Space
         android:layout_width="match_parent"
-        android:layout_height="4dp" />
+        android:layout_height="@dimen/row_spacing_land" />
     
     <!-- 두 번째 행: ASDFGHJKL 레이아웃 -->
     <LinearLayout
@@ -162,7 +162,7 @@
             app:mainText="ㅁ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -173,7 +173,7 @@
             app:mainText="ㄴ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -184,7 +184,7 @@
             app:mainText="ㅇ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -195,7 +195,7 @@
             app:mainText="ㄹ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -206,7 +206,7 @@
             app:mainText="ㅎ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -218,7 +218,7 @@
             app:mainText="ㅜ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -230,7 +230,7 @@
             app:mainText="ㅓ" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -247,7 +247,7 @@
 
     <Space
         android:layout_width="match_parent"
-        android:layout_height="4dp" />
+        android:layout_height="@dimen/row_spacing_land" />
     
     <!-- 세 번째 행: 기능키 행 -->
     <LinearLayout
@@ -268,7 +268,7 @@
             app:keyStyle="grey" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -279,7 +279,7 @@
             app:mainText="123" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -290,7 +290,7 @@
             app:mainText="Space" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -301,7 +301,7 @@
             app:keyStyle="grey" />
 
         <Space
-            android:layout_width="4dp"
+            android:layout_width="@dimen/key_spacing_land"
             android:layout_height="match_parent" />
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
@@ -319,7 +319,7 @@
     <Space
         android:id="@+id/space_below_keyboard"
         android:layout_width="match_parent"
-        android:layout_height="12dp" />
+        android:layout_height="@dimen/keyboard_bottom_space_land" />
         
     </LinearLayout>
     <!-- 키보드 영역 끝 -->

@@ -301,7 +301,8 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
                 setInputView(binding.root)
                 
                 // 키보드 상태 복원
-                binding.customKeyboard.updateConfiguration()
+                // 반응형 코드 주석처리 - 고정 레이아웃 사용
+                // binding.customKeyboard.updateConfiguration()
                 binding.customKeyboard.requestLayout()
                 binding.customKeyboard.invalidate()
                 
