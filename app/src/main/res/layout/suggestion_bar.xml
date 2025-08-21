@@ -15,11 +15,12 @@
     <ImageButton
         android:id="@+id/btnArrowDown"
         style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:contentDescription="Previous field"
         android:paddingStart="4dp"
-        android:paddingEnd="4dp"
         android:paddingTop="4dp"
+        android:paddingEnd="4dp"
         android:paddingBottom="4dp"
         android:scaleType="center"
         android:src="@drawable/ic_arrow_down" />
@@ -27,12 +28,13 @@
     <ImageButton
         android:id="@+id/btnArrowUp"
         style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginStart="4dp"
+        android:contentDescription="Next field"
         android:paddingStart="4dp"
-        android:paddingEnd="4dp"
         android:paddingTop="4dp"
+        android:paddingEnd="4dp"
         android:paddingBottom="4dp"
         android:src="@drawable/ic_arrow_up" />
 
@@ -45,6 +47,7 @@
         android:id="@+id/tvDone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
         android:text="완료"
         android:textColor="@color/primaryBlue"
         android:textSize="14sp" />

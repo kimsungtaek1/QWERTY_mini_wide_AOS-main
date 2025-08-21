@@ -279,22 +279,7 @@ class CustomKeyboardView @JvmOverloads constructor(
             keyboardContainer.setPadding(horizontalPadding, 0, horizontalPadding, 0)
         }
         
-        // 스페이스 키 아래 여백 조정
-        val spaceBelow = findViewById<View>(R.id.space_below_keyboard)
-        if (spaceBelow != null) {
-            val displayMetrics = resources.displayMetrics
-            val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
-            val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
-            
-            val layoutParams = spaceBelow.layoutParams
-            // 가로 모드일 때 10dp로 절반 감소
-            layoutParams.height = if (screenWidthDp > screenHeightDp) {
-                (10 * displayMetrics.density).toInt()
-            } else {
-                (50 * displayMetrics.density).toInt()
-            }
-            spaceBelow.layoutParams = layoutParams
-        }
+        // 스페이스 키 아래 여백은 XML의 dimen 값 사용 (세로: 6dp, 가로: 6dp)
     }
     
     // 반응형 코드 주석처리 - 고정 레이아웃 사용

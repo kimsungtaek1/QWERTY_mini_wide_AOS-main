@@ -318,7 +318,7 @@
     <Space
         android:id="@+id/space_below_keyboard"
         android:layout_width="match_parent"
-        android:layout_height="50dp" />
+        android:layout_height="@dimen/keyboard_bottom_space" />
         
     </LinearLayout>
     <!-- 키보드 영역 끝 -->

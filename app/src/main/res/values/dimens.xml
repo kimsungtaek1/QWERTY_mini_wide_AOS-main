@@ -3,4 +3,10 @@
     <!-- 세로 모드에서 키보드 좌우 패딩 (기본값) -->
     <dimen name="keyboard_horizontal_padding">0dp</dimen>
     
+    <!-- 세로 모드에서 키 높이 -->
+    <dimen name="key_height">60dp</dimen>
+    
+    <!-- 세로 모드에서 하단 여백 -->
+    <dimen name="keyboard_bottom_space">6dp</dimen>
+    
 </resources>
