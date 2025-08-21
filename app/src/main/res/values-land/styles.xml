@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 가로 모드용 키보드 버튼 스타일 -->
+    <style name="KeyboardButton" parent="android:Widget">
+        <item name="android:minHeight">@dimen/key_height_land</item>
+        <item name="android:layout_height">@dimen/key_height_land</item>
+    </style>
+</resources>

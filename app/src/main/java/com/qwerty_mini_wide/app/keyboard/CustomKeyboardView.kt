@@ -100,9 +100,11 @@ class CustomKeyboardView @JvmOverloads constructor(
         orientation = VERTICAL
         val view = inflate(context, R.layout.custom_keyboard_view, this)
         binding = CustomKeyboardViewBinding.bind(view)
-        setupSuggestionBar()
-        setupKeyboardPadding()
-        setupKeySpacing()
+        // 반응형 코드 주석처리 - 고정 레이아웃 사용
+        // setupSuggestionBar()
+        // setupKeyboardPadding()
+        // setupKeySpacing()
+        setupSuggestionBar()  // 클릭 리스너만 설정
         initViews(0) // 초기에는 actionId가 0
         // HanjaManager.init(context) // Chinese support removed
         
@@ -174,6 +176,8 @@ class CustomKeyboardView @JvmOverloads constructor(
         listener = l
     }
 
+    // 반응형 코드 주석처리 - 고정 레이아웃 사용
+    /*
     private fun setupSuggestionBar() {
         val suggestionBar = findViewById<LinearLayout>(R.id.suggestion_bar)
         val displayMetrics = resources.displayMetrics
@@ -232,7 +236,31 @@ class CustomKeyboardView @JvmOverloads constructor(
             service?.requestHideSelf(0)
         }
     }
+    */
     
+    // 고정 레이아웃 사용을 위한 새로운 설정 메서드
+    private fun setupSuggestionBar() {
+        val btnArrowUp = findViewById<ImageButton>(R.id.btnArrowUp)
+        val btnArrowDown = findViewById<ImageButton>(R.id.btnArrowDown)
+        val tvDone = findViewById<TextView>(R.id.tvDone)
+        
+        // 클릭 리스너만 설정 - 크기는 XML에서 고정
+        btnArrowUp?.setOnClickListener {
+            val service = context as? CustomKeyBoard_Service
+            service?.currentInputConnection?.performEditorAction(android.view.inputmethod.EditorInfo.IME_ACTION_PREVIOUS)
+        }
+        btnArrowDown?.setOnClickListener {
+            val service = context as? CustomKeyBoard_Service
+            service?.currentInputConnection?.performEditorAction(android.view.inputmethod.EditorInfo.IME_ACTION_NEXT)
+        }
+        tvDone?.setOnClickListener {
+            val service = context as? CustomKeyBoard_Service
+            service?.requestHideSelf(0)
+        }
+    }
+    
+    // 반응형 코드 주석처리 - 고정 레이아웃 사용
+    /*
     private fun setupKeyboardPadding() {
         // custom_keyboard_view.xml의 구조에 맞게 수정
         // 구조: LinearLayout (root) > View (divider) + include (suggestion bar) + LinearLayout (keyboard container)
@@ -273,7 +301,15 @@ class CustomKeyboardView @JvmOverloads constructor(
             spaceBelow.layoutParams = layoutParams
         }
     }
+    */
     
+    // 고정 레이아웃 사용을 위한 빈 메서드
+    private fun setupKeyboardPadding() {
+        // 패딩은 XML에서 고정값으로 설정
+    }
+    
+    // 반응형 코드 주석처리 - 고정 레이아웃 사용
+    /*
     private fun setupKeySpacing() {
         // 반응형 키 간격 설정
         val displayMetrics = resources.displayMetrics
@@ -332,11 +368,33 @@ class CustomKeyboardView @JvmOverloads constructor(
             }
         }
     }
+    */
     
+    // 고정 레이아웃 사용을 위한 빈 메서드들
+    private fun setupKeySpacing() {
+        // 간격은 XML에서 고정값으로 설정
+    }
+    
+    private fun updateSpaceViewsInLayout(layout: LinearLayout, spacing: Int, edgeSpacing: Int) {
+        // XML에서 고정값 사용
+    }
+    
+    private fun updateVerticalSpaces(spacing: Int) {
+        // XML에서 고정값 사용
+    }
+    
+    // 반응형 코드 주석처리 - 고정 레이아웃 사용
+    /*
     fun updateConfiguration() {
         setupSuggestionBar()
         setupKeyboardPadding()
         setupKeySpacing()
+    }
+    */
+    
+    // 고정 레이아웃 사용 - 업데이트 불필요
+    fun updateConfiguration() {
+        // 고정 레이아웃이므로 동적 업데이트 필요 없음
     }
 
     fun setFuntion(fountions:List<KeyModel>, actionId: Int = 0){

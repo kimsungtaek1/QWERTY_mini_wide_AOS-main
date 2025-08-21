@@ -257,12 +257,33 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
     
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        // 화면 회전 시 키보드 레이아웃 업데이트
-        updateKeyboardLayout()
-        // 키보드 뷰 재초기화
-        binding.customKeyboard.updateConfiguration()
-        binding.customKeyboard.requestLayout()
-        binding.customKeyboard.invalidate()
+        // 화면 회전 시 레이아웃 완전히 재로드
+        // Activity를 재생성하지 않으므로 수동으로 레이아웃 재로드 필요
+        
+        // 현재 입력 텍스트 저장 (null 체크 추가)
+        val currentText = inputField.text.toString()
+        val searchText = searchField?.text?.toString() ?: ""
+        val sendText = sendField?.text?.toString() ?: ""
+        val goText = goField?.text?.toString() ?: ""
+        
+        // 레이아웃 재생성
+        binding = ViewCustomkeyboardBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        // 다크모드 설정 재적용
+        binding.customKeyboard.setBackgroundColor(resources.getColor(R.color.keyboard_bg))
+        
+        // bind() 다시 호출하여 리스너 재설정
+        bind()
+        
+        // 이전 텍스트 복원 (빈 문자열이 아닌 경우에만)
+        inputField.setText(currentText)
+        if (searchText.isNotEmpty()) searchField?.setText(searchText)
+        if (sendText.isNotEmpty()) sendField?.setText(sendText)
+        if (goText.isNotEmpty()) goField?.setText(goText)
+        
+        // 커서 위치 복원
+        inputField.setSelection(currentText.length)
     }
     
     private fun updateKeyboardLayout() {
