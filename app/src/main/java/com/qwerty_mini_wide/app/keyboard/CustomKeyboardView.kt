@@ -245,9 +245,9 @@ class CustomKeyboardView @JvmOverloads constructor(
                 val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
                 val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
                 
-                // 가로 모드일 때만 좌우 패딩 20% 적용
+                // 가로 모드일 때만 좌우 패딩 25% 적용
                 val horizontalPadding = if (screenWidthDp > screenHeightDp) {
-                    (displayMetrics.widthPixels * 0.20f).toInt()
+                    (displayMetrics.widthPixels * 0.25f).toInt()
                 } else {
                     0
                 }
@@ -268,7 +268,7 @@ class CustomKeyboardView @JvmOverloads constructor(
             layoutParams.height = if (screenWidthDp > screenHeightDp) {
                 (10 * displayMetrics.density).toInt()
             } else {
-                (20 * displayMetrics.density).toInt()
+                (50 * displayMetrics.density).toInt()
             }
             spaceBelow.layoutParams = layoutParams
         }
@@ -287,15 +287,15 @@ class CustomKeyboardView @JvmOverloads constructor(
         
         if (screenWidthDp < screenHeightDp) {
             // 세로모드
-            horizontalSpacing = (screenWidthPx * 0.005f).toInt() // 화면 너비의 0.5%
+            horizontalSpacing = (screenWidthPx * 0.015f).toInt() // 화면 너비의 1.5% (1.5배)
             verticalSpacing = (screenWidthPx * 0.004f).toInt() // 화면 너비의 0.4%
         } else {
             // 가로모드
-            horizontalSpacing = (screenWidthPx * 0.003f).toInt() // 화면 너비의 0.3%
+            horizontalSpacing = (screenWidthPx * 0.009f).toInt() // 화면 너비의 0.9% (1.5배)
             verticalSpacing = (screenHeightDp * 0.007f * displayMetrics.density).toInt() // 화면 높이의 0.7% 유지
         }
         
-        val edgeSpacing = (screenWidthPx * 0.002f).toInt() // 화면 너비의 0.2%
+        val edgeSpacing = (screenWidthPx * 0.006f).toInt() // 화면 너비의 0.6% (1.5배)
         
         // 모든 Space 뷰의 크기 업데이트
         updateSpaceViewsInLayout(binding.firstLinear, horizontalSpacing, edgeSpacing)
@@ -803,13 +803,17 @@ class CustomKeyboardView @JvmOverloads constructor(
                 }
             }
             
-            // 2열 점 키 규칙 (A, L): 상대 키의 rbText 출력
+            // 2열 점 키 규칙 (A, L): 상대 키의 rbText 출력 (우측 최하단)
             if (isFirstA || isSecondA) {
                 val otherKey = if (isFirstA) second else first
-                val outputText = if (!otherKey.keyModel?.rbText.isNullOrEmpty()) {
-                    otherKey.keyModel?.rbText?.uppercase() ?: otherKey.keyModel?.rbText
-                } else {
-                    otherKey.keyModel?.ltText?.uppercase() ?: otherKey.keyModel?.ltText
+                // 우측 최하단(rbText)을 우선 출력, 없으면 rtText, 그것도 없으면 ltText
+                val outputText = when {
+                    !otherKey.keyModel?.rbText.isNullOrEmpty() -> 
+                        otherKey.keyModel?.rbText?.uppercase() ?: otherKey.keyModel?.rbText
+                    !otherKey.keyModel?.rtText.isNullOrEmpty() -> 
+                        otherKey.keyModel?.rtText?.uppercase() ?: otherKey.keyModel?.rtText
+                    else -> 
+                        otherKey.keyModel?.ltText?.uppercase() ?: otherKey.keyModel?.ltText
                 }
                 if (!outputText.isNullOrEmpty()) {
                     Log.d("Keyboard", "A + other key (Row 2 dot key): outputting rbText='$outputText'")
@@ -818,10 +822,14 @@ class CustomKeyboardView @JvmOverloads constructor(
                 }
             } else if (isFirstL || isSecondL) {
                 val otherKey = if (isFirstL) second else first
-                val outputText = if (!otherKey.keyModel?.rbText.isNullOrEmpty()) {
-                    otherKey.keyModel?.rbText?.uppercase() ?: otherKey.keyModel?.rbText
-                } else {
-                    otherKey.keyModel?.ltText?.uppercase() ?: otherKey.keyModel?.ltText
+                // 우측 최하단(rbText)을 우선 출력, 없으면 rtText, 그것도 없으면 ltText
+                val outputText = when {
+                    !otherKey.keyModel?.rbText.isNullOrEmpty() -> 
+                        otherKey.keyModel?.rbText?.uppercase() ?: otherKey.keyModel?.rbText
+                    !otherKey.keyModel?.rtText.isNullOrEmpty() -> 
+                        otherKey.keyModel?.rtText?.uppercase() ?: otherKey.keyModel?.rtText
+                    else -> 
+                        otherKey.keyModel?.ltText?.uppercase() ?: otherKey.keyModel?.ltText
                 }
                 if (!outputText.isNullOrEmpty()) {
                     Log.d("Keyboard", "L + other key (Row 2 dot key): outputting rbText='$outputText'")
