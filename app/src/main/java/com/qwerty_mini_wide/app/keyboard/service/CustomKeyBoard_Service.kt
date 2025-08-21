@@ -281,6 +281,12 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         try {
+            // 다크 모드 상태 변경 감지 및 적용
+            val nightModeFlags = newConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            val isNightMode = nightModeFlags == Configuration.UI_MODE_NIGHT_YES
+            KeyLetter.isLightMode = !isNightMode
+            Log.d("CustomKeyBoard_Service", "Configuration changed - Dark mode: $isNightMode")
+            
             // 화면 회전 시 키보드 재초기화
             if (::binding.isInitialized) {
                 // 키보드 뷰 재생성 필요시 처리
@@ -309,6 +315,9 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
                 // 테마 및 제안 바 업데이트
                 applySystemTheme()
                 setupSuggestionBar()
+                
+                // 다크모드 변경 시 키 배경색 업데이트
+                binding.customKeyboard.setupKeys()
                 
                 // 현재 액션 ID 유지
                 binding.customKeyboard.initViews(actionId)

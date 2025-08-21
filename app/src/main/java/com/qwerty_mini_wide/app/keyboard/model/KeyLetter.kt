@@ -16,21 +16,21 @@ object KeyLetter {
     
     // Responsive text sizes (scale with screen size)
     private val LARGE_ENG_SIZE: Int
-        get() = ((if (screenWidthDp > screenHeightDp) 30 else 20) * scaleFactor).toInt()
+        get() = ((if (screenWidthDp > screenHeightDp) 30 else 24) * scaleFactor).toInt()
     private val SMALL_ENG_SIZE: Int
-        get() = ((if (screenWidthDp > screenHeightDp) 31.5f else 21f) * scaleFactor).toInt()
+        get() = ((if (screenWidthDp > screenHeightDp) 31.5f else 25.2f) * scaleFactor).toInt()
     private val SPECIAL_TEXT_SIZE: Int
-        get() = ((if (screenWidthDp > screenHeightDp) 30 else 20) * scaleFactor).toInt()
+        get() = ((if (screenWidthDp > screenHeightDp) 30 else 24) * scaleFactor).toInt()
     private val NUMBER_TEXT_SIZE: Float
-        get() = (if (screenWidthDp > screenHeightDp) 36f else 24f) * scaleFactor
+        get() = (if (screenWidthDp > screenHeightDp) 36f else 28.8f) * scaleFactor
     private val FUNCTION_TEXT_SIZE: Float
-        get() = (if (screenWidthDp > screenHeightDp) 22.5f else 15f) * scaleFactor
+        get() = (if (screenWidthDp > screenHeightDp) 22.5f else 18f) * scaleFactor
     private val SPACE_TEXT_SIZE: Float
-        get() = (if (screenWidthDp > screenHeightDp) 27f else 18f) * scaleFactor
+        get() = (if (screenWidthDp > screenHeightDp) 27f else 21.6f) * scaleFactor
     private val DELETE_TEXT_SIZE: Float
-        get() = (if (screenWidthDp > screenHeightDp) 30f else 20f) * scaleFactor
+        get() = (if (screenWidthDp > screenHeightDp) 30f else 24f) * scaleFactor
     private val DOT_SIZE: Float
-        get() = (if (screenWidthDp > screenHeightDp) 60f else 45f) * scaleFactor
+        get() = (if (screenWidthDp > screenHeightDp) 60f else 54f) * scaleFactor
     
     // 반응형 마진 값 (키 너비의 백분율로 계산) - 5의 배수
     private val MARGIN_5: Int
@@ -125,7 +125,7 @@ object KeyLetter {
     val keyWidth: Float
         get() = screenWidthDp * (if (screenWidthDp < screenHeightDp) 0.096f else 0.088f)
     val keyHeight: Int
-        get() = if (screenWidthDp < screenHeightDp) 60 else 42  // 세로 60dp, 가로 42dp
+        get() = if (screenWidthDp < screenHeightDp) 72 else 42  // 세로 72dp, 가로 42dp
 
     // Helper function to create a letter key
     private fun createLetterKey(

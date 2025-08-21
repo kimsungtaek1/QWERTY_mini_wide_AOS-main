@@ -17,6 +17,7 @@ import android.widget.TextView
 import android.widget.LinearLayout
 import android.widget.Space
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.qwerty_mini_wide.app.R
 import com.qwerty_mini_wide.app.databinding.CustomKeyboardViewBinding
@@ -102,7 +103,7 @@ class CustomKeyboardView @JvmOverloads constructor(
         binding = CustomKeyboardViewBinding.bind(view)
         // 반응형 코드 주석처리 - 고정 레이아웃 사용
         // setupSuggestionBar()
-        // setupKeyboardPadding()
+        setupKeyboardPadding()  // 프로그래밍 방식으로 패딩 적용
         // setupKeySpacing()
         setupSuggestionBar()  // 클릭 리스너만 설정
         initViews(0) // 초기에는 actionId가 0
@@ -259,29 +260,23 @@ class CustomKeyboardView @JvmOverloads constructor(
         }
     }
     
-    // 반응형 코드 주석처리 - 고정 레이아웃 사용
-    /*
+    // 프로그래밍 방식으로 가로모드 패딩 적용
     private fun setupKeyboardPadding() {
-        // custom_keyboard_view.xml의 구조에 맞게 수정
-        // 구조: LinearLayout (root) > View (divider) + include (suggestion bar) + LinearLayout (keyboard container)
-        val rootLayout = getChildAt(0) as? ViewGroup
-        if (rootLayout != null && rootLayout.childCount > 2) {
-            // 세 번째 자식이 키보드 컨테이너 (index 2)
-            val keyboardContainer = rootLayout.getChildAt(2) as? LinearLayout
-            if (keyboardContainer != null) {
-                val displayMetrics = resources.displayMetrics
-                val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
-                val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
-                
-                // 가로 모드일 때만 좌우 패딩 25% 적용
-                val horizontalPadding = if (screenWidthDp > screenHeightDp) {
-                    (displayMetrics.widthPixels * 0.25f).toInt()
-                } else {
-                    0
-                }
-                
-                keyboardContainer.setPadding(horizontalPadding, 0, horizontalPadding, 0)
+        // keyboard_container ID로 직접 찾기
+        val keyboardContainer = findViewById<LinearLayout>(R.id.keyboard_container)
+        if (keyboardContainer != null) {
+            val displayMetrics = resources.displayMetrics
+            val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
+            val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
+            
+            // 가로 모드일 때만 좌우 패딩 27.5% 적용 (양쪽 합쳐서 55%)
+            val horizontalPadding = if (screenWidthDp > screenHeightDp) {
+                (displayMetrics.widthPixels * 0.275f).toInt()
+            } else {
+                0
             }
+            
+            keyboardContainer.setPadding(horizontalPadding, 0, horizontalPadding, 0)
         }
         
         // 스페이스 키 아래 여백 조정
@@ -300,12 +295,6 @@ class CustomKeyboardView @JvmOverloads constructor(
             }
             spaceBelow.layoutParams = layoutParams
         }
-    }
-    */
-    
-    // 고정 레이아웃 사용을 위한 빈 메서드
-    private fun setupKeyboardPadding() {
-        // 패딩은 XML에서 고정값으로 설정
     }
     
     // 반응형 코드 주석처리 - 고정 레이아웃 사용
@@ -415,8 +404,8 @@ class CustomKeyboardView @JvmOverloads constructor(
                 val keyButon = binding.funtionLinear.getChildAt(i) as CustomKeyButton
                 // Only reset ONSHIFT, not LOCKSHIFT
                 if(keyButon.keyModel?.keyType == KeyType.ONSHIFT){
-                    keyButon.setBackgroundDrawable(resources.getDrawable(keyButon.keyModel!!.backgroundColor))
-                    keyButon.getIcImageView().setImageDrawable(resources.getDrawable(keyButon.keyModel!!.image))
+                    keyButon.background = ContextCompat.getDrawable(context, keyButon.keyModel!!.backgroundColor)
+                    keyButon.getIcImageView().setImageDrawable(ContextCompat.getDrawable(context, keyButon.keyModel!!.image))
                     keyButon.keyModel!!.keyType = KeyType.SHIFT
                     
                     // Reset keyboard layout only if it was ONSHIFT
@@ -462,7 +451,7 @@ class CustomKeyboardView @JvmOverloads constructor(
 
 
     @SuppressLint("ResourceType", "ClickableViewAccessibility")
-    private fun setupKeys() {
+    fun setupKeys() {
 
 
         // 뷰 트리 순회해서 CustomKeyButton 모두 찾기
@@ -599,9 +588,9 @@ class CustomKeyboardView @JvmOverloads constructor(
                             keyModel.keyType = KeyType.LOCKSHIFT
 
                         } else {
-                            key.setBackgroundDrawable(resources.getDrawable(keyModel.backgroundColor))
+                            key.background = ContextCompat.getDrawable(context, keyModel.backgroundColor)
                             // key.setBackgroundColor(keyModel.backgroundColor)
-                            key.getIcImageView().setImageDrawable(resources.getDrawable(keyModel.image))
+                            key.getIcImageView().setImageDrawable(ContextCompat.getDrawable(context, keyModel.image))
                             keyModel.keyType = KeyType.SHIFT
                             // Always use English keyboard
                             setLetter(KeyLetter.getEngLetter())
@@ -612,18 +601,18 @@ class CustomKeyboardView @JvmOverloads constructor(
                     }
 
                     keyModel.keyType == KeyType.LOCKSHIFT ->{
-                        key.setBackgroundDrawable(resources.getDrawable(keyModel.backgroundColor))
+                        key.background = ContextCompat.getDrawable(context, keyModel.backgroundColor)
                         // key.setBackgroundColor(keyModel.backgroundColor)
-                        key.getIcImageView().setImageDrawable(resources.getDrawable(keyModel.image))
+                        key.getIcImageView().setImageDrawable(ContextCompat.getDrawable(context, keyModel.image))
                         keyModel.keyType = KeyType.SHIFT
                         // Always use English keyboard
                         setLetter(KeyLetter.getEngLetter())
                     }
 
                     keyModel.keyType == KeyType.SHIFT ->{
-                        key.setBackgroundDrawable(resources.getDrawable(keyModel.selectBackgroundColor))
+                        key.background = ContextCompat.getDrawable(context, keyModel.selectBackgroundColor)
                         key.getIcImageView()
-                            .setImageDrawable(resources.getDrawable(keyModel.selectImage))
+                            .setImageDrawable(ContextCompat.getDrawable(context, keyModel.selectImage))
                         keyModel.keyType = KeyType.ONSHIFT
                         // Always use English keyboard
                         setLetter(KeyLetter.getEngShiftLetter())

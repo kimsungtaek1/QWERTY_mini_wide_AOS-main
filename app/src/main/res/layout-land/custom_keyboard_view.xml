@@ -21,11 +21,10 @@
 
     <!-- 키보드 영역을 감싸는 LinearLayout - 가로 모드용 패딩 적용 -->
     <LinearLayout
+        android:id="@+id/keyboard_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingStart="@dimen/keyboard_horizontal_padding"
-        android:paddingEnd="@dimen/keyboard_horizontal_padding">
+        android:orientation="vertical">
 
     <Space
         android:layout_width="match_parent"
