@@ -17,7 +17,7 @@
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:contentDescription="Previous field"
+        android:contentDescription="@string/previous_field"
         android:paddingStart="4dp"
         android:paddingTop="4dp"
         android:paddingEnd="4dp"
@@ -31,7 +31,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginStart="4dp"
-        android:contentDescription="Next field"
+        android:contentDescription="@string/next_field"
         android:paddingStart="4dp"
         android:paddingTop="4dp"
         android:paddingEnd="4dp"
@@ -48,7 +48,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="20dp"
-        android:text="완료"
+        android:text="@string/done"
         android:textColor="@color/primaryBlue"
         android:textSize="14sp" />
 </LinearLayout>

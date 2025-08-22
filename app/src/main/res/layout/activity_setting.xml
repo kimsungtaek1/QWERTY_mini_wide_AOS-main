@@ -45,7 +45,7 @@
         android:layout_marginBottom="15dp"
         android:background="@drawable/bg_primary_button"
         android:backgroundTint="@null"
-        android:text="키보드 사용방법"
+        android:text="How to Use Keyboard"
         android:textColor="@color/white"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/btnPreview"
@@ -62,7 +62,7 @@
         android:layout_marginBottom="40dp"
         android:background="@drawable/bg_button_outline"
         android:backgroundTint="@null"
-        android:text="키보드 미리보기"
+        android:text="Keyboard Preview"
         android:textColor="@color/primaryBlue"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/itemTerms"
@@ -97,7 +97,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_weight="1"
-            android:text="이용약관 및 개인정보 보호"
+            android:text="Terms of Service &amp; Privacy Policy"
             android:textColor="@color/textPrimary"
             android:textSize="16sp" />
 
@@ -146,7 +146,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_weight="1"
-            android:text="앱 공유하기"
+            android:text="Share App"
             android:textColor="@color/textPrimary"
             android:textSize="16sp" />
 
@@ -196,7 +196,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_weight="1"
-            android:text="시스템 설정 열기"
+            android:text="Open System Settings"
             android:textColor="@color/textPrimary"
             android:textSize="16sp" />
 

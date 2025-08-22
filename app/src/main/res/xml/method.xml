@@ -2,7 +2,7 @@
 <input-method xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- 서비스 레이블(설정화면에 보이는 이름) -->
     <subtype
-        android:label="키보드"
-        android:imeSubtypeLocale="ko"
+        android:label="Keyboard"
+        android:imeSubtypeLocale="en"
         android:imeSubtypeMode="keyboard"/>
 </input-method>

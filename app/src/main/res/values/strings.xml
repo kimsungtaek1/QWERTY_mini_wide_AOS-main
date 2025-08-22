@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">QWERTY_mini_wide</string>
-    <string name="settings">설정</string>
-    <string name="back">뒤로가기</string>
-    <string name="subtype_label">"키보드"</string>
+    <string name="settings">Settings</string>
+    <string name="back">Back</string>
+    <string name="subtype_label">Keyboard</string>
+    <string name="previous_field">Previous field</string>
+    <string name="next_field">Next field</string>
+    <string name="done">Done</string>
 </resources>

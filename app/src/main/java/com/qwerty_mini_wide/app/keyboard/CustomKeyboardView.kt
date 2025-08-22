@@ -53,21 +53,21 @@ class CustomKeyboardView @JvmOverloads constructor(
     private var lastPressedKey: CustomKeyButton? = null
     private var lastPressTime = 0L
 
-    // 더블탭 간격 기준(ms)
+    // Double tap interval threshold (ms)
     private val DOUBLE_TAP_THRESHOLD = 300L
 
-    // 마지막 Shift 클릭 시각
+    // Last Shift click time
     private var lastShiftClickTime = 0L
     
-    // Shift 키 터치 상태 추적
+    // Shift key touch state tracking
 
-    // ↓ 이 부분을 클래스 바로 안쪽(다른 멤버 변수들 옆)에 추가
+    // ↓ Add this part directly inside the class (next to other member variables)
     private val deleteHandler = Handler(Looper.getMainLooper())
     private val deleteRunnable = object : Runnable {
         override fun run() {
             baseDelete()
            // listener?.onKey(KeyType.DELETE, "")
-            // 50ms 간격으로 반복
+            // Repeat every 50ms
             deleteHandler.postDelayed(this, 50)
         }
     }
@@ -79,6 +79,9 @@ class CustomKeyboardView @JvmOverloads constructor(
             resetShift()
         }
     }
+    
+    // Track last tapped letter key for smart shift reset
+    private var lastTappedLetterKey: CustomKeyButton? = null
 
     fun baseDelete(){
         // Korean support removed - just handle delete
@@ -94,19 +97,19 @@ class CustomKeyboardView @JvmOverloads constructor(
     var currentActionId: Int = 0
 
     init {
-        // 시스템의 다크모드 설정을 바로 확인하여 KeyLetter에 반영
+        // Check system dark mode setting directly and apply to KeyLetter
         val nightModeFlags = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
         KeyLetter.isLightMode = nightModeFlags != android.content.res.Configuration.UI_MODE_NIGHT_YES
         
         orientation = VERTICAL
         val view = inflate(context, R.layout.custom_keyboard_view, this)
         binding = CustomKeyboardViewBinding.bind(view)
-        // 반응형 코드 주석처리 - 고정 레이아웃 사용
+        // Responsive code commented out - using fixed layout
         // setupSuggestionBar()
-        setupKeyboardPadding()  // 프로그래밍 방식으로 패딩 적용
+        setupKeyboardPadding()  // Apply padding programmatically
         // setupKeySpacing()
-        setupSuggestionBar()  // 클릭 리스너만 설정
-        initViews(0) // 초기에는 actionId가 0
+        setupSuggestionBar()  // Set click listeners only
+        initViews(0) // Initially actionId is 0
         // HanjaManager.init(context) // Chinese support removed
         
         // Initialize popup window
@@ -124,31 +127,31 @@ class CustomKeyboardView @JvmOverloads constructor(
     }
 
 
-    // 마지막 단어 저장용
+    // For storing last word
     var chnLastWord: String = ""
 
     fun chnTap() {
-        // 1) 커서 앞 텍스트 모두 가져오기 (최대 1000자)
+        // 1) Get all text before cursor (max 1000 characters)
 
         val service = context as? CustomKeyBoard_Service
         var before = service?.currentInputConnection
             ?.getTextBeforeCursor(1000, 0)
             ?.toString() ?: ""
 
-        // 2. 만약 정말 빈 문자열("", null 등)이라면, 자체 버퍼를 fallback으로 쓴다
+        // 2. If it's really empty ("", null, etc), use internal buffer as fallback
         if (before.isEmpty()) {
             //val service = context as? CustomKeyBoard_Service
             before = service?.getTypedBuffer().orEmpty()
             Log.i("CustomKeyboardView", "fallback to typedBuffer: '$before'")
         }
         Log.i("Porxy",before)
-        // 2) 공백·개행·구두점으로 분리
+        // 2) Split by spaces, line breaks, and punctuation
         val separators = Regex("[\\s\\p{Punct}]+")
         val tokens = before
             .split(separators)
             .filter { it.isNotEmpty() }
 
-        // 마지막 토큰이 마지막 단어
+        // Last token is the last word
         var lastWord = tokens.lastOrNull() ?: ""
         Log.i("lastWord",lastWord)
         if(lastWord != ""){
@@ -156,12 +159,12 @@ class CustomKeyboardView @JvmOverloads constructor(
         }
 
 
-        // 3) before에서 마지막 단어가 등장한 인덱스 찾기
+        // 3) Find the index where last word appears in before
         val idx = before.lastIndexOf(lastWord)
         if (idx != -1) {
-            // 4) 시작 인덱스부터 끝까지 잘라내기
+            // 4) Cut from start index to end
             val lastWordWithSpaces = before.substring(idx)
-            // 이미 공백이 포함되어 있으면 뭔가 빠진 거니 리턴
+            // If it already contains spaces, something is missing so return
             if (lastWordWithSpaces.contains(" ")) {
                 return
             }
@@ -669,13 +672,27 @@ class CustomKeyboardView @JvmOverloads constructor(
             }
         }
         
-        // Schedule shift reset after multi-tap timeout
-        if (currentState == KeyType.ENG) {
+        // Smart shift reset based on key comparison
+        if (currentState == KeyType.ENG && isShiftOn()) {
             // Cancel any pending shift reset
             shiftResetHandler.removeCallbacks(shiftResetRunnable)
-            // Schedule new shift reset after 300ms (multi-tap timeout)
-            shiftResetHandler.postDelayed(shiftResetRunnable, 350)
+            
+            // Check if this is the same key as last tap (for multi-tap)
+            val isSameKey = lastTappedLetterKey?.keyModel?.tag == keyButton.keyModel?.tag
+            
+            if (isSameKey) {
+                // Same key: maintain 350ms delay for multi-tap support
+                shiftResetHandler.postDelayed(shiftResetRunnable, 350)
+                Log.d("Keyboard", "Same key tapped - maintaining 350ms shift delay")
+            } else {
+                // Different key: reset shift immediately
+                shiftResetHandler.post(shiftResetRunnable)
+                Log.d("Keyboard", "Different key tapped - resetting shift immediately")
+            }
         }
+        
+        // Update last tapped key
+        lastTappedLetterKey = keyButton
     }
 
     // 첫/두 번째 터치된 키 버튼을 저장할 변수

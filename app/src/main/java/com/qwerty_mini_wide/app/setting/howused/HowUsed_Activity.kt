@@ -22,29 +22,32 @@ class HowUsed_Activity: AppCompatActivity() {
     }
 
     fun bind(){
-        Log.i("여기","여기오냐?")
+        Log.i("here","are you coming here?")
         binding.btnBack2.setOnClickListener {
             finish()
         }
     }
 
     fun attribute(){
-        val fullText = binding.txtNote.text
-// 1) SpannableStringBuilder에 전체 문자열 담기
+        val fullText = binding.txtInstructions?.text ?: return
+// 1) Put the entire string in SpannableStringBuilder
         val spannable = SpannableStringBuilder(fullText)
 
-// 2) 색을 바꿀 구간의 시작·끝 인덱스 계산
-        val start = fullText.indexOf("QWERTY mini")
-        val end   = start + "QWERTY mini".length
+// 2) Calculate start and end indices of the section to change color
+        val searchText = "QWERTY Mini English Wide"
+        val start = fullText.indexOf(searchText)
+        if (start != -1) {
+            val end = start + searchText.length
 
-// 3) ForegroundColorSpan을 붙여서 색 지정
-        spannable.setSpan(
-            ForegroundColorSpan(resources.getColor(R.color.primaryBlue)),  // 원하는 색
-            start, end,
-            SPAN_EXCLUSIVE_EXCLUSIVE
-        )
+// 3) Apply ForegroundColorSpan to set the color
+            spannable.setSpan(
+                ForegroundColorSpan(resources.getColor(R.color.primaryBlue)),  // desired color
+                start, end,
+                SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
 
-        binding.txtNote.text = spannable
+        binding.txtInstructions?.text = spannable
     }
 
 }

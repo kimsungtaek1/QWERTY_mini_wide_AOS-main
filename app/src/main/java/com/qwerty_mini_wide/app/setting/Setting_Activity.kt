@@ -56,11 +56,11 @@ class Setting_Activity  : AppCompatActivity() {
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
-            putExtra(Intent.EXTRA_TEXT, "QWERTY_mini_wide 앱을 공유합니다!\n\n$playStoreUrl")
+            putExtra(Intent.EXTRA_TEXT, "Share QWERTY mini wide app!\n\n$playStoreUrl")
         }
 
         // 2) Chooser Intent에 NEW_TASK 플래그 추가
-        val chooser = Intent.createChooser(shareIntent, "앱 공유").apply {
+        val chooser = Intent.createChooser(shareIntent, "Share App").apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 

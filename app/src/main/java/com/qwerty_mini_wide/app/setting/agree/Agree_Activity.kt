@@ -17,7 +17,7 @@ class Agree_Activity: AppCompatActivity() {
     }
 
     fun bind(){
-        Log.i("여기","여기오냐?")
+        Log.i("here","are you coming here?")
         binding.btnBack.setOnClickListener {
             finish()
         }

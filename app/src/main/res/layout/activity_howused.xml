@@ -10,7 +10,7 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="키보드 사용방법"
+        android:text="How to Use Keyboard"
         android:textColor="@color/textPrimary"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -32,30 +32,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/imageView2"
+    <TextView
+        android:id="@+id/txt_instructions"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="200dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2"
-        app:srcCompat="@drawable/img_howused" />
-
-    <TextView
-        android:id="@+id/txt_note"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
-        android:fontFamily="sans-serif-medium"
-        android:text=" 버튼을 길게 눌러 QWERTY mini wide\n키보드를 선택해주세요."
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="60dp"
+        android:text="Settings → General → Default Keyboard and Additional Keyboard Settings → Enable 'Show Keyboard Button on Navigation Bar'\n\nThen, on the current keyboard screen, click the navigation bar at the bottom left or right corner to select QWERTY Mini English Wide Version!"
         android:textAlignment="center"
         android:textColor="@color/textPrimary"
-        android:textSize="18sp"
+        android:textSize="16sp"
+        android:lineSpacingExtra="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

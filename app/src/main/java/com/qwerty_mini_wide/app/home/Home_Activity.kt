@@ -30,7 +30,7 @@ class Home_Activity : AppCompatActivity() {
     }
 
     fun bind(){
-        Log.i("여기","여기오냐?")
+        Log.i("here","are you coming here?")
         binding.btnSettings.setOnClickListener {
             startActivity(Intent(this, Setting_Activity::class.java))
 
@@ -79,18 +79,18 @@ class Home_Activity : AppCompatActivity() {
     
     private fun showMicrophonePermissionDialog() {
         AlertDialog.Builder(this)
-            .setTitle("마이크 권한 필요")
-            .setMessage("키보드의 음성 인식 기능을 사용하기 위해 마이크 권한이 필요합니다.")
-            .setPositiveButton("허용") { _, _ ->
+            .setTitle("Microphone Permission Required")
+            .setMessage("Microphone permission is required to use the keyboard's voice recognition feature.")
+            .setPositiveButton("Allow") { _, _ ->
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.RECORD_AUDIO),
                     REQ_MICROPHONE_PERMISSION
                 )
             }
-            .setNegativeButton("취소") { dialog, _ ->
+            .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
-                Toast.makeText(this, "음성 인식 기능을 사용할 수 없습니다", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Voice recognition feature is unavailable", Toast.LENGTH_SHORT).show()
             }
             .show()
     }
@@ -106,10 +106,10 @@ class Home_Activity : AppCompatActivity() {
             REQ_MICROPHONE_PERMISSION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d("Home_Activity", "Microphone permission granted")
-                    Toast.makeText(this, "마이크 권한이 허용되었습니다. 이제 음성 인식 기능을 사용할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Microphone permission granted. You can now use voice recognition.", Toast.LENGTH_SHORT).show()
                 } else {
                     Log.d("Home_Activity", "Microphone permission denied")
-                    Toast.makeText(this, "마이크 권한이 거부되었습니다. 음성 인식 기능을 사용할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Microphone permission denied. Voice recognition is unavailable.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
