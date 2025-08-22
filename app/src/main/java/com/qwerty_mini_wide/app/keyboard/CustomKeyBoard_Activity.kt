@@ -6,10 +6,7 @@ import android.media.AudioManager
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
-import android.os.Handler
-import android.os.Looper
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
@@ -28,16 +25,8 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
     private var searchField: EditText? = null
     private var sendField: EditText? = null
     private var goField: EditText? = null
-    private var vibrationIntensityText: TextView? = null
     private var vibrator: Vibrator? = null
     private var audioManager: AudioManager? = null
-    private val handler = Handler(Looper.getMainLooper())
-    private val updateRunnable = object : Runnable {
-        override fun run() {
-            updateVibrationIntensityDisplay()
-            handler.postDelayed(this, 500) // 0.5초마다 업데이트
-        }
-    }
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,7 +51,6 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         searchField = binding.searchField
         sendField = binding.sendField
         goField = binding.goField
-        vibrationIntensityText = binding.vibrationIntensityText
         
         // 각 필드의 포커스 변경 시 키보드 업데이트
         setupFieldFocusListeners()
@@ -117,9 +105,6 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         // Suggestion bar 버튼 설정
         setupSuggestionBarButtons()
         
-        // 시스템 진동 강도 표시 시작
-        updateVibrationIntensityDisplay()
-        handler.post(updateRunnable)
     }
     
     private fun setupSuggestionBarButtons() {
@@ -166,9 +151,9 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         }
         
         tvDone?.setOnClickListener {
-            // 키보드 숨기기 시뮬레이션 (포커스 제거)
+            // Simulate hiding keyboard (remove focus)
             currentFocus?.clearFocus()
-            Toast.makeText(this, "완료", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Done", Toast.LENGTH_SHORT).show()
         }
     }
     
@@ -202,7 +187,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         searchField?.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val text = textView.text.toString()
-                Toast.makeText(this, "검색: $text", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Search: $text", Toast.LENGTH_SHORT).show()
                 android.util.Log.d("CustomKeyBoard_Activity", "Search: $text")
                 true
             } else {
@@ -213,7 +198,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         sendField?.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEND) {
                 val text = textView.text.toString()
-                Toast.makeText(this, "전송: $text", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Send: $text", Toast.LENGTH_SHORT).show()
                 android.util.Log.d("CustomKeyBoard_Activity", "Send: $text")
                 true
             } else {
@@ -224,7 +209,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         goField?.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_GO) {
                 val text = textView.text.toString()
-                Toast.makeText(this, "이동: $text", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Go: $text", Toast.LENGTH_SHORT).show()
                 android.util.Log.d("CustomKeyBoard_Activity", "Go: $text")
                 true
             } else {
@@ -233,27 +218,7 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         }
     }
     
-    private fun updateVibrationIntensityDisplay() {
-        // 고정된 진동 강도 값 30 사용
-        val intensity = 30
-        
-        // Ringer Mode 정보도 함께 표시
-        val ringerMode = audioManager?.ringerMode ?: -1
-        val ringerModeText = when (ringerMode) {
-            AudioManager.RINGER_MODE_SILENT -> "무음"
-            AudioManager.RINGER_MODE_VIBRATE -> "진동"
-            AudioManager.RINGER_MODE_NORMAL -> "소리"
-            else -> "알수없음"
-        }
-        
-        val displayText = "진동강도: $intensity | 모드: $ringerModeText"
-        vibrationIntensityText?.text = displayText
-    }
     
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacks(updateRunnable)
-    }
     
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
@@ -351,13 +316,13 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
                 val currentFocus = currentFocus as? EditText
                 when (currentFocus) {
                     searchField -> {
-                        Toast.makeText(this, "검색: ${searchField?.text}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Search: ${searchField?.text}", Toast.LENGTH_SHORT).show()
                     }
                     sendField -> {
-                        Toast.makeText(this, "전송: ${sendField?.text}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Send: ${sendField?.text}", Toast.LENGTH_SHORT).show()
                     }
                     goField -> {
-                        Toast.makeText(this, "이동: ${goField?.text}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Go: ${goField?.text}", Toast.LENGTH_SHORT).show()
                     }
                     else -> inputField.append("\n")
                 }
