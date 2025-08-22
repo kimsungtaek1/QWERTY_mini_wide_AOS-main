@@ -43,7 +43,7 @@
         <!-- altText: 대체자음, mainText: 실제문자, keyStyle: white/grey -->
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             android:background="@drawable/key_background_selector"
             app:keyStyle="white"
@@ -56,7 +56,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:lt_Text="ㅊ"
@@ -68,7 +68,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:lt_Text="ㅌ"
@@ -80,7 +80,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:lt_Text="ㅋ"
@@ -92,7 +92,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:lt_Text=""
@@ -104,7 +104,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:lt_Text="ㅛ"
@@ -116,7 +116,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:lt_Text="ㅕ"
@@ -129,7 +129,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:mainText="ㅣ" />
@@ -155,7 +155,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:mainText="ㅁ" />
@@ -166,7 +166,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:mainText="ㄴ" />
@@ -177,7 +177,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:mainText="ㅇ" />
@@ -188,7 +188,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:mainText="ㄹ" />
@@ -199,7 +199,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:mainText="ㅎ" />
@@ -210,7 +210,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:lt_Text="ㅠ"
@@ -222,7 +222,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:lt_Text="ㅕ"
@@ -234,7 +234,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="1"
             app:keyStyle="white"
             app:mainText="ㅡ" />
@@ -260,7 +260,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="10"
             app:icon="@drawable/ic_shift"
             app:keyStyle="grey" />
@@ -272,7 +272,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="10"
             app:keyStyle="grey"
             app:mainText="123" />
@@ -283,7 +283,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="60dp"
             android:layout_weight="3"
             app:keyStyle="white"
             app:mainText="Space" />
@@ -294,7 +294,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="8"
             app:icon="@drawable/ic_enter"
             app:keyStyle="grey" />
@@ -305,7 +305,7 @@
 
         <com.qwerty_mini_wide.app.keyboard.CustomKeyButton
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_weight="10"
             app:icon="@drawable/ic_backspace"
             app:keyStyle="grey" />

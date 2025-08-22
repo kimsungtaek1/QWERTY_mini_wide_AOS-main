@@ -681,9 +681,9 @@ class CustomKeyboardView @JvmOverloads constructor(
             val isSameKey = lastTappedLetterKey?.keyModel?.tag == keyButton.keyModel?.tag
             
             if (isSameKey) {
-                // Same key: maintain 350ms delay for multi-tap support
-                shiftResetHandler.postDelayed(shiftResetRunnable, 350)
-                Log.d("Keyboard", "Same key tapped - maintaining 350ms shift delay")
+                // Same key: maintain 200ms delay for multi-tap support
+                shiftResetHandler.postDelayed(shiftResetRunnable, 200)
+                Log.d("Keyboard", "Same key tapped - maintaining 200ms shift delay")
             } else {
                 // Different key: reset shift immediately
                 shiftResetHandler.post(shiftResetRunnable)

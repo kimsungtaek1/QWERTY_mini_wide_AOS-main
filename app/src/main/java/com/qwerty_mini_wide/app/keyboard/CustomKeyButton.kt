@@ -8,6 +8,7 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.view.View.MeasureSpec
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -50,9 +51,10 @@ class CustomKeyButton @JvmOverloads constructor(
         } else {
             context.resources.getDimensionPixelSize(R.dimen.key_height)
         }
-        layoutParams = layoutParams?.apply {
-            height = keyHeight
-        } ?: LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, keyHeight)
+        
+        // 레이아웃 파라미터 강제 설정
+        val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, keyHeight)
+        layoutParams = params
         minimumHeight = keyHeight
 
         context.theme.obtainStyledAttributes(
@@ -122,10 +124,42 @@ class CustomKeyButton @JvmOverloads constructor(
     fun getMainText(): String = tvMain.text.toString()
     fun getIconRes(): Int    = iconRes
     fun getIcImageView():ImageView = ivIcon
+    
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        // 키 높이를 강제로 고정
+        val orientation = context.resources.configuration.orientation
+        val fixedKeyHeight = if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            context.resources.getDimensionPixelSize(R.dimen.key_height_land)
+        } else {
+            context.resources.getDimensionPixelSize(R.dimen.key_height)
+        }
+        
+        // 높이를 고정값으로 설정
+        val newHeightSpec = MeasureSpec.makeMeasureSpec(fixedKeyHeight, MeasureSpec.EXACTLY)
+        super.onMeasure(widthMeasureSpec, newHeightSpec)
+    }
 
     @SuppressLint("ResourceType")
     fun setData(_keyModel: KeyModel, returnType: Int = EditorInfo.IME_ACTION_NONE) {
         val density = context.resources.displayMetrics.density
+        
+        // 키 높이를 강제로 유지
+        val orientation = context.resources.configuration.orientation
+        val fixedKeyHeight = if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            context.resources.getDimensionPixelSize(R.dimen.key_height_land)
+        } else {
+            context.resources.getDimensionPixelSize(R.dimen.key_height)
+        }
+        
+        // 현재 layoutParams의 높이를 고정값으로 설정
+        val currentParams = layoutParams
+        if (currentParams != null) {
+            currentParams.height = fixedKeyHeight
+            layoutParams = currentParams
+        } else {
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, fixedKeyHeight)
+        }
+        minimumHeight = fixedKeyHeight
 
         clipToOutline = true
         keyModel = _keyModel
@@ -145,7 +179,8 @@ class CustomKeyButton @JvmOverloads constructor(
         
         // 백분율 기반 위치 계산 (키 크기 기준)
         val keyWidthPx = (_keyModel.width * density).toInt()
-        val keyHeightPx = (_keyModel.height * density).toInt()
+        // 키 높이는 현재 설정된 높이를 사용 (60dp) - fixedKeyHeight 사용
+        val keyHeightPx = fixedKeyHeight
         
         val calculatedMarginLeft = if (_keyModel.ltTextMarginLeft == -1) (keyWidthPx * 0.1f).toInt() else _keyModel.ltTextMarginLeft
         val calculatedMarginTop = if (_keyModel.ltTextMarginTop == -1) (keyHeightPx * 0.07f).toInt() else _keyModel.ltTextMarginTop

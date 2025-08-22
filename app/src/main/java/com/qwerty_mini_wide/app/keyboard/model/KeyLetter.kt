@@ -89,7 +89,7 @@ object KeyLetter {
     
     // 2열 점키용 (아래로 내림) 
     private val DOT_MARGIN_TOP_ROW2: Int
-        get() = (keyHeight * 1.2f).toInt()
+        get() = (keyHeight * 1.0f).toInt()
     
     // Gravity constants
     private const val GRAVITY_LEFT = 3
