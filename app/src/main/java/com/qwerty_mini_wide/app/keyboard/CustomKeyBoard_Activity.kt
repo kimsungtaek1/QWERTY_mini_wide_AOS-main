@@ -101,60 +101,6 @@ class CustomKeyBoard_Activity: AppCompatActivity() , CustomKeyboardView.OnKeyboa
         
         // 키보드 액션 리스너 설정
         binding.customKeyboard.setOnKeyboardActionListener(this)
-        
-        // Suggestion bar 버튼 설정
-        setupSuggestionBarButtons()
-        
-    }
-    
-    private fun setupSuggestionBarButtons() {
-        // Suggestion bar 버튼 찾기
-        val suggestionBar = binding.customKeyboard.findViewById<android.widget.LinearLayout>(R.id.suggestion_bar)
-        val btnArrowUp = binding.customKeyboard.findViewById<android.widget.ImageButton>(R.id.btnArrowUp)
-        val btnArrowDown = binding.customKeyboard.findViewById<android.widget.ImageButton>(R.id.btnArrowDown)
-        val tvDone = binding.customKeyboard.findViewById<android.widget.TextView>(R.id.tvDone)
-        
-        // 다크 모드에서 화살표 버튼 및 텍스트 색상 설정
-        if (!KeyLetter.isLightMode) {
-            btnArrowUp?.setColorFilter(resources.getColor(R.color.suggestion_arrow_inactive))
-            btnArrowDown?.setColorFilter(resources.getColor(R.color.suggestion_arrow_inactive))
-            tvDone?.setTextColor(resources.getColor(R.color.suggestion_btn_text))
-        }
-        
-        // Suggestion bar 배경색을 실제 키보드와 동일하게 설정
-        if (KeyLetter.isLightMode) {
-            suggestionBar?.setBackgroundColor(resources.getColor(R.color.key_white))
-        } else {
-            // iOS 스타일 다크 모드 색상 적용
-            suggestionBar?.setBackgroundColor(resources.getColor(R.color.suggestion_bar_dark_bg))
-        }
-        
-        // iOS 스타일 버튼 기능 설정 (미리보기에서는 포커스 이동 시뮬레이션)
-        btnArrowUp?.setOnClickListener {
-            // 이전 필드로 포커스 이동
-            when (currentFocus) {
-                searchField -> inputField.requestFocus()
-                sendField -> searchField?.requestFocus()
-                goField -> sendField?.requestFocus()
-                else -> { /* 첫 번째 필드에서는 아무 동작 없음 */ }
-            }
-        }
-        
-        btnArrowDown?.setOnClickListener {
-            // 다음 필드로 포커스 이동
-            when (currentFocus) {
-                inputField -> searchField?.requestFocus()
-                searchField -> sendField?.requestFocus()
-                sendField -> goField?.requestFocus()
-                else -> { /* 마지막 필드에서는 아무 동작 없음 */ }
-            }
-        }
-        
-        tvDone?.setOnClickListener {
-            // Simulate hiding keyboard (remove focus)
-            currentFocus?.clearFocus()
-            Toast.makeText(this, "Done", Toast.LENGTH_SHORT).show()
-        }
     }
     
     private fun setupFieldFocusListeners() {

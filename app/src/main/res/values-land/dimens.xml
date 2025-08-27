@@ -2,14 +2,6 @@
 <resources>
     <!-- 가로 모드에서 키보드 좌우 패딩 - 고정 레이아웃 사용 (화면 너비의 약 30%) -->
     <dimen name="keyboard_horizontal_padding">180dp</dimen>
-    
-    <!-- 가로 모드에서 제안 바(suggestion bar) 높이 조정 -->
-    <dimen name="suggestion_bar_height_land">32dp</dimen>
-    <dimen name="suggestion_bar_padding_top">2dp</dimen>
-    <dimen name="suggestion_bar_padding_bottom">2dp</dimen>
-    <dimen name="suggestion_bar_text_size">12sp</dimen>
-    <dimen name="suggestion_bar_button_size">24dp</dimen>
-    
     <!-- 가로 모드에서 키 버튼 높이 조정 -->
     <dimen name="key_height_land">46dp</dimen>
     

@@ -81,8 +81,7 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
             binding.customKeyboard.setOnKeyboardActionListener(this)
 
             setBackgroundBg()
-            setupSuggestionBar()
-            // suggestion bar를 보이도록 설정 - 숨김 처리 제거
+            // suggestion bar 제거됨
 
             val extracted = currentInputConnection?.getExtractedText(ExtractedTextRequest(), 0)
             previousSelStart = extracted?.selectionStart ?: -1
@@ -312,9 +311,8 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
                 binding.customKeyboard.requestLayout()
                 binding.customKeyboard.invalidate()
                 
-                // 테마 및 제안 바 업데이트
+                // 테마 업데이트
                 applySystemTheme()
-                setupSuggestionBar()
                 
                 // 다크모드 변경 시 키 배경색 업데이트
                 binding.customKeyboard.setupKeys()
@@ -538,63 +536,6 @@ class CustomKeyBoard_Service: InputMethodService() , CustomKeyboardView.OnKeyboa
         } catch (e: Exception) {
             Log.e("SpeechRecognizer", "Error showing permission dialog", e)
             Toast.makeText(this, "설정 > 앱 > QWERTY_mini_wide > 권한에서 마이크 권한을 허용해 주세요", Toast.LENGTH_LONG).show()
-        }
-    }
-    
-    private fun setupSuggestionBar() {
-        val suggestionBar = binding.customKeyboard.findViewById<LinearLayout>(R.id.suggestion_bar)
-        val displayMetrics = resources.displayMetrics
-        val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
-        val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
-        
-        // 화면 방향에 따라 높이 비율 설정 (세로: 5%, 가로: 10%)
-        val heightRatio = if (screenWidthDp < screenHeightDp) 0.05f else 0.10f
-        val suggestionBarHeight = (displayMetrics.heightPixels * heightRatio).toInt()
-        
-        // suggestion bar의 높이 설정
-        val layoutParams = suggestionBar.layoutParams
-        layoutParams.height = suggestionBarHeight
-        suggestionBar.layoutParams = layoutParams
-        
-        // suggestion bar 배경색을 키 색상과 일치시키기
-        if (KeyLetter.isLightMode) {
-            suggestionBar.setBackgroundColor(ContextCompat.getColor(this, R.color.key_white))
-        } else {
-            // iOS 스타일 다크 모드 색상 적용
-            suggestionBar.setBackgroundColor(ContextCompat.getColor(this, R.color.suggestion_bar_dark_bg))
-        }
-        
-        // 화살표 버튼 크기 조정 및 색상 설정
-        val arrowSize = (suggestionBarHeight * 0.5f).toInt()
-        val btnArrowDown = suggestionBar.findViewById<android.widget.ImageButton>(R.id.btnArrowDown)
-        val btnArrowUp = suggestionBar.findViewById<android.widget.ImageButton>(R.id.btnArrowUp)
-        
-        // 화살표 버튼 색상 설정 (다크 모드에서 iOS 스타일)
-        if (!KeyLetter.isLightMode) {
-            btnArrowDown?.setColorFilter(ContextCompat.getColor(this, R.color.suggestion_arrow_inactive))
-            btnArrowUp?.setColorFilter(ContextCompat.getColor(this, R.color.suggestion_arrow_inactive))
-        }
-        
-        btnArrowDown?.let { btn ->
-            val params = btn.layoutParams
-            params.width = arrowSize
-            params.height = arrowSize
-            btn.layoutParams = params
-        }
-        btnArrowUp?.let { btn ->
-            val params = btn.layoutParams
-            params.width = arrowSize
-            params.height = arrowSize
-            btn.layoutParams = params
-        }
-        
-        // 텍스트 크기 조정 및 색상 설정
-        val tvDone = suggestionBar.findViewById<android.widget.TextView>(R.id.tvDone)
-        tvDone?.textSize = suggestionBarHeight * 0.35f / displayMetrics.density
-        
-        // 다크 모드에서 '완료' 버튼 색상 설정
-        if (!KeyLetter.isLightMode) {
-            tvDone?.setTextColor(ContextCompat.getColor(this, R.color.suggestion_btn_text))
         }
     }
     
