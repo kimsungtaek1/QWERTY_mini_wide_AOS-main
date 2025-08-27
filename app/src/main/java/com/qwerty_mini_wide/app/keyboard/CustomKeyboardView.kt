@@ -12,8 +12,6 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.TextView
 import android.widget.LinearLayout
 import android.widget.Space
 import androidx.annotation.RequiresApi
@@ -108,7 +106,6 @@ class CustomKeyboardView @JvmOverloads constructor(
         // setupSuggestionBar()
         setupKeyboardPadding()  // Apply padding programmatically
         // setupKeySpacing()
-        setupSuggestionBar()  // Set click listeners only
         initViews(0) // Initially actionId is 0
         // HanjaManager.init(context) // Chinese support removed
         
@@ -180,89 +177,6 @@ class CustomKeyboardView @JvmOverloads constructor(
         listener = l
     }
 
-    // 반응형 코드 주석처리 - 고정 레이아웃 사용
-    /*
-    private fun setupSuggestionBar() {
-        val suggestionBar = findViewById<LinearLayout>(R.id.suggestion_bar)
-        val displayMetrics = resources.displayMetrics
-        val screenHeightDp = displayMetrics.heightPixels.toFloat() / displayMetrics.density
-        val screenWidthDp = displayMetrics.widthPixels.toFloat() / displayMetrics.density
-        
-        // 화면 방향에 따라 높이 비율 설정 (세로: 5%, 가로: 10%)
-        val heightRatio = if (screenWidthDp < screenHeightDp) 0.05f else 0.10f
-        val suggestionBarHeight = (displayMetrics.heightPixels * heightRatio).toInt()
-        
-        // suggestion bar의 높이 설정
-        val layoutParams = suggestionBar.layoutParams
-        layoutParams.height = suggestionBarHeight
-        suggestionBar.layoutParams = layoutParams
-        
-        // 화살표 버튼 크기 조정
-        val arrowSize = (suggestionBarHeight * 0.5f).toInt()
-        val btnArrowDown = findViewById<ImageButton>(R.id.btnArrowDown)
-        val btnArrowUp = findViewById<ImageButton>(R.id.btnArrowUp)
-        
-        btnArrowDown?.let { btn ->
-            val params = btn.layoutParams
-            params.width = arrowSize
-            params.height = arrowSize
-            btn.layoutParams = params
-        }
-        btnArrowUp?.let { btn ->
-            val params = btn.layoutParams
-            params.width = arrowSize
-            params.height = arrowSize
-            btn.layoutParams = params
-        }
-        
-        // 텍스트 크기 조정
-        val tvDone = findViewById<TextView>(R.id.tvDone)
-        tvDone?.textSize = suggestionBarHeight * 0.35f / displayMetrics.density
-        
-        // 패딩 조정
-        val padding = (suggestionBarHeight * 0.15f).toInt()
-        suggestionBar.setPadding(padding * 2, padding, padding * 2, padding)
-        
-        // 클릭 리스너 설정 - iOS 스타일 기능
-        btnArrowUp.setOnClickListener {
-            // 이전 입력 필드로 이동
-            val service = context as? CustomKeyBoard_Service
-            service?.currentInputConnection?.performEditorAction(android.view.inputmethod.EditorInfo.IME_ACTION_PREVIOUS)
-        }
-        btnArrowDown.setOnClickListener {
-            // 다음 입력 필드로 이동
-            val service = context as? CustomKeyBoard_Service
-            service?.currentInputConnection?.performEditorAction(android.view.inputmethod.EditorInfo.IME_ACTION_NEXT)
-        }
-        tvDone.setOnClickListener {
-            // 키보드 숨기기
-            val service = context as? CustomKeyBoard_Service
-            service?.requestHideSelf(0)
-        }
-    }
-    */
-    
-    // 고정 레이아웃 사용을 위한 새로운 설정 메서드
-    private fun setupSuggestionBar() {
-        val btnArrowUp = findViewById<ImageButton>(R.id.btnArrowUp)
-        val btnArrowDown = findViewById<ImageButton>(R.id.btnArrowDown)
-        val tvDone = findViewById<TextView>(R.id.tvDone)
-        
-        // 클릭 리스너만 설정 - 크기는 XML에서 고정
-        btnArrowUp?.setOnClickListener {
-            val service = context as? CustomKeyBoard_Service
-            service?.currentInputConnection?.performEditorAction(android.view.inputmethod.EditorInfo.IME_ACTION_PREVIOUS)
-        }
-        btnArrowDown?.setOnClickListener {
-            val service = context as? CustomKeyBoard_Service
-            service?.currentInputConnection?.performEditorAction(android.view.inputmethod.EditorInfo.IME_ACTION_NEXT)
-        }
-        tvDone?.setOnClickListener {
-            val service = context as? CustomKeyBoard_Service
-            service?.requestHideSelf(0)
-        }
-    }
-    
     // 프로그래밍 방식으로 가로모드 패딩 적용
     private fun setupKeyboardPadding() {
         // keyboard_container ID로 직접 찾기
@@ -648,27 +562,45 @@ class CustomKeyboardView @JvmOverloads constructor(
 
         Log.d("Keyboard", "ch : $ch, isShiftOn: ${isShiftOn()}, tapCount: ${InputManager.shared.tapCount}")
 
-        if (InputManager.shared.tapCount == 1) {
-
-
-            if (currentState == KeyType.KOR) {
-                // Korean support removed - fallback to letter input
+        // 숫자 모드에서 숫자 키는 항상 단일 입력
+        if (currentState == KeyType.NUMBER) {
+            val mainText = keyButton.keyModel?.mainText.orEmpty()
+            if (mainText.matches(Regex("[0-9]"))) {
+                // 숫자 키는 연속 탭 처리 없이 바로 입력
                 listener?.onKey(KeyType.LETTER, ch)
             } else {
-                listener?.onKey(KeyType.LETTER, ch)
-            }
-
-        } else {
-            if (currentState == KeyType.KOR) {
-                // Korean support removed - handle as English
-                listener?.onKey(KeyType.DELETE, "")
-                listener?.onKey(KeyType.LETTER, ch)
-            } else {
-                if (InputManager.shared.tapCount > 1){
-                    InputManager.shared.tapCount = 0
+                // 특수문자 키는 연속 탭 처리
+                if (InputManager.shared.tapCount == 1) {
+                    listener?.onKey(KeyType.LETTER, ch)
+                } else {
+                    if (InputManager.shared.tapCount > 1){
+                        InputManager.shared.tapCount = 0
+                    }
+                    listener?.onKey(KeyType.DELETE, "")
+                    listener?.onKey(KeyType.LETTER, ch)
                 }
-                listener?.onKey(KeyType.DELETE, "")
-                listener?.onKey(KeyType.LETTER, ch)
+            }
+        } else {
+            // 기존 로직 유지 (영어, 특수문자, 한국어 모드)
+            if (InputManager.shared.tapCount == 1) {
+                if (currentState == KeyType.KOR) {
+                    // Korean support removed - fallback to letter input
+                    listener?.onKey(KeyType.LETTER, ch)
+                } else {
+                    listener?.onKey(KeyType.LETTER, ch)
+                }
+            } else {
+                if (currentState == KeyType.KOR) {
+                    // Korean support removed - handle as English
+                    listener?.onKey(KeyType.DELETE, "")
+                    listener?.onKey(KeyType.LETTER, ch)
+                } else {
+                    if (InputManager.shared.tapCount > 1){
+                        InputManager.shared.tapCount = 0
+                    }
+                    listener?.onKey(KeyType.DELETE, "")
+                    listener?.onKey(KeyType.LETTER, ch)
+                }
             }
         }
         

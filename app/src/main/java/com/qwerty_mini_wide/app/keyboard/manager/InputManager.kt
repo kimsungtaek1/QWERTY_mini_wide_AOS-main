@@ -27,6 +27,22 @@ class InputManager private constructor() {
     fun handleTap(keyButton: CustomKeyButton, currentState: KeyType, isShiftOn: Boolean = false): String {
         val now = SystemClock.elapsedRealtime()
 
+        // 숫자 모드에서 이전 키가 숫자이고 현재 키가 특수문자이면 연속 탭 리셋
+        if (currentState == KeyType.NUMBER) {
+            val lastMainText = lastKeyButton?.keyModel?.mainText.orEmpty()
+            val currentMainText = keyButton.keyModel?.mainText.orEmpty()
+            val lastIsNumber = lastMainText.matches(Regex("[0-9]"))
+            val currentIsNumber = currentMainText.matches(Regex("[0-9]"))
+            
+            // 숫자→특수문자 또는 특수문자→숫자 전환 시 연속 탭 리셋
+            if ((lastIsNumber && !currentIsNumber) || (!lastIsNumber && currentIsNumber)) {
+                lastKeyButton = keyButton
+                tapCount = 1
+                lastTapTime = now
+                return handleOtherTap(keyButton, currentState, isShiftOn)
+            }
+        }
+
         if (lastKeyButton?.keyModel?.tag == keyButton.keyModel?.tag
             && now - lastTapTime < multiTapInterval) {
 
@@ -52,15 +68,30 @@ class InputManager private constructor() {
     }
 
     private fun handleOtherTap(keyButton: CustomKeyButton, state: KeyType, isShiftOn: Boolean = false): String {
+        // 숫자 모드에서 숫자 키와 특수문자 키 구분
+        if (state == KeyType.NUMBER) {
+            val mainText = keyButton.keyModel?.mainText.orEmpty()
+            // mainText가 숫자인 경우 항상 숫자만 반환
+            if (mainText.matches(Regex("[0-9]"))) {
+                return mainText
+            }
+            // 특수문자 키인 경우 연속 탭 처리
+            return when (tapCount % 2) {
+                1 -> keyButton.keyModel?.ltText.orEmpty()
+                0 -> keyButton.keyModel?.rbText
+                    .takeIf { it?.isNotEmpty() ?: false }
+                    ?: keyButton.keyModel?.ltText.orEmpty()
+                else -> ""
+            }
+        }
+        
+        // 특수문자 모드와 영어 모드는 기존 로직 유지
         return when (tapCount % 2) {
             1 -> when (state) {
                 KeyType.ENG, KeyType.SPECIAL -> {
                     val text = keyButton.keyModel?.ltText.orEmpty()
                     if (isShiftOn && state == KeyType.ENG) text.uppercase() else text
                 }
-                KeyType.NUMBER -> keyButton.keyModel?.mainText
-                    .takeIf { it?.isNotEmpty() ?: false }
-                    ?: keyButton.keyModel?.ltText.orEmpty()
                 else -> keyButton.keyModel?.mainText.orEmpty()
             }
             0 -> when (state) {
@@ -76,9 +107,6 @@ class InputManager private constructor() {
                         ?: keyButton.keyModel?.ltText.orEmpty()
                     text
                 }
-                KeyType.NUMBER -> keyButton.keyModel?.rbText
-                    .takeIf { it?.isNotEmpty() ?: false }
-                    ?: keyButton.keyModel?.mainText.orEmpty()
                 else -> keyButton.keyModel?.ltText.orEmpty()
             }
             else -> ""

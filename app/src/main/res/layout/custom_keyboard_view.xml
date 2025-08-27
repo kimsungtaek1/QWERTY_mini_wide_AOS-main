@@ -7,18 +7,6 @@
     android:orientation="vertical"
     android:background="@color/keyboard_bg">
 
-    <!-- 1) 구분선 - 0.5dp 두께 -->
-    <View
-        android:id="@+id/suggestion_bar_divider"
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:background="@color/divider" />
-        
-    <!-- 2) 제안 바 - 전체 너비 -->
-    <include
-        layout="@layout/suggestion_bar"
-        />
-
     <!-- 키보드 영역을 감싸는 LinearLayout - 여기에 패딩 적용 -->
     <LinearLayout
         android:layout_width="match_parent"
